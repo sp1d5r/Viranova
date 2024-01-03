@@ -1,0 +1,9 @@
+.w-full {
+    width: 100%;
+}
+
+.h-10 {
+    min-height: 50px;
+}
+
+.min-h-10 {}
