@@ -3,6 +3,6 @@
   "newComponent": {
     "componentsPath": "src/components"
   },
-  "boardGlobalSetup": "./src/board-global-setup.ts",
-  "tailwindcssConfig": "./tailwind.config.cjs"
+  "tailwindcssConfig": "./tailwind.config.cjs",
+  "boardGlobalSetup": "./board-global-setup.ts"
 }
