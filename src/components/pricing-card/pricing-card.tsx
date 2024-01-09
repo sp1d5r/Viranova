@@ -1,8 +1,8 @@
 import React from 'react';
 import GreenTick from "../../assets/icons/GreenTick.svg";
 import BlackTick from "../../assets/icons/BlackTick.svg";
+import { PlainButton } from '../plain-button/plain-button';
 import { SecondaryButton } from '../secondary-button/secondary-button';
-import { PrimaryButton } from '../primary-button/primary-button';
 
 interface PricingFeature {
     available: boolean;
@@ -55,34 +55,34 @@ export const PricingCard: React.FC<PricingCardProps> = ({
 }) => {
 
     if (cardType === 'default') {
-        return <div className={className + 'border border-accent text-accent w-[25%] min-w-[300px] rounded py-8 px-5 flex flex-col items-center justify-center gap-5 min-h-[350px] max-w-[200px]'}>
+        return <div className={className + 'border border-accent text-accent w-[27%] min-w-[250px] rounded py-8 px-5 flex flex-col items-center justify-center gap-5 min-h-[350px]max-h-[375px]'}>
             
             <b>{planType}</b>
             <div className={"flex flex-col gap-1 items-center"}>
                 <p className={"text-bold underline"}>£{price}/ {granularity === 'month' ? "Per Month" : "Per Year"}</p>
                 <p>{subtext}</p>
             </div>
-            <div className={"flex flex-col gap-1 items-center w-full"}>
+            <div className={"flex flex-col gap-2 items-center w-full"}>
                 {features.map((elem, index) => {
                     return <PricingFeature feature={elem} cardType={cardType} key={index} />
                 })}
             </div>
-            <SecondaryButton text={"Get Started"}/>
+            <SecondaryButton text={"Get Started"} icon=""/>
         </div>
     } else {
-        return <div className={className + 'bg-accent border border-accent text-background w-[25%] min-w-[300px] rounded py-8 px-5 flex flex-col items-center justify-center gap-5 min-h-[350px] max-w-[200px]'}>
+        return <div className={className + 'bg-accent border border-accent text-background w-[30%] min-w-[250px] rounded py-5 px-5 flex flex-col items-center justify-evenly gap-5 min-h-[400px]'}>
             
             <b>{planType}</b>
             <div className={"flex flex-col gap-1 items-center"}>
                 <p className={"text-bold underline"}>£{price}/ {granularity === 'month' ? "Per Month" : "Per Year"}</p>
                 <p>{subtext}</p>
             </div>
-            <div className={"flex flex-col gap-1 items-center w-full"}>
+            <div className={"flex flex-col gap-2 items-center w-full"}>
                 {features.map((elem, index) => {
                     return <PricingFeature feature={elem} cardType={cardType} key={index} />
                 })}
             </div>
-            <PrimaryButton text={"Get Started"}/>
+            <PlainButton text={"Recommended for you"} className={"bg-background "} textClassName={"text-white"}/>
         </div>
     }
 };

@@ -10,4 +10,8 @@ export default createBoard({
         <HeroSection />
     </div>,
     isSnippet: true,
+    environmentProps: {
+        canvasHeight: 616,
+        canvasWidth: 1008
+    }
 });

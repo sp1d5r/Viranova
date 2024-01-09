@@ -12,6 +12,10 @@ p {
     margin-bottom: 0;
 }
 
+.small-body-text {
+    font-size: 14px;
+}
+
 .text-title, h1 {
     display: block;
     font-size: 2em;
@@ -65,7 +69,6 @@ h5 {
 
 .text-bold {
     font-family: Inter;
-    font-size: 16px;
     font-style: normal;
     font-weight: 700;
     line-height: normal;

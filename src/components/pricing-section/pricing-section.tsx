@@ -15,7 +15,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ className = '' }
             <Toggle active={isMonthly} name={"Monthly"} toggle={() => {setMonthly(true)}}/>
             <Toggle active={!isMonthly} name={"Annually"} toggle={() => {setMonthly(false)}}/>
         </div>
-        <div className={'bg-background w-full flex justify-center gap-5 flex-wrap'}>
+        <div className={'bg-background w-full flex justify-start md:justify-center items-center gap-5 overflow-x-scroll'}>
                       <PricingCard
                           features={[
                               {available: true, featureDescription: "200 shorts per month"},
