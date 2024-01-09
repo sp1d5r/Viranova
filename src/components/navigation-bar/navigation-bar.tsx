@@ -4,7 +4,7 @@ import { Logo } from '../logo/logo';
 import Notifications from "../../assets/icons/Notifications.svg";
 import Siren from "../../assets/icons/Siren.svg";
 import Cards from "../../assets/icons/Cards.svg";
-
+import ChevronDown from "../../assets/icons/ChevronDown.svg";
 
 interface ExpandedOption {
     title: string;
@@ -15,6 +15,7 @@ interface ExpandedOption {
 interface HoverableLinkProps {
     name: string;
     expandedOptions: ExpandedOption[];
+    left: number;
 }
 
 export interface NavigationBarProps {
@@ -22,7 +23,7 @@ export interface NavigationBarProps {
 }
 
 
-const HoverableLink: React.FC<HoverableLinkProps> = ({ name, expandedOptions }) => {
+const HoverableLink: React.FC<HoverableLinkProps> = ({ name, expandedOptions, left=0 }) => {
     const [isHovered, setIsHovered] = useState(false);
 
     return (
@@ -31,12 +32,17 @@ const HoverableLink: React.FC<HoverableLinkProps> = ({ name, expandedOptions }) 
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
-            <p className="text-center text-stone-50 text-base font-normal">{name}</p>
+            <div className="flex gap-2">
+                <p className="text-center text-stone-50 text-base font-normal">{name}</p>
+                <img src={ChevronDown} alt="" />
+            </div>
             {isHovered && (
-                <div className="absolute left-0 w-full bg-white p-2 shadow-lg z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div 
+                style={{left: left}}
+                className={`absolute top-6 w-[50vw] min-h-[30vh] bg-black/30 p-2 shadow-lg z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 rounded backdrop-blur border border-white p-5`}>
                     {expandedOptions.map((option, index) => (
-                        <a key={index} href={option.link} className="no-underline text-black">
-                            <h3 className="font-bold mb-1">{option.title}</h3>
+                        <a key={index} href={option.link} className="no-underline text-white w-[200px]">
+                            <h3 className="font-bold text-primary mb-1 underline">{option.title}</h3>
                             <p className="text-sm">{option.description}</p>
                         </a>
                     ))}
@@ -64,8 +70,8 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ className = '' }) 
                         title: "Research Paper",
                         description: "A link to the research papaer",
                         link: "/help"
-                    }]} name="Research" />
-                    <HoverableLink expandedOptions={[]} name="About" />
+                    }]} name="Research" left={-20} />
+                    <HoverableLink expandedOptions={[]} name="About" left= {-100}/>
                     <p className={"text-center text-stone-50 text-base font-normal font-['Inter']"}>Demo</p>
                 </div>
 
@@ -109,8 +115,8 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ className = '' }) 
                 title: "Research Paper",
                 description: "A link to the research papaer",
                 link: "/help"
-            }]} name="Research" />
-            <HoverableLink expandedOptions={[]} name="About" />
+            }]} name="Research"  left={-30}/>
+            <HoverableLink expandedOptions={[]} name="About" left={-100}/>
             <p className={"text-center text-stone-50 text-base font-normal font-['Inter']"}>Demo</p>
         </div>
 

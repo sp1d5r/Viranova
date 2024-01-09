@@ -5,4 +5,7 @@ export default createBoard({
     name: 'Button',
     Board: () => <PrimaryButton />,
     isSnippet: true,
+    environmentProps: {
+        canvasWidth: 179
+    }
 });

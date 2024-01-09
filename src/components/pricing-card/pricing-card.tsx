@@ -55,7 +55,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
 }) => {
 
     if (cardType === 'default') {
-        return <div className={className + 'border border-accent text-accent w-[27%] min-w-[250px] rounded py-8 px-5 flex flex-col items-center justify-center gap-5 min-h-[350px]max-h-[375px]'}>
+        return <div className={className + 'border border-accent text-accent w-[27%] min-w-[250px] rounded py-8 px-5 flex flex-col items-center justify-center gap-5 min-h-[350px] max-h-[375px] max-w-[350px]'}>
             
             <b>{planType}</b>
             <div className={"flex flex-col gap-1 items-center"}>
@@ -70,7 +70,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
             <SecondaryButton text={"Get Started"} icon=""/>
         </div>
     } else {
-        return <div className={className + 'bg-accent border border-accent text-background w-[30%] min-w-[250px] rounded py-5 px-5 flex flex-col items-center justify-evenly gap-5 min-h-[400px]'}>
+        return <div className={className + 'bg-accent border border-accent text-background w-[30%] min-w-[250px] rounded py-5 px-5 flex flex-col items-center justify-evenly gap-5 min-h-[400px]  max-w-[375px]'}>
             
             <b>{planType}</b>
             <div className={"flex flex-col gap-1 items-center"}>
