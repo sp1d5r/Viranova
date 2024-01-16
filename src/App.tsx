@@ -4,6 +4,8 @@ import {NavigationBar} from "./components/navigation-bar/navigation-bar";
 import {HeroSection} from "./components/hero-section/hero-section";
 import {PricingCard} from "./components/pricing-card/pricing-card";
 import {PricingSection} from "./components/pricing-section/pricing-section";
+import {WhySection} from "./components/why-section/why-section";
+import {NewEraSection} from "./components/new-era-section/new-era-section";
 
 
 function App() {
@@ -14,7 +16,8 @@ function App() {
               <div>
                   <NavigationBar />
                   <HeroSection />
-                  <PricingSection />
+                  <WhySection />
+                  <NewEraSection />
               </div>
           } />
           <Route path="/about" element={<> </>} />
