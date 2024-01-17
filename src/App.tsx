@@ -6,6 +6,7 @@ import {PricingCard} from "./components/pricing-card/pricing-card";
 import {PricingSection} from "./components/pricing-section/pricing-section";
 import {WhySection} from "./components/why-section/why-section";
 import {NewEraSection} from "./components/new-era-section/new-era-section";
+import {ModelReview} from "./pages/ModelReview";
 
 
 function App() {
@@ -20,7 +21,11 @@ function App() {
                   <NewEraSection />
               </div>
           } />
-          <Route path="/about" element={<> </>} />
+          <Route path="/model-review" element={<div>
+              <NavigationBar />
+              <ModelReview />
+
+          </div>} />
         </Routes>
       </Router>
   );
