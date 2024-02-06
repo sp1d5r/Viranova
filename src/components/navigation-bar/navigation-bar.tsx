@@ -5,6 +5,8 @@ import Notifications from "../../assets/icons/Notifications.svg";
 import Siren from "../../assets/icons/Siren.svg";
 import Cards from "../../assets/icons/Cards.svg";
 import ChevronDown from "../../assets/icons/ChevronDown.svg";
+import {useAuth} from "../../contexts/Authentication";
+import {NotificationContext, useNotificaiton} from "../../contexts/NotificationProvider";
 
 interface ExpandedOption {
     title: string;
@@ -54,6 +56,8 @@ const HoverableLink: React.FC<HoverableLinkProps> = ({ name, expandedOptions, le
 
 export const NavigationBar: React.FC<NavigationBarProps> = ({ className = '' }) => {
     const [menuExpanded, setMenuExpanded] = useState(false);
+    const {authState, logout} = useAuth();
+    const { showNotification } = useNotificaiton();
 
     return <div className="w-full flex sticky top-0 bg-background min-h-12 shadow justify-start items-center gap-[90px] inline-flex px-10 py-5 navigation-bar z-10">
         {
@@ -89,12 +93,31 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ className = '' }) 
                             Announcements
                         </p>
                     </div>
-                    
-                    <a href={"/authenticate"}>
+
+                    { authState.isAuthenticated ?
+                        <p onClick={() => {
+                            logout(() => {
+                                showNotification(
+                                    "Signed Out",
+                                    "You've successfully signed out, it might take a second to propagate",
+                                    "success"
+                                )},
+                                () => {
+                                    showNotification(
+                                        "Failed to Sign Out",
+                                        "I don't think this is possible... try refreshing.",
+                                        "warning"
+                                    )
+                                }
+                            )}}
+                            className={"text-bold text-danger"}
+                        >
+                        Sign Out
+                    </p> :<a href={"/authenticate"}>
                         <p className={"m-0 text-center text-stone-50 text-base font-normal font-['Inter']"}>
                             Sign Up
                         </p>
-                    </a>
+                    </a>}
                     <div className={"w-full flex justify-center items-center border border-red-500 rounded-xl p-5 bg-red-400"} onClick={() => {setMenuExpanded(false)}}>
                         <p className={"text-white font-bold"}>
                             Close Menu
@@ -124,11 +147,30 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ className = '' }) 
             <div className="border-l border-white h-12 w-[10px]" />
             <img src={Notifications} alt={"Notifications"} />
             <img src={Siren} alt={"Siren"} />
-            <a href={"/authenticate"}>
-                <p className={"m-0 text-center text-stone-50 text-base font-normal font-['Inter']"}>
-                    Sign Up
-                </p>
-            </a>
+            { authState.isAuthenticated ?
+                <p onClick={() => {
+                    logout(() => {
+                            showNotification(
+                                "Signed Out",
+                                "You've successfully signed out, it might take a second to propagate",
+                                "success"
+                            )},
+                        () => {
+                            showNotification(
+                                "Failed to Sign Out",
+                                "I don't think this is possible... try refreshing.",
+                                "warning"
+                            )
+                        }
+                    )}}
+                   className={"text-bold text-danger"}
+                >
+                    Sign Out
+                </p> :<a href={"/authenticate"}>
+                    <p className={"m-0 text-center text-stone-50 text-base font-normal font-['Inter']"}>
+                        Sign Up
+                    </p>
+                </a>}
         </div>
 
         <div className={"flex md:hidden gap-5 justify-center items-center "} onClick={() => {setMenuExpanded(true)}}>

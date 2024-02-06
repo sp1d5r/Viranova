@@ -57,3 +57,12 @@ const NotificationMessage: React.FC<{ title:string; message: string; type: 'info
         </div>
     );
 };
+
+
+export const useNotificaiton = () => {
+    const context = useContext(NotificationContext);
+    if (!context) {
+        throw new Error("useNotification must be used within an NotificationProvider");
+    }
+    return context;
+}
