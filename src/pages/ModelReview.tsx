@@ -15,7 +15,6 @@ const _youtubeVideo: Video = {
     thumbnailUrl: "https://placehold.co/600x400",
 }
 
-
 export const ModelReview : React.FC<ModelReviewProps> = ({}) => {
     const [videoShorts, setVideoShorts] = useState<VectorVideo[]>([]);
     const [youtubeShort, setYoutubShort] = useState<Video>({
@@ -37,7 +36,9 @@ export const ModelReview : React.FC<ModelReviewProps> = ({}) => {
 
     useEffect(() => {
         getShorts().then((vectorVideos: VectorVideo[] | undefined) => {
+            console.log(vectorVideos)
             if (vectorVideos) {
+                console.log(vectorVideos)
                 setVideoShorts(vectorVideos);
             }
         })
@@ -96,12 +97,9 @@ export const ModelReview : React.FC<ModelReviewProps> = ({}) => {
     }
 
     const skip = () => {
-        // Update the property on the Zilis database
-            // viewed = True
-            // verified = False
-        //
-
-        getNewVideo();
+        let _vectorVideos: VectorVideo[] = [...videoShorts];
+        const vectorVideo: VectorVideo | undefined = _vectorVideos.pop();
+        setVideoShorts(_vectorVideos);
         return;
     }
 
