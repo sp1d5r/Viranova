@@ -1,5 +1,5 @@
 import React from 'react';
-import { HiddenBackgroundTitle } from '../hidden-background-title/hidden-background-title';
+import { HiddenBackgroundTitle } from '../../hidden-background-title/hidden-background-title';
 
 export interface WhySectionProps {
     className?: string;

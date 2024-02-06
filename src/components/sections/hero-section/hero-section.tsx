@@ -1,8 +1,8 @@
 import React from 'react';
-import HeroAsset from "../../assets/landing-page-assets/HeroAsset.png";
-import { PrimaryButton } from '../buttons/primary-button/primary-button';
-import { SecondaryButton } from '../buttons/secondary-button/secondary-button';
-import Mouse from "../../assets/icons/Mouse.svg";
+import HeroAsset from "../../../assets/landing-page-assets/HeroAsset.png";
+import { PrimaryButton } from '../../buttons/primary-button/primary-button';
+import { SecondaryButton } from '../../buttons/secondary-button/secondary-button';
+import Mouse from "../../../assets/icons/Mouse.svg";
 
 export interface HeroSectionProps {
     className?: string;

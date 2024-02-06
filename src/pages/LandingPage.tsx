@@ -1,7 +1,6 @@
-import {NavigationBar} from "../components/navigation-bar/navigation-bar";
-import {HeroSection} from "../components/hero-section/hero-section";
-import {WhySection} from "../components/why-section/why-section";
-import {NewEraSection} from "../components/new-era-section/new-era-section";
+import {HeroSection} from "../components/sections/hero-section/hero-section";
+import {WhySection} from "../components/sections/why-section/why-section";
+import {NewEraSection} from "../components/sections/new-era-section/new-era-section";
 import React from "react";
 import ScrollableLayout from "../layouts/ScrollableLayout";
 
