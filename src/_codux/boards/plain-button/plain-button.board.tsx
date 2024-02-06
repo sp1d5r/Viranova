@@ -1,5 +1,5 @@
 import { createBoard } from '@wixc3/react-board';
-import { PlainButton } from '../../../components/plain-button/plain-button';
+import { PlainButton } from '../../../components/buttons/plain-button/plain-button';
 
 export default createBoard({
     name: 'PlainButton',
