@@ -1,5 +1,6 @@
 import React from "react";
 import PlaygroundBackground from "../assets/playground-assets/PlaygroundBackground.png";
+import {ExistingProjectCard} from "../components/cards/existing-project-card/existing-project-card";
 
 export interface PlaygroundPageProps {
     // NONE
@@ -23,7 +24,7 @@ export default function PlaygroundPage() {
         </div>
 
         {/* Bottom Recently Used Cards */}
-        <div className={"w-full h-full border-t border-accent flex justify-center items-center flex-col gap-[10] p-5"}>
+        <div className={"w-full min-h-full border-t border-accent flex justify-center items-center flex-col gap-[10] p-5"}>
             { /* Existing Projects Title */}
             <div className={"container h-full flex-col justify-center items-start"}>
                 <div>
@@ -34,8 +35,10 @@ export default function PlaygroundPage() {
 
             { /* Existing Projects Carousel */ }
 
-            <div className={"grid grid-cols-3"}>
-
+            <div className={"w-[70%] grid grid-cols-3 gap-5 pt-10 justify-center items-center"}>
+                {[1, 2, 3, 4].map((index,elem) => {
+                    return <ExistingProjectCard backgroundImage={PlaygroundBackground} date={"Tue 6 Feb"} title={"Begin your journey with Vira Nova"}/>
+                })}
 
             </div>
 
