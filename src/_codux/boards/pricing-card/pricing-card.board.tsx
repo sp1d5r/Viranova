@@ -1,6 +1,6 @@
 
 import { createBoard } from '@wixc3/react-board';
-import { PricingCard } from '../../../components/pricing-card/pricing-card';
+import { PricingCard } from '../../../components/cards/pricing-card/pricing-card';
 
 export default createBoard({
     name: 'PricingCard',

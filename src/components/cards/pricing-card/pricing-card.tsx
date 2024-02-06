@@ -1,8 +1,8 @@
 import React from 'react';
 import GreenTick from "../../assets/icons/GreenTick.svg";
 import BlackTick from "../../assets/icons/BlackTick.svg";
-import { PlainButton } from '../plain-button/plain-button';
-import { SecondaryButton } from '../secondary-button/secondary-button';
+import { PlainButton } from '../../buttons/plain-button/plain-button';
+import { SecondaryButton } from '../../buttons/secondary-button/secondary-button';
 
 interface PricingFeature {
     available: boolean;
@@ -67,7 +67,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
                     return <PricingFeature feature={elem} cardType={cardType} key={index} />
                 })}
             </div>
-            <SecondaryButton text={"Get Started"} icon=""/>
+            <SecondaryButton text={"Get Started"} icon="" onClick={(e) => {console.log("Here")}}/>
         </div>
     } else {
         return <div className={className + 'bg-accent border border-accent text-background w-[30%] min-w-[250px] rounded py-5 px-5 flex flex-col items-center justify-evenly gap-5 min-h-[400px]  max-w-[375px]'}>

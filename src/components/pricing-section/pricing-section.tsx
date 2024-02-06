@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import { Toggle } from '../toggle/toggle';
-import { PricingCard } from "../pricing-card/pricing-card";
+import { PricingCard } from "../cards/pricing-card/pricing-card";
 
 export interface PricingSectionProps {
     className?: string;

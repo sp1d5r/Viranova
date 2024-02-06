@@ -1,8 +1,8 @@
 import { createBoard } from '@wixc3/react-board';
-import { SecondaryButton } from '../../../components/secondary-button/secondary-button';
+import { SecondaryButton } from '../../../components/buttons/secondary-button/secondary-button';
 
 export default createBoard({
     name: 'SecondaryButton',
-    Board: () => <SecondaryButton />,
+    Board: () => <SecondaryButton onClick={(e) => {console.log("Here")}} />,
     isSnippet: true,
 });

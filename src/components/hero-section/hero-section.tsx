@@ -1,7 +1,7 @@
 import React from 'react';
 import HeroAsset from "../../assets/landing-page-assets/HeroAsset.png";
-import { PrimaryButton } from '../primary-button/primary-button';
-import { SecondaryButton } from '../secondary-button/secondary-button';
+import { PrimaryButton } from '../buttons/primary-button/primary-button';
+import { SecondaryButton } from '../buttons/secondary-button/secondary-button';
 import Mouse from "../../assets/icons/Mouse.svg";
 
 export interface HeroSectionProps {
@@ -19,8 +19,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ className = '' }) => (
                 Join the businesses working with us to improve engagement, increase retention and reduce time spent editing your videos!
             </p>
             <div className={"flex gap-3"}>
-                <PrimaryButton text={"Get Started"} icon=""/>
-                <SecondaryButton text={"Learn More"} icon=""/>
+                <PrimaryButton text={"Get Started"} icon="" onClick={(e)=>{window.location.href ="/playground"}} />
+                <SecondaryButton text={"Learn More"} icon="" onClick={(e) => {console.log("Here2")}}/>
             </div>
             <div className={"flex gap-3 items-center"}>
                 <img className={"h-[50px]"} src={Mouse} alt={"/"}/>
