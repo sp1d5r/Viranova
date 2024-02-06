@@ -9,11 +9,30 @@ export interface PlaygroundPageProps {
 
 export default function PlaygroundPage() {
     const [files, setFiles] = useState<File[]>([]);
+    const [error, setError] = useState<string | null>(null); // For displaying error messages
 
     const validateAndProcessFiles = (newFiles: FileList) => {
-        console.log(newFiles);
-        const validatedFiles = Array.from(newFiles).filter(file => file.size <= 1024 * 1024); // Files less than 1MB
-        setFiles(prevFiles => [...prevFiles, ...validatedFiles]);
+        if (newFiles.length !== 1) {
+            setError('Please upload only one file.');
+            return;
+        }
+
+        const file = newFiles[0];
+
+        if (!file.type.includes('mp4')) {
+            setError('File must be an MP4 video.');
+            return;
+        }
+
+        const fileSizeLimit = 1024 * 1024; // For example, 1MB
+        if (file.size > fileSizeLimit) {
+            setError(`File must be smaller than ${fileSizeLimit / 1024 / 1024}MB.`);
+            return;
+        }
+
+        // If all validations pass, reset any previous error and update state with the new file
+        setError(null);
+        setFiles([file]); // Replace the current file(s) with the new file
     };
 
     const dropHandler: DragEventHandler<HTMLDivElement> = (event) => {
@@ -49,6 +68,7 @@ export default function PlaygroundPage() {
                 {files.map((file) => (
                     <p>{file.name}</p>
                 ))}
+                {error && <p style={{ color: 'red' }}>{error}</p>}
             </div>
         </div>
 
