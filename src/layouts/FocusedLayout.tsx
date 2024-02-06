@@ -1,5 +1,8 @@
-import React from "react";
+import React, {ReactNode} from "react";
 
-export default function FocussedLayout(){
+export interface FocussedLayoutProps {
+    children?: ReactNode
+}
+export default function FocussedLayout({children}: FocussedLayoutProps){
     return (<div></div>)
 }
