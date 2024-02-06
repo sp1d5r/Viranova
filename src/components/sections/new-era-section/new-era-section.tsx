@@ -1,7 +1,7 @@
 import React from 'react';
-import { VideoAnalysisCard } from '../video-analysis-card/video-analysis-card';
-import Desktop from "../../assets/icons/Desktop.svg";
-import Mobile from "../../assets/icons/Mobile.svg";
+import { VideoAnalysisCard } from '../../video-analysis-card/video-analysis-card';
+import Desktop from "../../../assets/icons/Desktop.svg";
+import Mobile from "../../../assets/icons/Mobile.svg";
 
 export interface NewEraSectionProps {
     className?: string;
