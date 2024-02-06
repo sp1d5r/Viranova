@@ -90,7 +90,7 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ className = '' }) 
                         </p>
                     </div>
                     
-                    <a href={"/sign-up"}>
+                    <a href={"/authenticate"}>
                         <p className={"m-0 text-center text-stone-50 text-base font-normal font-['Inter']"}>
                             Sign Up
                         </p>
@@ -124,7 +124,7 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ className = '' }) 
             <div className="border-l border-white h-12 w-[10px]" />
             <img src={Notifications} alt={"Notifications"} />
             <img src={Siren} alt={"Siren"} />
-            <a href={"/sign-up"}>
+            <a href={"/authenticate"}>
                 <p className={"m-0 text-center text-stone-50 text-base font-normal font-['Inter']"}>
                     Sign Up
                 </p>
