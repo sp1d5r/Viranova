@@ -11,6 +11,10 @@ module.exports = {
         "accent": "#C8EF9F",
         "button-primary": "#C8EF9F",
         "button-secondary": "#E0FAE0",
+        "danger": "#B64A4A",
+        "warning": "#b6904a",
+        "success": "#58b64a",
+        "info": "#4a4fb6",
         "gradient": "linear-gradient(180deg, #093909 0%, #35DC32 100%)"
       }
     },
