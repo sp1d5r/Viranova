@@ -14,7 +14,7 @@ export const ReviewVideo: React.FC<ReviewVideoProps> = ({youtubeShort, proposedY
             <h2 className={"text-subtitle"}> Youtube Shorts</h2>
             <a className={"text-bold underline"} href={youtubeShort.videoUrl}>{youtubeShort.videoTitle}</a>
             <p>{youtubeShort.videoDescription}</p>
-            <img src={youtubeShort.thumbnailUrl} alt={"Youtube Short image"} />
+            <img src={youtubeShort.thumbnailUrl} alt={"Youtube Short"} />
             <div className={"flex w-full h-20 justify-evenly"}>
                 {proposedYoutubeVideos.map((proposedVideo, index) => {
                     return <button className={"bg-blue-200 text-black px-5 rounded"} key={index} onClick={()=>{selectOption(proposedVideo.order)}}>
@@ -42,7 +42,7 @@ export const ReviewVideo: React.FC<ReviewVideoProps> = ({youtubeShort, proposedY
                     const video = value.video;
 
                     return <div key={index} className={"text-accent flex justify-between border border-accent rounded flex-1 items-center p-2"}>
-                        <img className={"h-[100px]"} src={video.thumbnailUrl} alt={"Youtube Short image"} />
+                        <img className={"h-[100px]"} src={video.thumbnailUrl} alt={"Youtube Short"} />
                         <div className={"flex flex-1 flex-col gap-2 p-2" }>
                             <a className={"text-bold underline"} href={video.videoUrl}>{video.videoTitle}</a>
                             <p>{video.videoDescription}</p>

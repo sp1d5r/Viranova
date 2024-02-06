@@ -15,7 +15,7 @@ const _youtubeVideo: Video = {
     thumbnailUrl: "https://placehold.co/600x400",
 }
 
-export const ModelReview : React.FC<ModelReviewProps> = ({}) => {
+export const ModelReview : React.FC<ModelReviewProps> = () => {
     const [videoShorts, setVideoShorts] = useState<VectorVideo[]>([]);
     const [youtubeShort, setYoutubShort] = useState<Video>({
         videoId: "1",
@@ -47,6 +47,7 @@ export const ModelReview : React.FC<ModelReviewProps> = ({}) => {
     useEffect(() => {
         // Get the proposed videos.
         getNewVideo();
+
     }, [videoShorts])
 
 
