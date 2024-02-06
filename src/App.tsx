@@ -4,6 +4,7 @@ import {NavigationBar} from "./components/navigation-bar/navigation-bar";
 import {ModelReview} from "./pages/ModelReview";
 import LandingPage from "./pages/LandingPage";
 import PlaygroundPage from "./pages/PlaygroundPage";
+import AuthenticationPage from "./pages/AuthenticationPage";
 
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
               <LandingPage />
           } />
         <Route path={"/playground"} element={<PlaygroundPage />} />
+        <Route path={"/authenticate"} element={<AuthenticationPage />} />
 
           <Route path="/model-review" element={<div>
               <NavigationBar />
