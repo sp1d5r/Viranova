@@ -1,6 +1,8 @@
-import React, {ChangeEvent, FormEvent, MutableRefObject, useEffect, useRef, useState} from "react";
+import React, {ChangeEvent, FormEvent, useContext, useEffect, useRef, useState} from "react";
 import ScrollableLayout from "../layouts/ScrollableLayout";
-import {type} from "os";
+import {useAuth} from "../contexts/Authentication";
+import {NotificationContext} from "../contexts/NotificationProvider";
+
 
 interface LoginRequestData {
     email: string;
@@ -9,6 +11,8 @@ interface LoginRequestData {
 
 export default function AuthenticationPage() {
     const inputRef = useRef<HTMLInputElement>(null);
+    const { login, register, authState } = useAuth();
+    const { showNotification } = useContext(NotificationContext);
 
     useEffect(() => {
         const handleKeyPress = (event: KeyboardEventInit) => {
@@ -24,10 +28,17 @@ export default function AuthenticationPage() {
     }, []);
 
 
+    useEffect(() => {
+        if (authState.isAuthenticated) {
+            window.location.href="/playground";
+        }
+    }, [authState.isAuthenticated]);
+
     const [formData, setFormData] = useState<LoginRequestData>({
         email: '',
         password: '',
     });
+
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData(prevState => ({
@@ -39,6 +50,9 @@ export default function AuthenticationPage() {
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         console.log('Logging in with', formData);
+        login(formData.email, formData.password, () => {
+            window.location.href="/playground"
+        }, ()=>{showNotification("Authentication Issue", "Fuck u cunt.", "error", 5000)})
     };
 
     return <ScrollableLayout>
@@ -73,7 +87,6 @@ export default function AuthenticationPage() {
                     />
                 </div>
                 <button type="submit" className={"py-2 px-5 border-primary bg-secondary rounded hover:bg-primary hover:text-black focus:bg-primary focus:text-black"}>Login</button>
-
             </form>
         </div>
     </ScrollableLayout>

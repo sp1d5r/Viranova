@@ -6,15 +6,18 @@ import './styles/container.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import {NotificationProvider} from "./contexts/NotificationProvider";
+import {AuthProvider} from "./contexts/Authentication";
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
   <React.StrictMode>
-      <NotificationProvider>
-          <App />
-      </NotificationProvider>
+      <AuthProvider>
+          <NotificationProvider>
+              <App />
+          </NotificationProvider>
+      </AuthProvider>
   </React.StrictMode>
 );
 
