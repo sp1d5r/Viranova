@@ -1,5 +1,5 @@
-import axios, {AxiosResponse} from 'axios';
-import {VectorVideo, Video} from "../types/Video";
+import axios from 'axios';
+import {Video} from "../types/Video";
 
 const getVideoInfo = async (videoId: string) : Promise<Video | undefined> => {
     const url = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=snippet&key=${process.env.REACT_APP_GOOGLE_API_KEY}`;
@@ -22,9 +22,9 @@ const getVideoInfo = async (videoId: string) : Promise<Video | undefined> => {
     }
 };
 
-const convertVectorToVideo = async (vectorVideo: VectorVideo) :Promise<Video| undefined> => {
-    const video = await getVideoInfo(vectorVideo.video_id);
-    return video
-}
+// const convertVectorToVideo = async (vectorVideo: VectorVideo) :Promise<Video| undefined> => {
+//     const video = await getVideoInfo(vectorVideo.video_id);
+//     return video
+// }
 
 export {getVideoInfo}

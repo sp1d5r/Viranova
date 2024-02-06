@@ -24,7 +24,7 @@ const getRelatedOriginalVideos = async (videoEmbedding: number[]) : Promise<Vect
         method: 'POST',
         url:  url + 'v1/vector/search',
         headers: headers,
-        data: `{"collectionName":"video_embeddings","vector":${JSON.stringify(videoEmbedding)},"limit":10,"outputFields":["video_id","video_type"],"filter":"video_type==\'ORIGINAL\'"}`
+        data: `{"collectionName":"video_embeddings","vector":${JSON.stringify(videoEmbedding)},"limit":10,"outputFields":["video_id","video_type"],"filter":"video_type=='ORIGINAL'"}`
     };
 
     try {
