@@ -1,5 +1,5 @@
 import { createBoard } from '@wixc3/react-board';
-import { PricingSection } from '../../../components/pricing-section/pricing-section';
+import { PricingSection } from '../../../components/sections/pricing-section/pricing-section';
 
 export default createBoard({
     name: 'PricingSection',

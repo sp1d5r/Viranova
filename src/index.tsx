@@ -5,13 +5,16 @@ import './styles/tailwind.css';
 import './styles/container.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import {NotificationProvider} from "./contexts/NotificationProvider";
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <App />
+      <NotificationProvider>
+          <App />
+      </NotificationProvider>
   </React.StrictMode>
 );
 
