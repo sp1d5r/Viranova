@@ -4,7 +4,7 @@ import {NewEraSection} from "../components/sections/new-era-section/new-era-sect
 import React from "react";
 import ScrollableLayout from "../layouts/ScrollableLayout";
 
-export default function LandingPage({}){
+export default function LandingPage(){
     return <ScrollableLayout>
         <HeroSection />
         <WhySection />

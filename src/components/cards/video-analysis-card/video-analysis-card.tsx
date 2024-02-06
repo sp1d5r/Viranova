@@ -1,5 +1,5 @@
 import React from 'react';
-import Desktop from "../../assets/icons/Desktop.svg";
+import Desktop from "../../../assets/icons/Desktop.svg";
 
 export interface VideoAnalysisCardProps {
     className?: string;
