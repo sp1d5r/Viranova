@@ -6,7 +6,7 @@ import Siren from "../../assets/icons/Siren.svg";
 import Cards from "../../assets/icons/Cards.svg";
 import ChevronDown from "../../assets/icons/ChevronDown.svg";
 import {useAuth} from "../../contexts/Authentication";
-import {NotificationContext, useNotificaiton} from "../../contexts/NotificationProvider";
+import {useNotificaiton} from "../../contexts/NotificationProvider";
 
 interface ExpandedOption {
     title: string;

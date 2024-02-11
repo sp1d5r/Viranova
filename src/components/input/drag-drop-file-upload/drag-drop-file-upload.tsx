@@ -1,12 +1,13 @@
 import React, {ChangeEventHandler, DragEventHandler, useRef} from "react";
 import BGDots from "../../../assets/input/dots-background.svg";
 export interface DragDropFileUploadProps {
+    text: string;
     dropHandler: DragEventHandler<HTMLDivElement>;
     dragOverHandler: DragEventHandler<HTMLDivElement>;
     handleFileInputChange: ChangeEventHandler<HTMLInputElement>;
 }
 
-export const DragDropFileUpload:React.FC<DragDropFileUploadProps> = ({dropHandler, dragOverHandler, handleFileInputChange}) => {
+export const DragDropFileUpload:React.FC<DragDropFileUploadProps> = ({text, dropHandler, dragOverHandler, handleFileInputChange}) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const openFileDialog = () => {
@@ -27,6 +28,6 @@ export const DragDropFileUpload:React.FC<DragDropFileUploadProps> = ({dropHandle
             style={{ display: 'none' }} // Hide the file input
         />
         <img src={BGDots} alt={""} className={"absolute z-0 w-[110%] h-[110%] object-cover hover:scale-125 transition-all"} />
-        <p className={"font-bold text-accent z-10 hover:underline transition-all"}>Upload your video</p>
+        <p className={"font-bold text-accent z-10 hover:underline transition-all"}>{text}</p>
     </div>
 }
