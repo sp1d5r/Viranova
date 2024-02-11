@@ -26,6 +26,7 @@ const FirebaseStorageService: StorageService = {
                     getDownloadURL(uploadTask.snapshot.ref).then(downloadURL => {
                         console.log("Uploaded", downloadURL);
                         resolve(downloadURL);
+                        return downloadURL;
                     });
                 }
             );
