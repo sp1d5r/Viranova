@@ -35,7 +35,7 @@ const HoverableLink: React.FC<HoverableLinkProps> = ({ name, expandedOptions, le
             onMouseLeave={() => setIsHovered(false)}
         >
             <div className="flex gap-2">
-                <p className="text-center text-stone-50 text-base font-normal">{name}</p>
+                <p className="text-center text-stone-50 text-base">{name}</p>
                 <img src={ChevronDown} alt="" />
             </div>
             {isHovered && (
@@ -76,7 +76,7 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ className = '' }) 
                         link: "/help"
                     }]} name="Research" left={-20} />
                     <HoverableLink expandedOptions={[]} name="About" left= {-100}/>
-                    <p className={"text-center text-stone-50 text-base font-normal font-['Inter']"}>Demo</p>
+                    <p className={"text-center text-stone-50 text-base font-normal"}>Demo</p>
                 </div>
 
                 <div className={"flex flex-1 gap-5 justify-end items-center flex-col "}>
@@ -114,7 +114,7 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ className = '' }) 
                         >
                         Sign Out
                     </p> :<a href={"/authenticate"}>
-                        <p className={"m-0 text-center text-stone-50 text-base font-normal font-['Inter']"}>
+                        <p className={"m-0 text-center text-stone-50 text-base font-normal"}>
                             Sign Up
                         </p>
                     </a>}
@@ -140,7 +140,7 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ className = '' }) 
                 link: "/help"
             }]} name="Research"  left={-30}/>
             <HoverableLink expandedOptions={[]} name="About" left={-100}/>
-            <p className={"text-center text-stone-50 text-base font-normal font-['Inter']"}>Demo</p>
+            <p className={"text-center text-stone-50 text-base font-normal"}>Demo</p>
         </div>
 
         <div className={"hidden md:flex gap-5 justify-center items-center "}>
@@ -167,7 +167,7 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ className = '' }) 
                 >
                     Sign Out
                 </p> :<a href={"/authenticate"}>
-                    <p className={"m-0 text-center text-stone-50 text-base font-normal font-['Inter']"}>
+                    <p className={"m-0 text-center text-stone-50 text-base font-normal"}>
                         Sign Up
                     </p>
                 </a>}

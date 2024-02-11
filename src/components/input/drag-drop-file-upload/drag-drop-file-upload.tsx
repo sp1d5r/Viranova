@@ -27,6 +27,6 @@ export const DragDropFileUpload:React.FC<DragDropFileUploadProps> = ({dropHandle
             style={{ display: 'none' }} // Hide the file input
         />
         <img src={BGDots} alt={""} className={"absolute z-0 w-[110%] h-[110%] object-cover hover:scale-125 transition-all"} />
-        <p className={"text-bold text-accent z-10 hover:underline transition-all"}>Upload your video</p>
+        <p className={"font-bold text-accent z-10 hover:underline transition-all"}>Upload your video</p>
     </div>
 }
