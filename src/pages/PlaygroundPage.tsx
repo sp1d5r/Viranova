@@ -4,6 +4,7 @@ import {ExistingProjectCard} from "../components/cards/existing-project-card/exi
 import {DragDropFileUpload} from "../components/input/drag-drop-file-upload/drag-drop-file-upload";
 import {NotificationContext} from "../contexts/NotificationProvider";
 import {TransparentNavigationBar} from "../components/navigation-bar/transparent-navigation-bar";
+import FirebaseStorageService from "../services/storage/strategies/FirebaseStorageService";
 
 export interface PlaygroundPageProps {
     // NONE
@@ -17,8 +18,9 @@ function getRandomString(strings: string[]): string {
 export default function PlaygroundPage() {
     const { showNotification } = useContext(NotificationContext);
     const [files, setFiles] = useState<File[]>([]);
+    const [uploadProgress, setUploadProgress] = useState<number>(0);
 
-    const validateAndProcessFiles = (newFiles: FileList) => {
+    const validateAndProcessFiles = async (newFiles: FileList) => {
         if (newFiles.length !== 1) {
             let error =  getRandomString([
                     "Whoa there! This isn't a file buffet. Pick your favorite and stick with it—one file at a time, please.",
@@ -38,7 +40,6 @@ export default function PlaygroundPage() {
 
         const file = newFiles[0];
 
-
         if (!file.type.includes('mp4')) {
             let error = getRandomString([
                 "In a world full of formats, be an MP4 🤢. Seriously, we can only handle MP4s right now.",
@@ -57,7 +58,7 @@ export default function PlaygroundPage() {
             return;
         }
 
-        const fileSizeLimit = 5 * 1024 * 1024; // 5 MB
+        const fileSizeLimit = 15 * 1024 * 1024; // 5 MB
         if (file.size > fileSizeLimit) {
             const errorMessages = [
                 `This file's got more weight than we can lift 🏋️‍♂️. Keep it under ${(fileSizeLimit / 1024 / 1024).toFixed(2)}MB, please.`,
@@ -78,8 +79,24 @@ export default function PlaygroundPage() {
             return;
         }
 
-        // If all validations pass, reset any previous error and update state with the new file
-        setFiles([file]); // Replace the current file(s) with the new file
+        const filePath = `videos-raw/${file.name}`;
+
+        try {
+            const downloadURL = await FirebaseStorageService.uploadFile(filePath, file, (progress) => {
+                setUploadProgress(progress);
+            });
+            console.log('File uploaded successfully:', downloadURL);
+            showNotification('Upload Success', 'File uploaded successfully!', 'success', 5000);
+        } catch (error) {
+            console.error('Upload error:', error);
+            showNotification(
+                'Upload Error',
+                `Failed to upload file. \n ${error}`,
+                'error',
+                10000);
+        }
+
+        setFiles([file]);
     };
 
     const dropHandler: DragEventHandler<HTMLDivElement> = (event) => {
@@ -96,7 +113,9 @@ export default function PlaygroundPage() {
     const handleFileInputChange: ChangeEventHandler<HTMLInputElement> = (event) => {
         if (event.target.files && event.target.files.length > 0) {
             console.log('Files selected', event.target.files);
-            validateAndProcessFiles(event.target.files); // Corrected to use validateAndProcessFiles
+            validateAndProcessFiles(event.target.files).then((res) => {
+                console.log("Uploaded file: ", res)
+            });
         }
     };
 
@@ -113,10 +132,13 @@ export default function PlaygroundPage() {
             <div
                 className={"relative flex w-full h-full flex-col justify-center items-center gap-5 z-10"}
             >
-                <DragDropFileUpload dragOverHandler={dragOverHandler} dropHandler={dropHandler} handleFileInputChange={handleFileInputChange}/>
+                <DragDropFileUpload text={uploadProgress === 0 ? "Upload Video" : uploadProgress === 100 ? "File Uploaded!": `(${uploadProgress}%) Uploading Video...`} dragOverHandler={dragOverHandler} dropHandler={dropHandler} handleFileInputChange={handleFileInputChange}/>
                 {files.map((file) => (
-                    <p>{file.name}</p>
+                    <p className={"text-primary font-bold"}>{file.name}</p>
                 ))}
+                {uploadProgress!==0 && <div className={"w-[300px] outline outline-black rounded-full h-2.5"}>
+                    <div className={"bg-accent outline-black outline  h-2.5 rounded-full"} style={{width: `${uploadProgress}%`}}></div>
+                </div>}
             </div>
         </div>
 
