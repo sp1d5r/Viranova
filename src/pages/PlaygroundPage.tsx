@@ -3,6 +3,7 @@ import PlaygroundBackground from "../assets/playground-assets/PlaygroundBackgrou
 import {ExistingProjectCard} from "../components/cards/existing-project-card/existing-project-card";
 import {DragDropFileUpload} from "../components/input/drag-drop-file-upload/drag-drop-file-upload";
 import {NotificationContext} from "../contexts/NotificationProvider";
+import {TransparentNavigationBar} from "../components/navigation-bar/transparent-navigation-bar";
 
 export interface PlaygroundPageProps {
     // NONE
@@ -100,6 +101,8 @@ export default function PlaygroundPage() {
     };
 
     return <div className={"w-full h-[100vh]"}>
+        <TransparentNavigationBar />
+
         {/* Main Green Top Part*/}
         <div className={"w-full h-1/2 max-h-[700px] relative"}>
             <img
