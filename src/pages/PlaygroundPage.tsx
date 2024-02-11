@@ -123,7 +123,7 @@ export default function PlaygroundPage() {
         <TransparentNavigationBar />
 
         {/* Main Green Top Part*/}
-        <div className={"w-full h-1/2 max-h-[700px] relative"}>
+        <div className={"w-full h-1/2 max-h-[700px] min-h-[500px] relative"}>
             <img
                 src={PlaygroundBackground}
                 alt={"Oh no... I didn't load :( "}
@@ -132,7 +132,7 @@ export default function PlaygroundPage() {
             <div
                 className={"relative flex w-full h-full flex-col justify-center items-center gap-5 z-10"}
             >
-                <DragDropFileUpload text={uploadProgress === 0 ? "Upload Video" : uploadProgress === 100 ? "File Uploaded!": `(${uploadProgress}%) Uploading Video...`} dragOverHandler={dragOverHandler} dropHandler={dropHandler} handleFileInputChange={handleFileInputChange}/>
+                <DragDropFileUpload text={uploadProgress === 0 ? "Upload Video" : uploadProgress === 100 ? "File Uploaded!": `(${uploadProgress.toFixed(2)}%) Uploading Video...`} dragOverHandler={dragOverHandler} dropHandler={dropHandler} handleFileInputChange={handleFileInputChange}/>
                 {files.map((file) => (
                     <p className={"text-primary font-bold"}>{file.name}</p>
                 ))}
