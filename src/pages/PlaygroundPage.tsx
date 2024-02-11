@@ -5,6 +5,8 @@ import {DragDropFileUpload} from "../components/input/drag-drop-file-upload/drag
 import {NotificationContext} from "../contexts/NotificationProvider";
 import {TransparentNavigationBar} from "../components/navigation-bar/transparent-navigation-bar";
 import FirebaseStorageService from "../services/storage/strategies/FirebaseStorageService";
+import {UserVideo} from "../types/collections/UserVideo";
+import {useAuth} from "../contexts/Authentication";
 
 export interface PlaygroundPageProps {
     // NONE
@@ -17,6 +19,7 @@ function getRandomString(strings: string[]): string {
 
 export default function PlaygroundPage() {
     const { showNotification } = useContext(NotificationContext);
+    const { authState } = useAuth();
     const [files, setFiles] = useState<File[]>([]);
     const [uploadProgress, setUploadProgress] = useState<number>(0);
 
@@ -79,13 +82,23 @@ export default function PlaygroundPage() {
             return;
         }
 
+        if (!authState.isAuthenticated) {
+            showNotification('Video Upload Error', "You aren't authenticated you donut...", 'error', 5000);
+            window.location.href = "/authenticate"
+            return;
+        }
+
+        // const newVideoRef = doc(collection(db, "videos"));
+        // const videoId = newVideoRef.id;
         const filePath = `videos-raw/${file.name}`;
 
+        /* Attempt to Upload Video */
         try {
             const downloadURL = await FirebaseStorageService.uploadFile(filePath, file, (progress) => {
                 setUploadProgress(progress);
             });
-            console.log('File uploaded successfully:', downloadURL);
+
+            console.log('File uploaded successfully:', filePath);
             showNotification('Upload Success', 'File uploaded successfully!', 'success', 5000);
         } catch (error) {
             console.error('Upload error:', error);
@@ -94,6 +107,24 @@ export default function PlaygroundPage() {
                 `Failed to upload file. \n ${error}`,
                 'error',
                 10000);
+
+            return;
+        }
+
+        /* Attempt to Create a New Document */
+        try {
+            // const userVideoData: UserVideo  = {
+            //     videoId: "", originalFileName: "", processingProgress: 0, status: "Uploaded", uploadTimestamp: 0, videoPath: "",
+            // }
+
+        } catch (error) {
+            console.log('Upload Error:', error);
+            showNotification(
+                'Document Upload Error',
+                `Failed to Create Document. \n ${error}`,
+                'error',
+                10000);
+            // Delete the stored blob
         }
 
         setFiles([file]);

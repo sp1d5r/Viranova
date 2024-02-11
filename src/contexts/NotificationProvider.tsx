@@ -27,10 +27,25 @@ export interface NotificationProviderProps {
 export const NotificationProvider: React.FC<NotificationProviderProps> = ({ children }) => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
 
+    useEffect(() => {
+        /* Load in Notifications from Storage */
+        const storedNotification = sessionStorage.getItem('notification');
+        if (storedNotification) {
+            const notification = JSON.parse(storedNotification);
+            showNotification(notification.title, notification.message, notification.type);
+            sessionStorage.removeItem('notification');
+        }
+    }, []);
+
     const showNotification = (title: string, message: string, type: 'info' | 'warning' | 'error' | 'success', duration = 5000) => {
         const id = ++notificationId;
+        const newNotification = { title, id, message, type };
+        sessionStorage.setItem('notification', JSON.stringify(newNotification));
         setNotifications(prev => [...prev, { title, id, message, type }]);
-        setTimeout(() => setNotifications(prev => prev.filter(notification => notification.id !== id)), duration);
+        setTimeout(() => {
+            setNotifications(prev => prev.filter(notification => notification.id !== id));
+            sessionStorage.removeItem('notification');
+        }, duration);
     };
 
     const value:NotificationContextType = { showNotification, notifications };
@@ -52,7 +67,7 @@ const NotificationMessage: React.FC<{ title:string; message: string; type: 'info
     return (
         <div className={`rounded-xl border-2 border-black p-5 text-white flex flex-col  bg-${backgroundColor} m-5`}>
             <div className={"bg-danger bg-info bg-warning bg-success"}/>
-            <p className={"text-bold"}>{title}</p>
+            <p className={"font-bold"}>{title}</p>
             <p>{message}</p>
         </div>
     );
