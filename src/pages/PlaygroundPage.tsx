@@ -5,8 +5,9 @@ import {DragDropFileUpload} from "../components/input/drag-drop-file-upload/drag
 import {NotificationContext} from "../contexts/NotificationProvider";
 import {TransparentNavigationBar} from "../components/navigation-bar/transparent-navigation-bar";
 import FirebaseStorageService from "../services/storage/strategies/FirebaseStorageService";
-import {UserVideo} from "../types/collections/UserVideo";
+import {UserVideo, userVideoToDocument} from "../types/collections/UserVideo";
 import {useAuth} from "../contexts/Authentication";
+import FirebaseDatabaseService from "../services/database/strategies/FirebaseFirestoreService";
 
 export interface PlaygroundPageProps {
     // NONE
@@ -111,12 +112,46 @@ export default function PlaygroundPage() {
             return;
         }
 
+        setFiles([file]);
+
         /* Attempt to Create a New Document */
         try {
-            // const userVideoData: UserVideo  = {
-            //     videoId: "", originalFileName: "", processingProgress: 0, status: "Uploaded", uploadTimestamp: 0, videoPath: "",
-            // }
+            showNotification('Creating Task', 'Creating a new job... Don\'t go anywhere.', 'info', 10000);
 
+            // Generate new User Video
+            const userVideoData: UserVideo  = {
+                uid: authState.user!.uid,
+                originalFileName: file.name,
+                processingProgress: 0,
+                status: "Uploaded",
+                uploadTimestamp: Date.now(),
+                videoPath: filePath
+            }
+
+            // Generate new Video Document
+            const videoDocument = userVideoToDocument(userVideoData);
+
+            await FirebaseDatabaseService.addDocument(
+                "videos",
+                videoDocument,
+                (doc_id) => {
+                    showNotification(
+                        "Created Document!",
+                        `Successfully created new document: ${doc_id}`,
+                        "success",
+                        10000
+                        );
+                    window.location.href = `/video-handler?video_id=${doc_id}`
+                },
+                () => {
+                    showNotification(
+                        "Error Document Creation",
+                        'Failed to create document... Try again another time maybe?',
+                        "error",
+                        10000
+                    );
+                }
+                )
         } catch (error) {
             console.log('Upload Error:', error);
             showNotification(
@@ -124,10 +159,9 @@ export default function PlaygroundPage() {
                 `Failed to Create Document. \n ${error}`,
                 'error',
                 10000);
-            // Delete the stored blob
+            setFiles([]);
+            setUploadProgress(0);
         }
-
-        setFiles([file]);
     };
 
     const dropHandler: DragEventHandler<HTMLDivElement> = (event) => {
