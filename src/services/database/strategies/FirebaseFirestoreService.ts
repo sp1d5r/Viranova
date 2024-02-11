@@ -15,10 +15,10 @@ import {
 } from 'firebase/firestore';
 import app from "../../../config/firebaseConfig";
 import {DatabaseService, FailureCallback, SuccessCallback, UpdateCallback} from '../DatabaseInterface';
-
 const db = getFirestore(app);
 
 const FirebaseDatabaseService: DatabaseService = {
+
 
     async addDocument(collectionPath: string, data: any, onSuccess?: SuccessCallback<string>, onFailure?: FailureCallback): Promise<void> {
         try {
@@ -73,6 +73,15 @@ const FirebaseDatabaseService: DatabaseService = {
             },
             onError
         );
+    },
+
+    getNewDocumentID<T>(
+        collectionName: string,
+        onSuccess: SuccessCallback<string> = (res) => console.log(res),
+        onFailure?: FailureCallback): Promise<string> {
+        const newDocRef = doc(collection(db, collectionName));
+        onSuccess(newDocRef.id);
+        return Promise.resolve(newDocRef.id);
     },
 }
 

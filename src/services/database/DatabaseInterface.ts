@@ -10,6 +10,7 @@ export interface DatabaseService {
     updateDocument<T>(collectionPath: string, docId: string, data: Partial<T>, onSuccess?:SuccessCallback<void>, onFailure?: FailureCallback): Promise<void>;
     deleteDocument(collectionPath: string, docId: string, onSuccess?: SuccessCallback<void>, onFailure?: FailureCallback): Promise<void>;
     listenToDocument<T>(collectionPath: string, docId: string, onUpdate: UpdateCallback<T>, onError?: ErrorCallback<T>): Unsubscribe;
+    getNewDocumentID<T>(collectionName: string, onSuccess?:SuccessCallback<string>, onFailure?:FailureCallback): Promise<string>;
 }
 
 export default DatabaseService;

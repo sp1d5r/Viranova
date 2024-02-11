@@ -1,11 +1,8 @@
 import {doc, DocumentData} from 'firebase/firestore';
-import firebase from "firebase/compat";
-import DocumentSnapshot = firebase.firestore.DocumentSnapshot;
 
 type UserVideoStatus = "Uploaded" | "Transcribing" | "Diarizing" | "Segmenting" | "Summarizing Segments"
 
 export interface UserVideo {
-    videoId: string;
     videoPath: string;
     originalFileName: string;
     uploadTimestamp: number;
@@ -14,13 +11,8 @@ export interface UserVideo {
     uid: string;
 }
 
-export function documentToUserVideo(docSnap: DocumentSnapshot): UserVideo {
-    const docData = docSnap.data();
-    if (!docData) {
-        throw new Error('Document data is undefined');
-    }
+export function documentToUserVideo(docData: DocumentData): UserVideo {
     return {
-        videoId: docSnap.id,
         videoPath: docData.videoPath,
         originalFileName: docData.originalFileName,
         uploadTimestamp: docData.uploadTimestamp,
