@@ -14,9 +14,9 @@ export const ExistingProjectCard: React.FC<ExistingProjectCardProps> = ({backgro
             className={"z-0 w-full h-full absolute object-cover "}
         />
 
-        <div className={"z-10 h-10 w-full bg-gradient-to-b from-transparent to-black"}/>
+        <div className={"z-10 h-full w-full bg-gradient-to-b from-transparent to-black"}/>
         <div className={"relative bg-black z-10 w-full min-h-[30%] text-white flex flex-col p-5 gap-2"}>
-            <p className={"text-bold"}>{title}</p>
+            <p className={"font-bold"}>{title}</p>
             <p>{date}</p>
         </div>
     </div>
