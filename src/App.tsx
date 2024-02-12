@@ -5,6 +5,7 @@ import {ModelReview} from "./pages/ModelReview";
 import LandingPage from "./pages/LandingPage";
 import PlaygroundPage from "./pages/PlaygroundPage";
 import AuthenticationPage from "./pages/AuthenticationPage";
+import {VideoProgress} from "./pages/VideoProgress";
 
 
 function App() {
@@ -20,8 +21,9 @@ function App() {
           <Route path="/model-review" element={<div>
               <NavigationBar />
               <ModelReview />
-
           </div>} />
+
+        <Route path={"/video-handler"} element={<VideoProgress />} />
         </Routes>
       </Router>
   );

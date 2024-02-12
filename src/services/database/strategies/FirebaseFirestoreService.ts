@@ -39,6 +39,7 @@ const FirebaseDatabaseService: DatabaseService = {
             } else {
                 if (onSuccess) onSuccess(null);
             }
+
         } catch (error) {
             if (onFailure) onFailure(error as Error);
         }
