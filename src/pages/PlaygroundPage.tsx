@@ -125,7 +125,8 @@ export default function PlaygroundPage() {
                 processingProgress: 0,
                 status: "Uploaded",
                 uploadTimestamp: Date.now(),
-                videoPath: filePath
+                videoPath: filePath,
+                queuePosition: -1
             }
 
             // Generate new Video Document

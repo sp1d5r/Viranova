@@ -1,6 +1,6 @@
-import {doc, DocumentData} from 'firebase/firestore';
+import {DocumentData} from 'firebase/firestore';
 
-type UserVideoStatus = "Uploaded" | "Transcribing" | "Diarizing" | "Segmenting" | "Summarizing Segments"
+type UserVideoStatus = "Uploaded" | "Transcribing" | "Diarizing" | "Segmenting" | "Summarizing Segments" | "Preprocessing Complete"
 
 export interface UserVideo {
     videoPath: string;
@@ -9,6 +9,7 @@ export interface UserVideo {
     status: UserVideoStatus;
     processingProgress: number;
     uid: string;
+    queuePosition: number;
 }
 
 export function documentToUserVideo(docData: DocumentData): UserVideo {
@@ -19,6 +20,7 @@ export function documentToUserVideo(docData: DocumentData): UserVideo {
         status: docData.status,
         processingProgress: docData.processingProgress,
         uid: docData.uid,
+        queuePosition: docData.queuePosition,
     };
 }
 
