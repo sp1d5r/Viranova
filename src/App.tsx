@@ -6,6 +6,7 @@ import LandingPage from "./pages/LandingPage";
 import PlaygroundPage from "./pages/PlaygroundPage";
 import AuthenticationPage from "./pages/AuthenticationPage";
 import {VideoProgress} from "./pages/VideoProgress";
+import {VideoSegments} from "./pages/VideoSegments";
 
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
           </div>} />
 
         <Route path={"/video-handler"} element={<VideoProgress />} />
+        <Route path={"/video-temporal-segmentation"} element={<VideoSegments />} />
         </Routes>
       </Router>
   );

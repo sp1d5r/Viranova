@@ -15,12 +15,13 @@ export interface VideoProgressProps {
 }
 
 export const VideoProgress: React.FC<VideoProgressProps> = ({}) => {
-    const [searchParams, setSearchParams] = useSearchParams();
+    const [searchParams, _] = useSearchParams();
+    const video_id = searchParams.get("video_id");
+
     const [video, setVideo] = useState<UserVideo>();
     const {showNotification} = useNotificaiton();
 
     useEffect(() => {
-        const video_id = searchParams.get("video_id");
         if (video_id){
             FirebaseDatabaseService.getDocument('videos', video_id, (document) => {
                 showNotification("Document Collection", "Retrieved document from database", "success", 5000)
@@ -32,7 +33,6 @@ export const VideoProgress: React.FC<VideoProgressProps> = ({}) => {
             })
 
             FirebaseDatabaseService.listenToDocument("videos", video_id, (document)=>{
-                    // showNotification("Document Collection", "Retrieved document from database", "success", 5000)
                     if (document) {
                         setVideo(documentToUserVideo(document));
                     }
@@ -41,6 +41,12 @@ export const VideoProgress: React.FC<VideoProgressProps> = ({}) => {
 
         }
     }, []);
+
+    useEffect(() => {
+        if (video && video.status === "Preprocessing Complete") {
+            window.location.href = `/video-temporal-segmentation?video_id${video_id}`
+        }
+    }, [video, video_id]);
 
     return <ModalLayout>
         {video && <div className={"min-w-[300px] min-h-[300px] w-[50vw] h-[50vh] bg-background rounded-xl flex flex-col justify-center items-center gap-10 text-white"}>

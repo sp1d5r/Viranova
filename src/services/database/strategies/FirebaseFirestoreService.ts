@@ -7,6 +7,10 @@ import {
     DocumentReference,
     FirestoreError,
     getDoc,
+    getDocs,
+    query,
+    where,
+    orderBy,
     getFirestore,
     onSnapshot,
     Unsubscribe,
@@ -16,6 +20,8 @@ import {
 import app from "../../../config/firebaseConfig";
 import {DatabaseService, FailureCallback, SuccessCallback, UpdateCallback} from '../DatabaseInterface';
 const db = getFirestore(app);
+
+type QueryResult<T> = T & { id: string };
 
 const FirebaseDatabaseService: DatabaseService = {
 
@@ -76,13 +82,29 @@ const FirebaseDatabaseService: DatabaseService = {
         );
     },
 
-    getNewDocumentID<T>(
+    getNewDocumentID(
         collectionName: string,
         onSuccess: SuccessCallback<string> = (res) => console.log(res),
         onFailure?: FailureCallback): Promise<string> {
         const newDocRef = doc(collection(db, collectionName));
         onSuccess(newDocRef.id);
         return Promise.resolve(newDocRef.id);
+    },
+
+    async queryDocuments<T>(collectionPath: string, queryField: string, queryValue: any, orderByField: string, onSuccess?:SuccessCallback<T[]>, onFailure?:FailureCallback): Promise<void> {
+        try {
+            const q = query(collection(db, collectionPath), where(queryField, "==", queryValue), orderBy(orderByField));
+            const querySnapshot = await getDocs(q);
+            const documents: QueryResult<T>[] = [];
+            querySnapshot.forEach((doc) => {
+                const data = doc.data() as T;
+                const result: QueryResult<T> = { ...data, id: doc.id };
+                documents.push(result)
+            });
+            if (onSuccess) onSuccess(documents);
+        } catch (error) {
+            if (onFailure) onFailure(error as FirestoreError);
+        }
     },
 }
 
