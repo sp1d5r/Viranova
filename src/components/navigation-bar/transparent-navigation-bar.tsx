@@ -163,11 +163,11 @@ export const TransparentNavigationBar: React.FC<TransparentNavigationBarProps> =
                             )
                         }
                     )}}
-                   className={"font-bold text-white px-5 py-3 bg-danger rounded-xl border-black border"}
+                   className={"font-bold text-white px-5 py-3 text-center bg-danger rounded-xl border-black border min-w-[120px]"}
                 >
                     Sign Out
                 </p> :<a href={"/authenticate"}>
-                    <p className={"m-0 text-center text-stone-50 text-base font-normal"}>
+                    <p className={"m-0 text-center text-stone-50 text-base font-normal min-w-[100px]"}>
                         Sign Up
                     </p>
                 </a>}

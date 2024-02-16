@@ -62,7 +62,7 @@ export default function PlaygroundPage() {
             return;
         }
 
-        const fileSizeLimit = 15 * 1024 * 1024; // 5 MB
+        const fileSizeLimit = 70 * 1024 * 1024; // 5 MB
         if (file.size > fileSizeLimit) {
             const errorMessages = [
                 `This file's got more weight than we can lift 🏋️‍♂️. Keep it under ${(fileSizeLimit / 1024 / 1024).toFixed(2)}MB, please.`,
@@ -125,6 +125,7 @@ export default function PlaygroundPage() {
                 processingProgress: 0,
                 status: "Uploaded",
                 uploadTimestamp: Date.now(),
+                progressMessage: "Uploading video to transcription queue",
                 videoPath: filePath,
                 queuePosition: -1
             }
@@ -198,7 +199,7 @@ export default function PlaygroundPage() {
             <div
                 className={"relative flex w-full h-full flex-col justify-center items-center gap-5 z-10"}
             >
-                <DragDropFileUpload text={uploadProgress === 0 ? "Upload Video" : uploadProgress === 100 ? "File Uploaded!": `(${uploadProgress.toFixed(2)}%) Uploading Video...`} dragOverHandler={dragOverHandler} dropHandler={dropHandler} handleFileInputChange={handleFileInputChange}/>
+                <DragDropFileUpload text={uploadProgress === 0 ? "Upload Video" : uploadProgress === 100 ? "File Uploaded!": `(${uploadProgress.toFixed(2)}%) \n Uploading Video...`} dragOverHandler={dragOverHandler} dropHandler={dropHandler} handleFileInputChange={handleFileInputChange}/>
                 {files.map((file) => (
                     <p className={"text-primary font-bold"}>{file.name}</p>
                 ))}
