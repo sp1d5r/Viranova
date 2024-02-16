@@ -55,23 +55,22 @@ export const VideoProgress: React.FC<VideoProgressProps> = ({}) => {
             }
 
 
-            {
-                video.status == "Uploaded" ?
-                    <div className={"flex flex-col justify-center items-center"}>
-                        <p className={"text-white font-bold text-subsubtitle"}> Video Uploaded! </p>
-                        <p>Adding to Transcription Queue</p>
-                    </div> :
-                video.status === "Transcribing" ? <img className={"animate-spin"} src={Transcript} alt={"Uploaded video"} /> :
-                        video.status === "Diarizing" ? <img className={"animate-spin"} src={Transcript} alt={"Uploaded video"} /> :
-                            video.status === "Segmenting" ? <img className={"animate-bounce"} src={Segments} alt={"Uploaded video"} /> :
-                                video.status === "Summarizing Segments" ? <img className={"animate-bounce"} src={Proposals} alt={"Summarising Segments"} /> :
-                                    video.status === "Preprocessing Complete" ? <img className={"animate-bounce"} src={ThumbsUp} alt={"Process Complete"} /> :
-                                        <img src={ThumbsUp} alt={"Unsure what's going on "} />
-            }
+            <div className={"flex flex-col justify-center items-center"}>
+                {
+                    video.status === "Uploaded" ? <p className={"text-white font-bold text-subsubtitle"}> Video Uploaded! </p> :
+                    video.status === "Transcribing" ? <p className={"text-white font-bold text-subsubtitle"}> Transcribing the Video </p> :
+                    // video.status === "Diarizing" ? <p className={"text-white font-bold text-subsubtitle"}> Video Uploaded! </p> :
+                    video.status === "Segmenting" ? <p className={"text-white font-bold text-subsubtitle"}> Segmenting Video </p> :
+                    video.status === "Summarizing Segments" ? <p className={"text-white font-bold text-subsubtitle"}> Summarizing Segments </p> :
+                    video.status === "Preprocessing Complete" ? <p className={"text-white font-bold text-subsubtitle"}> Preprocessing Complete!  </p> :
+                        <p className={"text-white font-bold text-subsubtitle"}>I have no clue what's going on...</p>
+                }
+                <p>{video.progressMessage}</p>
+            </div>
 
             {
-                <div className={"w-[300px] outline outline-white rounded-full h-2 bg-secondary"}>
-                    <div className={"bg-accent h-2.5 rounded-full"} style={{width: `${video.processingProgress}%`}}></div>
+                <div className={"w-[300px] border border-primary rounded-full h-2 bg-secondary"}>
+                    <div className={"bg-accent h-2.5 rounded-full transition-all"} style={{width: `${video.processingProgress}%`}}></div>
                 </div>
             }
 

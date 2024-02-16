@@ -8,6 +8,7 @@ export interface UserVideo {
     uploadTimestamp: number;
     status: UserVideoStatus;
     processingProgress: number;
+    progressMessage: string;
     uid: string;
     queuePosition: number;
 }
@@ -19,11 +20,12 @@ export function documentToUserVideo(docData: DocumentData): UserVideo {
         uploadTimestamp: docData.uploadTimestamp,
         status: docData.status,
         processingProgress: docData.processingProgress,
+        progressMessage: docData.progressMessage,
         uid: docData.uid,
         queuePosition: docData.queuePosition,
     };
 }
 
 export function userVideoToDocument(userVideo: UserVideo): DocumentData {
-    return { ...userVideo };
+    return { ...userVideo, 'previousStatus': null };
 }
