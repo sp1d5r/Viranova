@@ -7,6 +7,7 @@ import PlaygroundPage from "./pages/PlaygroundPage";
 import AuthenticationPage from "./pages/AuthenticationPage";
 import {VideoProgress} from "./pages/VideoProgress";
 import {VideoSegments} from "./pages/VideoSegments";
+import {SegmentationHandlingPage} from "./pages/SegmentationHandlingPage";
 
 
 function App() {
@@ -23,6 +24,8 @@ function App() {
               <NavigationBar />
               <ModelReview />
           </div>} />
+
+        <Route path={"/segmentation"} element={<SegmentationHandlingPage />} />
 
         <Route path={"/video-handler"} element={<VideoProgress />} />
         <Route path={"/video-temporal-segmentation"} element={<VideoSegments />} />
