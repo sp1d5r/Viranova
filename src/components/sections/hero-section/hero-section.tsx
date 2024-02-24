@@ -1,5 +1,5 @@
 import React from 'react';
-import HeroAsset from "../../../assets/landing-page-assets/HeroAsset.png";
+import Background from "../../../assets/landing-page-assets/background.png";
 import { PrimaryButton } from '../../buttons/primary-button/primary-button';
 import { SecondaryButton } from '../../buttons/secondary-button/secondary-button';
 import Mouse from "../../../assets/icons/Mouse.svg";
@@ -27,9 +27,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ className = '' }) => (
                 <p>Scroll to Continue </p>
             </div>
 
-        </div>
-        <div className="relative flex-1 h-full min-w-[300px] flex flex-col gap-3 overflow-hidden rounded-full">
-            <img className="w-full h-full object-cover rounded-full aspect-square border-2 border-background" src={HeroAsset} alt="Mask" />
+            <img className={"absolute top-10"} src={Background} alt={""} />
+
         </div>
     </div>
 );
