@@ -10,5 +10,5 @@ export interface LogoProps {
 export const Logo: React.FC<LogoProps> = ({ className = '' }) => (
     <div className={className + 'text-2xl font-bold flex items-center justify-center gap-1'}>
         <img src={LogoIcon} alt="" className={"h-8 w-8"} />
-        <span className={"text-text"}>Vira</span><span className="text-primary">Nova</span></div>
+        <span className={"text-text tracking-widest"}>IRA</span><span className="text-primary tracking-widest">NOVA</span></div>
 );
