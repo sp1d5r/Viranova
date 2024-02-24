@@ -59,7 +59,7 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ className = '' }) 
     const {authState, logout} = useAuth();
     const { showNotification } = useNotificaiton();
 
-    return <div className="w-full flex sticky top-0 bg-background min-h-12 shadow justify-start items-center gap-[90px] inline-flex px-10 py-5 navigation-bar z-10">
+    return <div className="w-full flex sticky top-0 bg-background min-h-12 shadow justify-start items-center gap-[90px] inline-flex px-10 py-5 navigation-bar z-50">
         {
             menuExpanded && <div className={"absolute z-20 h-[100vh] w-[100vw] top-0 left-0 bg-background flex flex-col px-10 py-5 justify-between"}>
                 <div className="flex justify-start min-h-[50px]">
@@ -110,7 +110,7 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ className = '' }) 
                                     )
                                 }
                             )}}
-                            className={"text-bold text-danger"}
+                            className={"font-bold text-danger"}
                         >
                         Sign Out
                     </p> :<a href={"/authenticate"}>
@@ -163,7 +163,7 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ className = '' }) 
                             )
                         }
                     )}}
-                   className={"text-bold text-danger"}
+                   className={"font-bold text-danger"}
                 >
                     Sign Out
                 </p> :<a href={"/authenticate"}>
