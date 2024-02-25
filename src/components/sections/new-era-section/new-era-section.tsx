@@ -9,7 +9,7 @@ export interface NewEraSectionProps {
 
 
 export const NewEraSection: React.FC<NewEraSectionProps> = ({ className = '' }) => (
-    <div className={className + "container flex flex-col gap-5 min-h-[80vh] justify-center py-10"}>
+    <section className={className + "container flex flex-col gap-5 min-h-[50vh] justify-center py-10"}>
         <p className="text-title text-accent z-10">A brand new era...</p>
         <p className="text-accent">Traditional methods are focused on longer form content. Because models don’t know tiktok’s format.</p>
         <div className="flex w-full sm:justify-evenly justify-center items-center flex-wrap sm:flex-no-wrap gap-20 sm:gap-1">
@@ -18,5 +18,5 @@ export const NewEraSection: React.FC<NewEraSectionProps> = ({ className = '' }) 
         </div>
         <p className="text-accent">We’ve had years of traditional videos, current models understand them unbelieveably well, they can’t comprehend TikToks.  </p>
         <p className="text-primary text-bold">ViraNova is capable of understanding tiktoks.</p>
-    </div>
+    </section>
 );
