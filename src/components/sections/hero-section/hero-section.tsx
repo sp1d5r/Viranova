@@ -1,5 +1,6 @@
 import React from 'react';
 import Background from "../../../assets/landing-page-assets/background.png";
+import BackgroundMobile from "../../../assets/landing-page-assets/backgroundMobile.png";
 import PeaceLeft from "../../../assets/landing-page-assets/PeaceFingersLeft.svg";
 import PeaceRight from "../../../assets/landing-page-assets/PeaceFingersRight.svg";
 import Underline from "../../../assets/landing-page-assets/underline.svg";
@@ -20,18 +21,20 @@ export interface LandingCardProps {
 }
 const LandingCard : React.FC<LandingCardProps> = ({imageSrc, cardTitle, cardDescription}) => {
     return <div
-        className={"flex-col bg-white/5 flex border-primary border h-72 backdrop-blur rounded-xl hover:scale-110 transition-all p-3 justify-center items-center w-[20%] gap-3 hover:shadow hover:shadow-primary"}>
+        className={"flex-col bg-white/5 flex border-primary border h-72 backdrop-blur rounded-xl hover:scale-110 transition-all p-3 justify-center items-center  gap-3 hover:shadow hover:shadow-primary min-w-[150px"}>
         <img src={imageSrc} alt={"landing card image"} className={"mix-blend-darken h-32 w-32 aspect-square"}/>
         <p className={"font-bold"}>{cardTitle}</p>
         <p>{cardDescription}</p>
     </div>;
 }
 
-export const HeroSection: React.FC<HeroSectionProps> = ({ className = '' }) => (
-    <div
-        className={className + 'container bg-background text-white w-full min-h-[80vh] flex gap-5 justify-center items-center md:flex-wrap-reverse  px-5 flex-col-reverse sm:flex-row container'}>
-        <img className={"absolute top-10"} src={Background} alt={""}/>
-        <div className={"z-10 flex flex-col gap-10 justify-center"}>
+export const HeroSection: React.FC<HeroSectionProps> = ({ className = '' }) => {
+    const isMobile = window.innerWidth <= 450;
+
+    return <div
+        className={className + 'container bg-background text-white w-full pt-10 min-h-[80vh] flex gap-5 justify-center items-center md:flex-wrap-reverse  px-5 flex-col-reverse sm:flex-row container'}>
+        <img className={"absolute z-1 top-10 w-[100vw] opacity-75"} src={isMobile ? BackgroundMobile : Background} alt={""}/>
+        <div className={"z-10 flex flex-col gap-10 justify-center items-center"}>
             <div className={"flex justify-center items-center relative "}>
                 <div className={"relative group"}>
                     <div
@@ -48,7 +51,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ className = '' }) => (
 
             <div className={"flex gap-5 justify-center"}>
                 <img className={"hidden md:flex h-20"} src={PeaceLeft} alt={"peace fingers left"}/>
-                <div>
+                <div className={"flex flex-col gap-2"}>
                     <span className={"text-title m-0 text-center relative"}>
                         Block Chain Powered {" "}
                         <span className={"text-primary relative"}>
@@ -63,13 +66,19 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ className = '' }) => (
             </div>
 
 
-            <div className={"flex gap-5 justify-center"}>
-                <LandingCard imageSrc={DrivingVideo} cardTitle={"Driving Video"} cardDescription={"Provide the model with a driving video."}/>
-                <LandingCard imageSrc={Segmentation} cardTitle={"Segmentation"} cardDescription={"Perform Temporal and Spacial Segmentation."}/>
-                <LandingCard imageSrc={LayingDown} cardTitle={"Metric Driven"} cardDescription={"Fine-tune videos for your audience."}/>
-                <LandingCard imageSrc={BuildingBlocks} cardTitle={"Blockchain Powered"} cardDescription={"Inference and training powered by blockchain."}/>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-5 justify-center">
+                <LandingCard imageSrc={DrivingVideo} cardTitle={"Driving Video"}
+                             cardDescription={"Provide the model with a driving video."}/>
+                <LandingCard imageSrc={Segmentation} cardTitle={"Segmentation"}
+                             cardDescription={"Perform Temporal and Spacial Segmentation."}/>
+                <LandingCard imageSrc={LayingDown} cardTitle={"Metric Driven"}
+                             cardDescription={"Fine-tune videos for your audience."}/>
+                <LandingCard imageSrc={BuildingBlocks} cardTitle={"Blockchain Powered"}
+                             cardDescription={"Inference and training powered by blockchain."}/>
             </div>
+
+            <p className={"text-secondary font-bold tracking-widest underline "}>Continue Scrolling</p>
         </div>
 
     </div>
-);
+};
