@@ -58,5 +58,6 @@ export default function LandingPage(){
             <div className={"w-2 h-[80vh] "}>
             </div>
         </div>
+        <div className={"h-screen"}/>
     </ScrollableLayout>
 }
