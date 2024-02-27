@@ -8,6 +8,7 @@ import FirebaseDatabaseService from "../services/database/strategies/FirebaseFir
 import {documentToUserVideo} from "../types/collections/UserVideo";
 import {documentToProposedMatch, ProposedMatch} from "../types/collections/ProposedMatches";
 import {MatchResults, matchResultsToDocument} from "../types/collections/self-supervised/MatchResults";
+import {useAuth} from "../contexts/Authentication";
 
 export interface VideoMatchingPageProps {
     //
@@ -30,6 +31,7 @@ export const VideoMatchingPage : React.FC<VideoMatchingPageProps> = () => {
     const [times, setTimes] = useState({startTime:'', endTime:''})
 
     const {showNotification} = useNotificaiton();
+    const {authState}= useAuth();
 
     const getNewRandom = async() => {
         FirebaseDatabaseService.getRandomDocument(
@@ -49,7 +51,12 @@ export const VideoMatchingPage : React.FC<VideoMatchingPageProps> = () => {
     }
 
     useEffect(() => {
-        getNewRandom();
+        if (authState.isAuthenticated){
+            getNewRandom();
+        } else {
+            showNotification('Authentication Error', 'You need to login', 'error', 5000);
+            window.location.href="/authenticate"
+        }
     }, []);
 
     useEffect(() => {
@@ -123,8 +130,7 @@ export const VideoMatchingPage : React.FC<VideoMatchingPageProps> = () => {
             <h1 className={"text-title"}>Do these Videos Match</h1>
             <span className={"text-white"}><a href={"https://en.wikipedia.org/wiki/Self-supervised_learning"} className={"text-primary font-bold hover:underline"}>Self-Supervised Learning</a> is the next best thing... But I don’t have people to help - whenever you’re bored just come in and let me know if this is
 right or wrong. </span>
-
-            <div className={"flex gap-20 justify-center py-5"}>
+            <div className={"flex flex-wrap sm:flex-nowrap  gap-2 sm:gap-20 justify-center py-5"}>
 
                 <div className={"flex flex-1 flex-col py-5 justify-evenly items-center gap-2 min-w-[200px] min-h-[400px] bg-white/5 hover:bg-white/10 rounded-xl backdrop-blur-sm"}>
                     <img className={" max-h-[200px] object-cover"} src={shortVideo ? shortVideo.thumbnailUrl :"https://placehold.jp/300x150.png"} alt={"something "} />
