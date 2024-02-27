@@ -8,6 +8,7 @@ import AuthenticationPage from "./pages/AuthenticationPage";
 import {VideoProgress} from "./pages/VideoProgress";
 import {VideoSegments} from "./pages/VideoSegments";
 import {SegmentationHandlingPage} from "./pages/SegmentationHandlingPage";
+import {VideoMatchingPage} from "./pages/VideoMatchingPage";
 
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
           </div>} />
 
         <Route path={"/segmentation"} element={<SegmentationHandlingPage />} />
+        <Route path={"/video-matching"} element={<VideoMatchingPage />}/>
 
         <Route path={"/video-handler"} element={<VideoProgress />} />
         <Route path={"/video-temporal-segmentation"} element={<VideoSegments />} />
