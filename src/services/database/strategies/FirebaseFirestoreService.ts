@@ -106,6 +106,30 @@ const FirebaseDatabaseService: DatabaseService = {
             if (onFailure) onFailure(error as FirestoreError);
         }
     },
+
+    async getRandomDocument<T>(collectionPath: string, onSuccess?: SuccessCallback<T | null>, onFailure?: FailureCallback): Promise<void> {
+        try {
+            const q = query(collection(db, collectionPath));
+            const querySnapshot = await getDocs(q);
+            const documents: QueryResult<T>[] = [];
+            querySnapshot.forEach((doc) => {
+                const data = doc.data() as T;
+                const result: QueryResult<T> = { ...data, id: doc.id };
+                documents.push(result);
+            });
+
+            if (documents.length > 0) {
+                const randomIndex = Math.floor(Math.random() * documents.length);
+                const randomDocument = documents[randomIndex];
+                if (onSuccess) onSuccess(randomDocument as T);
+            } else {
+                if (onSuccess) onSuccess(null); // No documents found
+            }
+        } catch (error) {
+            if (onFailure) onFailure(error as FirestoreError);
+        }
+    }
+
 }
 
 export default FirebaseDatabaseService;

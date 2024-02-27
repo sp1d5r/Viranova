@@ -65,7 +65,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
 const NotificationMessage: React.FC<{ title:string; message: string; type: 'info' | 'warning' | 'error' | 'success'}> = ({title, message, type }) => {
     const backgroundColor = type === 'error' ? 'danger' : type === 'warning' ? 'warning' : type === 'success' ? 'success' : 'info';
     return (
-        <div className={`rounded-xl border-2 border-black p-5 text-white flex flex-col  bg-${backgroundColor} m-5`}>
+        <div className={`rounded-xl animate-slide-in border-2 border-black p-5 text-white flex flex-col  bg-${backgroundColor} m-5`}>
             <div className={"bg-danger bg-info bg-warning bg-success"}/>
             <p className={"font-bold"}>{title}</p>
             <p>{message}</p>
