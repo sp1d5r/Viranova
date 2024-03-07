@@ -5,10 +5,10 @@ import {getVideoInfo} from "../services/youtube";
 import {Video} from "../types/Video";
 import {useNotificaiton} from "../contexts/NotificationProvider";
 import FirebaseDatabaseService from "../services/database/strategies/FirebaseFirestoreService";
-import {documentToUserVideo} from "../types/collections/UserVideo";
 import {documentToProposedMatch, ProposedMatch} from "../types/collections/ProposedMatches";
 import {MatchResults, matchResultsToDocument} from "../types/collections/self-supervised/MatchResults";
 import {useAuth} from "../contexts/Authentication";
+import {VideoCard} from "../components/cards/video-card/VideoCard";
 
 export interface VideoMatchingPageProps {
     //
@@ -51,12 +51,7 @@ export const VideoMatchingPage : React.FC<VideoMatchingPageProps> = () => {
     }
 
     useEffect(() => {
-        if (authState.isAuthenticated){
-            getNewRandom();
-        } else {
-            showNotification('Authentication Error', 'You need to login', 'error', 5000);
-            window.location.href="/authenticate"
-        }
+        getNewRandom();
     }, []);
 
     useEffect(() => {
@@ -100,6 +95,7 @@ export const VideoMatchingPage : React.FC<VideoMatchingPageProps> = () => {
             correct: correct,
             startTime: times.startTime,
             endTime: times.endTime,
+
         }
         FirebaseDatabaseService.addDocument(
             'self-supervised-match',
@@ -132,37 +128,8 @@ export const VideoMatchingPage : React.FC<VideoMatchingPageProps> = () => {
 right or wrong. </span>
             <div className={"flex flex-wrap sm:flex-nowrap  gap-2 sm:gap-20 justify-center py-5"}>
 
-                <div className={"flex flex-1 flex-col py-5 justify-evenly items-center gap-2 min-w-[200px] min-h-[400px] bg-white/5 hover:bg-white/10 rounded-xl backdrop-blur-sm"}>
-                    <img className={" max-h-[200px] object-cover"} src={shortVideo ? shortVideo.thumbnailUrl :"https://placehold.jp/300x150.png"} alt={"something "} />
-
-                    <div className={"flex flex-col gap-1 items-start w-[80%]"}>
-                        <p className={"font-light text-gray-400"}>Video Title</p>
-                        <p className={"text-white"}>{shortVideo ? shortVideo.videoTitle: "Unknown Video"}</p>
-                    </div>
-
-                    <div className={"flex flex-col gap-1 items-start w-[80%]"}>
-                        <p className={"font-light text-gray-400"}>Video Description</p>
-                        <p className={"text-white"}>{shortVideo ? shortVideo.videoDescription.substring(0, 100): "Unknown Video"}</p>
-                    </div>
-
-                    <a href={shortVideo ? shortVideo.videoUrl : "/"} target="_blank" rel="noopener noreferrer" className={"font-bold hover:underline"} >Go to Video</a>
-                </div>
-
-                <div className={"flex flex-col py-5 flex-1  justify-evenly items-center gap-2 min-w-[200px] min-h-[400px] bg-white/5 hover:bg-white/10 rounded-xl backdrop-blur-sm"}>
-                    <img className={"max-h-[200px] object-cover"} src={longVideo ? longVideo.thumbnailUrl :"https://placehold.jp/300x150.png"} alt={"something "} />
-
-                    <div className={"flex flex-col gap-1 items-start w-[80%]"}>
-                        <p className={"font-light text-gray-400"}>Video Title</p>
-                        <p className={"text-white"}>{longVideo ? longVideo.videoTitle: "Unknown Video"}</p>
-                    </div>
-
-                    <div className={"flex flex-col gap-1 items-start w-[80%]"}>
-                        <p className={"font-light text-gray-400"}>Video Description</p>
-                        <p className={"text-white"}>{longVideo ? longVideo.videoDescription.substring(0, 100): "Unknown Video"}</p>
-                    </div>
-
-                    <a href={longVideo ? longVideo.videoUrl : "/"} target="_blank" rel="noopener noreferrer" className={"font-bold hover:underline"} >Go to Video</a>
-                </div>
+                {shortVideo && <VideoCard video={shortVideo} />}
+                {longVideo && <VideoCard video={longVideo} />}
 
                 <div className={"flex flex-col justify-center gap-2"}>
                     <button
