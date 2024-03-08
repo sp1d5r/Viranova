@@ -6,6 +6,7 @@ import {useNotificaiton} from "../contexts/NotificationProvider";
 import {SpacialSegmentation} from "../components/segmentation/SpacialSegmentation";
 import {SegmentationGroup} from "../types/segmentation-masks/SegmentationGroup";
 import axios from 'axios';
+import Background from "../assets/landing-page-assets/background.png";
 
 export interface SegmentationHandlingPageProps {
     //
@@ -73,7 +74,8 @@ export const SegmentationHandlingPage: React.FC<SegmentationHandlingPageProps> =
     }, [authState]);
 
     return <ScrollableLayout>
-        <div className={"container"}>
+        <img onMouseDown={() => {return;}} className={"absolute z-0 top-10  opacity-75"} src={Background} alt={""}/>
+        <div className={"container relative z-10"}>
             {
                 pageState === "Introduction" ?
                     <SegmentationIntro
