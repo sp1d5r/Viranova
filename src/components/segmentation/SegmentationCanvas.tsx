@@ -5,9 +5,10 @@ interface SegmentationCanvasProps {
     masks: SegmentationMask[];
     groups: number[]; // This represents special indices, not groups of indices
     setGroups: (groups: number[]) => void;
+    imageSrc: string;
 }
 
-const SegmentationCanvas: React.FC<SegmentationCanvasProps> = ({ masks, groups, setGroups }) => {
+const SegmentationCanvas: React.FC<SegmentationCanvasProps> = ({ masks, groups, setGroups, imageSrc }) => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const [currentSelected, setCurrentSelected] = useState<Set<number>>(new Set());
     const [groupColors, setGroupColors] = useState<{[key: number]: string}>({});
@@ -16,7 +17,6 @@ const SegmentationCanvas: React.FC<SegmentationCanvasProps> = ({ masks, groups, 
         const newGroupColors: {[key: number]: string} = {};
         groups.forEach((group, index) => {
             if (!newGroupColors[group]) {
-                // Assign a new color if this group doesn't have one yet
                 newGroupColors[group] = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
             }
         });
@@ -88,10 +88,37 @@ const SegmentationCanvas: React.FC<SegmentationCanvasProps> = ({ masks, groups, 
         setGroups(newGroups); // Assuming you have a setGroups function to update the state
     };
 
-    return <div><canvas ref={canvasRef} width={640} height={480} onClick={handleClick} />
-        <button onClick={() => {updateGroups()}}>Merge Groups</button>
-        <button onClick={() => {setCurrentSelected(new Set<number>())}}>Reset Groups</button>
-        <button onClick={() => {console.log(groups)}}>Print Spacial Groups</button>
+    return <div className={"w-full flex gap-2 justify-center items-start"}>
+        <div className={"flex flex-col gap-5 flex-1 items-center p-2"}>
+            <p className={"font-bold text-subtitle"}>Original Frame</p>
+            <img className={"w-[440px] h-[440px] object-contain"} src={imageSrc} alt={"frame"} />
+            <button
+                onClick={() => {updateGroups()}}
+                className={"w-[200px] bg-blue-400/10 hover:bg-blue-400/30 px-5 py-2 rounded border border-white font-bold"}
+            >Merge Groups</button>
+            <button
+                onClick={() => {setCurrentSelected(new Set<number>())}}
+                className={"w-[200px] bg-red-400/10 hover:bg-red-400/30 px-5 py-2 rounded border border-white font-bold"}
+            >Reset Groups</button>
+        </div>
+
+        <div className={"flex flex-col gap-5 flex-1 items-center p-2"}>
+            <p className={"font-bold text-primary text-subtitle"}>Segments</p>
+            <canvas ref={canvasRef} width={440} height={440} onClick={handleClick} />
+            <div className={"flex flex-wrap gap-2"}>
+                {Object.keys(groupColors).map((key) => (
+                    <div key={key} className={"flex gap-2"}>
+                        <div
+                            style={{backgroundColor: groupColors[parseInt(key)]}}
+                            className={"w-5 h-5 border border-black rounded"}
+                        ></div>
+                        <p>Segment {key}</p>
+                    </div>
+                ))}
+            </div>
+
+        </div>
+
     </div>;
 };
 
