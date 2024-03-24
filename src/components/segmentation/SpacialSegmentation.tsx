@@ -56,7 +56,6 @@ export const SpacialSegmentation : React.FC<SpacialSegmentationProps> = ({segmen
                     <p>
                         Click on Submit and we can move to the next stage! Temporal Segmentation
                     </p>
-
                 </div>
             }
         </div>

@@ -17,7 +17,7 @@ export const WhySection: React.FC<WhySectionProps> = ({ className = '' }) => {
             gsap.timeline({
                     scrollTrigger: {
                         trigger: whySection.current,
-                        start: "top 30%",
+                        start: "top 50%",
                         end: "+=300",
                         scrub: 0.5,
                         toggleActions: "restart pause pause pause"
@@ -36,7 +36,7 @@ export const WhySection: React.FC<WhySectionProps> = ({ className = '' }) => {
     }, []);
 
 
-    return <section ref={whySection} className={className + "container flex flex-col gap-5 min-h-[50vh] justify-center"}>
+    return <section ref={whySection} className={className + "container flex flex-col gap-5 min-h-[50vh] justify-center overflow-hidden"}>
         <HiddenBackgroundTitle/>
         <p id="why-section-1" className="text-bold text-primary">Generating TikTok Clips is not hard.</p>
         <p id="why-section-2" className="text-white">You need to generate funny clips that engage your viewers, this means you need to

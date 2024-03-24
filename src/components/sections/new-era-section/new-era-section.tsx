@@ -19,7 +19,7 @@ export const NewEraSection: React.FC<NewEraSectionProps> = ({ className = '' }) 
             gsap.timeline({
                     scrollTrigger: {
                         trigger: newEraRef.current,
-                        start: "top 30%",
+                        start: "top 50%",
                         end: "+=200",
                         scrub: 0.5,
                         toggleActions: "restart pause pause pause"
