@@ -21,7 +21,7 @@ export interface LandingCardProps {
 }
 const LandingCard : React.FC<LandingCardProps> = ({imageSrc, cardTitle, cardDescription}) => {
     return <div
-        className={"flex-col bg-white/5 flex border-primary border h-72 backdrop-blur rounded-xl hover:scale-110 transition-all p-3 justify-center items-center  gap-3 hover:shadow hover:shadow-primary min-w-[150px"}>
+        className={"flex-col bg-white/5 flex border-primary border h-72 backdrop-blur rounded-xl hover:scale-110 transition-all p-3 justify-center items-center  gap-3 hover:shadow hover:shadow-primary min-w-[150px] max-w-[250px]"}>
         <img src={imageSrc} alt={"landing card image"} className={"mix-blend-darken h-32 w-32 aspect-square"}/>
         <p className={"font-bold"}>{cardTitle}</p>
         <p>{cardDescription}</p>

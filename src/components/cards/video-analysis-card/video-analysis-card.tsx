@@ -28,7 +28,7 @@ export const VideoAnalysisCard = ({ className = '', src = Desktop, title = "Trad
             gsap.timeline({
                     scrollTrigger: {
                         trigger: comp.current,
-                        start: "top 40%",
+                        start: "top 60%",
                         end: "+=50",
                         scrub: 0.5,
                         toggleActions: "restart pause pause pause"
@@ -54,7 +54,7 @@ export const VideoAnalysisCard = ({ className = '', src = Desktop, title = "Trad
     return (
         <div ref={comp} className={className + " flex flex-col gap-5 w-[45%] sm:w-auto"}>
             <div className="flex flex-col justify-center items-center gap-2">
-                <img id={ids.image} src={src} alt=""/>
+                <img id={ids.image} src={src} alt="w-[30vw] sm:w-auto"/>
                 <p className="text-primary text-bold">{title}</p>
             </div>
             <ul className="text-accent gap-2">

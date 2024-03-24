@@ -44,7 +44,7 @@ export const VideoProgress: React.FC<VideoProgressProps> = ({}) => {
 
     useEffect(() => {
         if (video && video.status === "Preprocessing Complete") {
-            window.location.href = `/video-temporal-segmentation?video_id${video_id}`
+            window.location.href = `/video-temporal-segmentation?video_id=${video_id}`
         }
     }, [video, video_id]);
 
@@ -75,8 +75,8 @@ export const VideoProgress: React.FC<VideoProgressProps> = ({}) => {
             </div>
 
             {
-                <div className={"w-[300px] border border-primary rounded-full h-2 bg-secondary"}>
-                    <div className={"bg-accent h-2.5 rounded-full transition-all"} style={{width: `${video.processingProgress}%`}}></div>
+                <div className={"w-[300px] outline outline-primary rounded-full h-2 bg-secondary"}>
+                    <div className={"bg-accent h-2 rounded-full transition-all"} style={{width: `${video.processingProgress}%`}}></div>
                 </div>
             }
 
