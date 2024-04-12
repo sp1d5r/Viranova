@@ -1,8 +1,12 @@
 import React, {useState} from "react";
-import {SegmentationGroup} from "../../types/segmentation-masks/SegmentationGroup";
+import {
+    SegmentationGroup,
+    spacialSegmentationGroupToDocument
+} from "../../types/segmentation-masks/SegmentationGroup";
 import {PageState} from "../../pages/SegmentationHandlingPage";
-import SegmentationCanvas from "./SegmentationCanvas";
+import SpacialSegmentationCanvas from "./SpacialSegmentationCanvas";
 import {useNotificaiton} from "../../contexts/NotificationProvider";
+import FirebaseDatabaseService from "../../services/database/strategies/FirebaseFirestoreService";
 
 export interface SpacialSegmentationProps {
     segmentationGroup: SegmentationGroup,
@@ -42,7 +46,7 @@ export const SpacialSegmentation : React.FC<SpacialSegmentationProps> = ({segmen
             }
 
             {currentFrame !== -1 && currentFrame !== segmentationGroup.frames.length -1 &&
-                <SegmentationCanvas
+                <SpacialSegmentationCanvas
                     masks={segmentationGroup.segmentationMasks[currentFrame]}
                     groups={segmentationGroup.spacialGroups[currentFrame]}
                     setGroups={updateSpacialGroups}
@@ -73,7 +77,19 @@ export const SpacialSegmentation : React.FC<SpacialSegmentationProps> = ({segmen
 
             <button
                 onClick={() => {
-                    showNotification("Not implemented", "We can't submit just yet", "error", 5000)
+                    console.log(segmentationGroup);
+                    FirebaseDatabaseService.addDocument(
+                        "segmentation_groups",
+                        spacialSegmentationGroupToDocument(segmentationGroup),
+                        ()=>{
+                            showNotification("Uploaded", "Uploaded Results to Database!", "success", 5000);
+                            setPageState("TemporalSegmentation");
+                        },
+                        (error)=>{
+                            showNotification("Upload Failed", "We can't submit just yet" + error, "error", 5000)
+                        }
+                    )
+
                 }}
                 className={"w-[200px] bg-green-400/10 hover:bg-green-400/30 px-5 py-2 rounded border border-white"}>
                 <p className={"font-bold hover:underline"}>Submit</p>
