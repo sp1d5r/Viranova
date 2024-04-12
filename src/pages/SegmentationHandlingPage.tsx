@@ -7,6 +7,7 @@ import {SpacialSegmentation} from "../components/segmentation/SpacialSegmentatio
 import {SegmentationGroup} from "../types/segmentation-masks/SegmentationGroup";
 import axios from 'axios';
 import Background from "../assets/landing-page-assets/background.png";
+import {TemporalSegmentation} from "../components/segmentation/TemporalSegmentation";
 
 export interface SegmentationHandlingPageProps {
     //
@@ -92,7 +93,10 @@ export const SegmentationHandlingPage: React.FC<SegmentationHandlingPageProps> =
                         setSegmentationGroup={setSegmentationGroup}
                     /> :
                 pageState === "TemporalSegmentation" ?
-                    <div></div> :
+                    <TemporalSegmentation
+                      setPageState={setPageState}
+                      segmentationGroup={segmentationGroup}
+                    /> :
                 pageState === "SegmentationComplete" ?
                     <div></div> :
                 <div>

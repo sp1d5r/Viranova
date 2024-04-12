@@ -1,14 +1,14 @@
 import React, {useRef, useEffect, useState} from 'react';
 import {SegmentationMask} from "../../types/segmentation-masks/SegmentationMask";
 
-interface SegmentationCanvasProps {
+interface SpacialSegmentationCanvasProps {
     masks: SegmentationMask[];
     groups: number[]; // This represents special indices, not groups of indices
     setGroups: (groups: number[]) => void;
     imageSrc: string;
 }
 
-const SegmentationCanvas: React.FC<SegmentationCanvasProps> = ({ masks, groups, setGroups, imageSrc }) => {
+const SpacialSegmentationCanvas: React.FC<SpacialSegmentationCanvasProps> = ({ masks, groups, setGroups, imageSrc }) => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const [currentSelected, setCurrentSelected] = useState<Set<number>>(new Set());
     const [groupColors, setGroupColors] = useState<{[key: number]: string}>({});
@@ -20,6 +20,7 @@ const SegmentationCanvas: React.FC<SegmentationCanvasProps> = ({ masks, groups, 
                 newGroupColors[group] = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
             }
         });
+
         setGroupColors(newGroupColors);
     }, [groups]);
 
@@ -97,7 +98,7 @@ const SegmentationCanvas: React.FC<SegmentationCanvasProps> = ({ masks, groups, 
                 className={"w-[200px] bg-blue-400/10 hover:bg-blue-400/30 px-5 py-2 rounded border border-white font-bold"}
             >Merge Groups</button>
             <button
-                onClick={() => {setCurrentSelected(new Set<number>())}}
+                onClick={() => {setGroups(groups.map((group, index) => index))}}
                 className={"w-[200px] bg-red-400/10 hover:bg-red-400/30 px-5 py-2 rounded border border-white font-bold"}
             >Reset Groups</button>
         </div>
@@ -122,7 +123,7 @@ const SegmentationCanvas: React.FC<SegmentationCanvasProps> = ({ masks, groups, 
     </div>;
 };
 
-export default SegmentationCanvas;
+export default SpacialSegmentationCanvas;
 
 const drawMask = (context: CanvasRenderingContext2D, maskData: number[][], color: string) => {
     context.fillStyle = color;
