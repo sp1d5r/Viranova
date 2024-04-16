@@ -19,7 +19,7 @@ export const NewEraSection: React.FC<NewEraSectionProps> = ({ className = '' }) 
             gsap.timeline({
                     scrollTrigger: {
                         trigger: newEraRef.current,
-                        start: "top 50%",
+                        start: "top 70%",
                         end: "+=200",
                         scrub: 0.5,
                         toggleActions: "restart pause pause pause"
@@ -45,7 +45,7 @@ export const NewEraSection: React.FC<NewEraSectionProps> = ({ className = '' }) 
         }
     }, []);
 
-    return <section ref={newEraRef} className={className + "container flex flex-col gap-5 min-h-[50vh] justify-center py-10"}>
+    return <section ref={newEraRef} className={className + "container flex flex-col gap-5 min-h-[50vh] justify-center py-10 overflow-hidden"}>
         <p id={"new-era-title"} className="text-title text-white z-10">A brand new era...</p>
         <span id={"new-era-subtitle"} className="text-accent">Traditional methods are focused on longer form content. <span className={"font-bold text-primary"}>Because models don’t know
             tiktok’s format.</span></span>

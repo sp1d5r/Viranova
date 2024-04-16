@@ -5,11 +5,13 @@ import React, {useEffect, useLayoutEffect, useRef, useState} from "react";
 import ScrollableLayout from "../layouts/ScrollableLayout";
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import {
+    SelfSupervisedLearningSection
+} from "../components/sections/self-supervised-learning-section/SelfSupervisedLearningSection";
 
 
 
 export default function LandingPage(){
-    const progressBarRef = useRef<HTMLProgressElement>(null);
     const [progress, setProgress] = useState(0);
 
     useEffect(() => {
@@ -54,6 +56,7 @@ export default function LandingPage(){
             <div className={"flex flex-col gap-2 w-full"}>
                 <WhySection />
                 <NewEraSection />
+                <SelfSupervisedLearningSection />
             </div>
             <div className={"w-2 h-[80vh] "}>
             </div>
