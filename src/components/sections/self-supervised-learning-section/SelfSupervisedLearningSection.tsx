@@ -65,7 +65,6 @@ export const SelfSupervisedLearningSection : React.FC<SelfSupervisedLearningSect
           <p>Your responses directly feed the model creating better shorts.</p>
           <a className='text-primary font-bold'>Perform Segmentation</a>
         </a>
-
       </div>
 
     </div>
