@@ -36,9 +36,9 @@ export const WhySection: React.FC<WhySectionProps> = ({ className = '' }) => {
     }, []);
 
 
-    return <section ref={whySection} className={className + "container flex flex-col gap-5 min-h-[50vh] justify-center overflow-hidden"}>
+    return <section ref={whySection} className={className + "container flex flex-col gap-5 min-h-[40vh] justify-start overflow-hidden"}>
         <HiddenBackgroundTitle/>
-        <p id="why-section-1" className="text-bold text-primary">Generating TikTok Clips is not hard.</p>
+        <p id="why-section-1" className="font-light text-primary text-subtitle">Generating TikTok clips is not hard.</p>
         <p id="why-section-2" className="text-white">You need to generate funny clips that engage your viewers, this means you need to
             give your videos personality. This lets you build a fan base of paying customers.</p>
         <p id="why-section-3" className="text-white">This will bring people back to you helping you build that fanbase.</p>
