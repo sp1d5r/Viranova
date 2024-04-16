@@ -8,11 +8,13 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
     SelfSupervisedLearningSection
 } from "../components/sections/self-supervised-learning-section/SelfSupervisedLearningSection";
+import {useAuth} from "../contexts/Authentication";
 
 
 
 export default function LandingPage(){
     const [progress, setProgress] = useState(0);
+    const {authState} = useAuth();
 
     useEffect(() => {
         gsap.registerPlugin(ScrollTrigger);
@@ -45,6 +47,12 @@ export default function LandingPage(){
             return () => window.removeEventListener('scroll', updateProgressBar);
         }
     }, []);
+
+    useEffect(() => {
+        if (authState.isAuthenticated) {
+            window.location.href = "/playground";
+        }
+    }, [authState]);
 
 
     return <ScrollableLayout className={"gap-2"}>
