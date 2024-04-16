@@ -1,6 +1,5 @@
 import React, {ChangeEventHandler, DragEventHandler, useContext, useState} from "react";
 import PlaygroundBackground from "../assets/playground-assets/PlaygroundBackground.png";
-import {ExistingProjectCard} from "../components/cards/existing-project-card/existing-project-card";
 import {DragDropFileUpload} from "../components/input/drag-drop-file-upload/drag-drop-file-upload";
 import {NotificationContext} from "../contexts/NotificationProvider";
 import {TransparentNavigationBar} from "../components/navigation-bar/transparent-navigation-bar";
@@ -10,9 +9,6 @@ import {useAuth} from "../contexts/Authentication";
 import FirebaseDatabaseService from "../services/database/strategies/FirebaseFirestoreService";
 import {ExistingProjects} from "../components/playground/ExistingProjects";
 
-export interface PlaygroundPageProps {
-    // NONE
-}
 
 function getRandomString(strings: string[]): string {
     const randomIndex = Math.floor(Math.random() * strings.length);
@@ -213,6 +209,5 @@ export default function PlaygroundPage() {
 
         {/* Bottom Recently Used Cards */}
         <ExistingProjects />
-
     </div>
 }
