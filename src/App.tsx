@@ -9,6 +9,7 @@ import {VideoProgress} from "./pages/VideoProgress";
 import {VideoSegments} from "./pages/VideoSegments";
 import {SegmentationHandlingPage} from "./pages/SegmentationHandlingPage";
 import {VideoMatchingPage} from "./pages/VideoMatchingPage";
+import {NotFound} from "./pages/NotFound";
 
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
 
         <Route path={"/video-handler"} element={<VideoProgress />} />
         <Route path={"/video-temporal-segmentation"} element={<VideoSegments />} />
+        <Route path={"*"} element={<NotFound />} />
         </Routes>
       </Router>
   );
