@@ -8,6 +8,7 @@ import FirebaseStorageService from "../services/storage/strategies/FirebaseStora
 import {UserVideo, userVideoToDocument} from "../types/collections/UserVideo";
 import {useAuth} from "../contexts/Authentication";
 import FirebaseDatabaseService from "../services/database/strategies/FirebaseFirestoreService";
+import {ExistingProjects} from "../components/playground/ExistingProjects";
 
 export interface PlaygroundPageProps {
     // NONE
@@ -23,6 +24,7 @@ export default function PlaygroundPage() {
     const { authState } = useAuth();
     const [files, setFiles] = useState<File[]>([]);
     const [uploadProgress, setUploadProgress] = useState<number>(0);
+
 
     const validateAndProcessFiles = async (newFiles: FileList) => {
         if (newFiles.length !== 1) {
@@ -210,30 +212,7 @@ export default function PlaygroundPage() {
         </div>
 
         {/* Bottom Recently Used Cards */}
-        <div className={"w-full min-h-full border-t border-accent flex justify-center items-center flex-col gap-[10] p-5"}>
-            { /* Existing Projects Title */}
-            <div className={"container h-full flex-col justify-center items-start"}>
-                <div>
-                    <h1 className={"text-title text-white"}>Existing Projects </h1>
-                    <p className={"text-gray-500"}>Look through your existing projects to edit or export! </p>
-                </div>
-            </div>
-
-            { /* Existing Projects Carousel */ }
-
-            <div className={"w-[70%] grid grid-cols-3 gap-5 pt-10 justify-center items-center"}>
-                {[1, 2, 3, 4].map((index,elem) => {
-                    return <ExistingProjectCard
-                        key={index}
-                        backgroundImage={PlaygroundBackground}
-                        date={"Tue 6 Feb"} title={"Begin your journey with Vira Nova"}
-                        projectId={elem.toString()}
-                    />
-                })}
-
-            </div>
-
-        </div>
+        <ExistingProjects />
 
     </div>
 }

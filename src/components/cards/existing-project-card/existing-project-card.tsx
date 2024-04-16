@@ -3,11 +3,11 @@ export interface ExistingProjectCardProps {
     backgroundImage: string;
     title: string;
     date: string;
-    projectId: string;
+    videoId: string;
 }
 
-export const ExistingProjectCard: React.FC<ExistingProjectCardProps> = ({backgroundImage, date, title, projectId}) => {
-    return <div onClick={() => {window.location.href=`/edit-project?projectId=${projectId}`}} className={"m-auto border-accent border flex flex-col relative overflow-hidden rounded-xl border-accent w-[100%] max-w-[400px] h-[50vh] items-end justify-end bg-gradient-to-r from-green-500 to-emerald-900 hover:scale-105 transition-all"}>
+export const ExistingProjectCard: React.FC<ExistingProjectCardProps> = ({backgroundImage, date, title, videoId}) => {
+    return <div onClick={() => {window.location.href=`/video-handler?video_id=${videoId}`}} className={"m-auto border-accent border flex flex-col relative overflow-hidden rounded-xl border-accent w-[100%] max-w-[400px] h-[50vh] items-end justify-end bg-gradient-to-r from-green-500 to-emerald-900 hover:scale-105 transition-all"}>
         <img
             src={backgroundImage}
             alt={"Oh no load failed bg-gradient-to-r from-green-500 to-emerald-900"}
