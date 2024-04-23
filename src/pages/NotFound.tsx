@@ -18,7 +18,6 @@ export const NotFound : React.FC<NotFoundProps> = ({}) => {
     <div className="flex gap-5">
       <PrimaryButton onClick={() => {window.location.href = "/"}} className={""} text={"Go Home"} icon={""}/>
       <SecondaryButton onClick={() => {window.location.href = "TODO"}} className={""} text={"Contact Support"} icon={""} />
-
     </div>
 
   </section>
