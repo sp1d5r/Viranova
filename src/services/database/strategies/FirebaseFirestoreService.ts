@@ -91,6 +91,22 @@ const FirebaseDatabaseService: DatabaseService = {
         return Promise.resolve(newDocRef.id);
     },
 
+    async queryDocumentById<T>(collectionPath: string, docId: string, onSuccess?: SuccessCallback<T>, onFailure?: FailureCallback): Promise<void> {
+        try {
+            const docRef = doc(db, collectionPath, docId);
+            const docSnapshot = await getDoc(docRef);
+            if (docSnapshot.exists()) {
+                const document: QueryResult<T> = { ...docSnapshot.data() as T, id: docSnapshot.id };
+                if (onSuccess) onSuccess(document);
+            } else {
+                throw new Error("Document not found");
+            }
+        } catch (error) {
+            if (onFailure) onFailure(error as FirestoreError);
+        }
+    },
+
+
     async queryDocuments<T>(collectionPath: string, queryField: string, queryValue: any, orderByField: string, onSuccess?:SuccessCallback<T[]>, onFailure?:FailureCallback): Promise<void> {
         try {
             const q = query(collection(db, collectionPath), where(queryField, "==", queryValue), orderBy(orderByField));

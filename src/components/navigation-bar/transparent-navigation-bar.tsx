@@ -146,7 +146,7 @@ export const TransparentNavigationBar: React.FC<TransparentNavigationBarProps> =
         <div className={"hidden md:flex gap-5 justify-center items-center "}>
             <div className="border-l border-white h-12 w-[10px]" />
             <img src={Notifications} alt={"Notifications"} />
-            <img src={Siren} alt={"Siren"} />
+            <img src={Siren} alt={"Siren"} onClick={()=>{ window.location.href = "/settings"; }} />
             { authState.isAuthenticated ?
                 <p onClick={() => {
                     logout(() => {

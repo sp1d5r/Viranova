@@ -10,29 +10,36 @@ import {VideoSegments} from "./pages/VideoSegments";
 import {SegmentationHandlingPage} from "./pages/SegmentationHandlingPage";
 import {VideoMatchingPage} from "./pages/VideoMatchingPage";
 import {NotFound} from "./pages/NotFound";
+import {Settings} from "./pages/Settings";
 
 
 function App() {
   return (
       <Router>
         <Routes>
+          {/* Basic Pages */}
           <Route path="/" element={
               <LandingPage />
           } />
-        <Route path={"/playground"} element={<PlaygroundPage />} />
-        <Route path={"/authenticate"} element={<AuthenticationPage />} />
 
+          {/* User Pages */}
+          <Route path={"/authenticate"} element={<AuthenticationPage />} />
+          <Route path={"/settings"} element={<Settings />} />
+
+          {/* Self Supervised Learning */}
+          <Route path={"/segmentation"} element={<SegmentationHandlingPage />} />
+          <Route path={"/video-matching"} element={<VideoMatchingPage />}/>
           <Route path="/model-review" element={<div>
-              <NavigationBar />
-              <ModelReview />
+            <NavigationBar />
+            <ModelReview />
           </div>} />
 
-        <Route path={"/segmentation"} element={<SegmentationHandlingPage />} />
-        <Route path={"/video-matching"} element={<VideoMatchingPage />}/>
+          {/* Main Pages */}
+          <Route path={"/playground"} element={<PlaygroundPage />} />
+          <Route path={"/video-handler"} element={<VideoProgress />} />
+          <Route path={"/video-temporal-segmentation"} element={<VideoSegments />} />
 
-        <Route path={"/video-handler"} element={<VideoProgress />} />
-        <Route path={"/video-temporal-segmentation"} element={<VideoSegments />} />
-        <Route path={"*"} element={<NotFound />} />
+          <Route path={"*"} element={<NotFound />} />
         </Routes>
       </Router>
   );

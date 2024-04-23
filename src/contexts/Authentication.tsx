@@ -5,7 +5,7 @@ import {FirebaseAuthService} from "../services/authentication/strategies";
 
 
 interface AuthState {
-    isAuthenticated: boolean;
+    isAuthenticated?: boolean;
     user: null | User;
 }
 
@@ -24,7 +24,7 @@ interface AuthProviderProps {
 
 // Provider component
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-    const [authState, setAuthState] = useState<AuthState>({ isAuthenticated: false, user: null });
+    const [authState, setAuthState] = useState<AuthState>({ user: null });
 
     useEffect(() => {
         const unsubscribe = FirebaseAuthService.onAuthStateChanged(firebaseUser => {

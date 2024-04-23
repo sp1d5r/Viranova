@@ -9,13 +9,15 @@ import {documentToProposedMatch, ProposedMatch} from "../types/collections/Propo
 import {MatchResults, matchResultsToDocument} from "../types/collections/self-supervised/MatchResults";
 import {useAuth} from "../contexts/Authentication";
 import {VideoCard} from "../components/cards/video-card/VideoCard";
+import CompleteIcon from "../assets/video-matching-assets/Complete.svg";
+import FirebaseFirestoreService from "../services/database/strategies/FirebaseFirestoreService";
 
 export interface VideoMatchingPageProps {
     //
 }
 
 export const VideoMatchingPage : React.FC<VideoMatchingPageProps> = () => {
-
+    const [allMatchedComplete, setAllMatchesComplete] = useState(false);
     const [videoPair, setVideoPair] = useState<ProposedMatch>({
         'id': '',
         'short_id': '',
@@ -33,6 +35,12 @@ export const VideoMatchingPage : React.FC<VideoMatchingPageProps> = () => {
     const {showNotification} = useNotificaiton();
     const {authState}= useAuth();
 
+    useEffect(() => {
+        if (authState.isAuthenticated && !authState.isAuthenticated) {
+            window.location.href = "/authenticate";
+        }
+    }, [authState]);
+
     const getNewRandom = async() => {
         FirebaseDatabaseService.getRandomDocument(
             'proposed_matches',
@@ -40,7 +48,20 @@ export const VideoMatchingPage : React.FC<VideoMatchingPageProps> = () => {
                 if (res) {
                     const matchedPair = documentToProposedMatch(res);
                     setVideoPair(matchedPair);
+
+                    // query to see if already matched.
+                    FirebaseDatabaseService.queryDocumentById("self-supervised-match", videoPair.id, (res: object[]) => {
+                        if (res.length >= 0) {
+                            getNewRandom();
+                        }
+                    }, (err) => {
+                        console.log(err);
+                        showNotification('Query Failed', 'unable to query existing video pairs', 'error', 500)
+                    })
+
                     showNotification('Matched Pair', 'Got new pair', 'info', 5000);
+                } else {
+                    setAllMatchesComplete(true);
                 }
                 setTimes({startTime:'', endTime:''});
             },
@@ -58,7 +79,7 @@ export const VideoMatchingPage : React.FC<VideoMatchingPageProps> = () => {
         const short_id = videoPair.short_id;
         const long_id = videoPair.long_id;
 
-        if (short_id != "") {
+        if (short_id !== "") {
             getVideoInfo(short_id).then((res) => {
                 if (res) {
                     setShortVideo(res);
@@ -68,7 +89,7 @@ export const VideoMatchingPage : React.FC<VideoMatchingPageProps> = () => {
             })
         }
 
-        if (long_id != "") {
+        if (long_id !== "") {
             getVideoInfo(long_id).then((res) => {
                 if (res) {
                     setLongVideo(res);
@@ -95,8 +116,16 @@ export const VideoMatchingPage : React.FC<VideoMatchingPageProps> = () => {
             correct: correct,
             startTime: times.startTime,
             endTime: times.endTime,
-
         }
+
+        // Delete Matched pair from library
+        FirebaseFirestoreService.deleteDocument("proposed_matches", videoPair.id, ()=>{
+            showNotification('Pair Deleted', 'Pair Deleted from list', 'info', 5000)
+        }, (err) => {
+            console.log(err);
+            showNotification('Delete Failed', 'Failed to delete pair', 'error', 5000)
+        })
+
         FirebaseDatabaseService.addDocument(
             'self-supervised-match',
             matchResultsToDocument(matchRes),
@@ -126,7 +155,12 @@ export const VideoMatchingPage : React.FC<VideoMatchingPageProps> = () => {
             <h1 className={"text-title"}>Do these Videos Match</h1>
             <span className={"text-white"}><a href={"https://en.wikipedia.org/wiki/Self-supervised_learning"} className={"text-primary font-bold hover:underline"}>Self-Supervised Learning</a> is the next best thing... But I don’t have people to help - whenever you’re bored just come in and let me know if this is
 right or wrong. </span>
-            <div className={"flex flex-wrap sm:flex-nowrap  gap-2 sm:gap-20 justify-center py-5"}>
+            {
+                allMatchedComplete ?
+                  <div className="flex flex-col py-5 flex-1  justify-evenly items-center gap-2 min-w-[200px] min-h-[400px] rounded-xl backdrop-blur-sm">
+                      <img src={CompleteIcon} alt={"Complete"} />
+                  </div> :
+                <div className={"flex flex-wrap sm:flex-nowrap  gap-2 sm:gap-20 justify-center py-5"}>
 
                 {shortVideo && <VideoCard video={shortVideo} />}
                 {longVideo && <VideoCard video={longVideo} />}
@@ -200,6 +234,7 @@ right or wrong. </span>
                     </form>
                 </div>
             </div>
+            }
         </div>
 
     </ScrollableLayout>

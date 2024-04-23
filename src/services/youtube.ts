@@ -6,6 +6,8 @@ const getVideoInfo = async (videoId: string) : Promise<Video | undefined> => {
 
     try {
         const response = await axios.get(url);
+        console.log(response);
+        console.log(videoId);
         const videoData = response.data.items[0].snippet;
 
         const videoInfo: Video = {
