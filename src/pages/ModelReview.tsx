@@ -47,7 +47,6 @@ export const ModelReview : React.FC<ModelReviewProps> = () => {
     useEffect(() => {
         // Get the proposed videos.
         getNewVideo();
-
     }, [videoShorts])
 
 

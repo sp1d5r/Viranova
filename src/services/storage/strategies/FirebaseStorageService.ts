@@ -1,5 +1,5 @@
 // Assuming you have initialized Firebase in a similar manner
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import app from "../../../config/firebaseConfig";
 import { StorageService } from '../StorageInterface';
 
@@ -38,7 +38,12 @@ const FirebaseStorageService: StorageService = {
     },
 
     async deleteFile(path: string): Promise<void> {
-        throw new Error("deleteFile method not implemented.");
+        const storageRef = ref(storage, path);
+        deleteObject(storageRef).then((res) => {
+            console.log("File deleted successfully");
+        }).catch((err)=>{
+            console.log(`failed ${err}`)
+        });
     },
 }
 

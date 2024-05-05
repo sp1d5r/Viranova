@@ -11,6 +11,7 @@ import {SegmentationHandlingPage} from "./pages/SegmentationHandlingPage";
 import {VideoMatchingPage} from "./pages/VideoMatchingPage";
 import {NotFound} from "./pages/NotFound";
 import {Settings} from "./pages/Settings";
+import {SegmentVideoMatching} from "./components/segment-video-matching/SegmentVideoMatching";
 
 
 function App() {
@@ -31,7 +32,8 @@ function App() {
           <Route path={"/video-matching"} element={<VideoMatchingPage />}/>
           <Route path="/model-review" element={<div>
             <NavigationBar />
-            <ModelReview />
+            <SegmentVideoMatching />
+            {/*<ModelReview />*/}
           </div>} />
 
           {/* Main Pages */}
