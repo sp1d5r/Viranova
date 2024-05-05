@@ -35,7 +35,7 @@ export default function PlaygroundPage() {
         <TransparentNavigationBar />
 
         {/* Loading Page */}
-        <div id="landingBackgroundScreen" className="absolute w-screen h-screen bg-background z-50 flex flex-col justify-center items-center gap-3">
+        <div id="landingBackgroundScreen" className="fixed w-screen h-screen bg-background z-50 flex flex-col justify-center items-center gap-3 cursor-not-allowed">
             <span className='text-2xl text-white font-bold flex items-center justify-center gap-1'>
                 <img id="landingLogoIcon" src={LogoIcon} alt="" className={"h-8 w-8"} />
                 <span id="landingLogoI">I</span>
