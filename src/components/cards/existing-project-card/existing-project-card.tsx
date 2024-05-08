@@ -3,13 +3,15 @@ import {UserVideo} from "../../../types/collections/UserVideo";
 import FirebaseDatabaseService from "../../../services/database/strategies/FirebaseFirestoreService";
 import {useNotificaiton} from "../../../contexts/NotificationProvider";
 import {FirebaseStorageService} from "../../../services/storage/strategies";
+import {LoadingIcon} from "../../loading/Loading";
 export interface ExistingProjectCardProps {
     userVideo: UserVideo,
     videoId: string,
     setRefresh: React.Dispatch<React.SetStateAction<boolean>>
+    id: number,
 }
 
-export const ExistingProjectCard: React.FC<ExistingProjectCardProps> = ({userVideo, videoId, setRefresh}) => {
+export const ExistingProjectCard: React.FC<ExistingProjectCardProps> = ({userVideo, videoId, setRefresh, id}) => {
     const {showNotification} = useNotificaiton();
 
     const deleteVideo = () => {
@@ -25,10 +27,9 @@ export const ExistingProjectCard: React.FC<ExistingProjectCardProps> = ({userVid
         )
     }
 
-    return <div className="max-w-sm border  rounded-lg shadow bg-gray-800 border-gray-700">
-        <a href="/">
-            <img className="rounded-t-lg w-full max-h-[250px] object-cover" src="https://fakeimg.pl/300x450/000000/00ab30?text=Viranova&font=bebashttps://fakeimg.pl/300x450/000000/00ab30?text=Viranova&font=bebas" alt="" />
-        </a>
+    return <div className="max-w-sm border  rounded-lg shadow bg-gray-800 border-gray-700 overflow-hidden">
+        <LoadingIcon className="h-35 w-full bg-black py-10" id={id.toString()}/>
+
         <div className="p-5">
             <div>
                 <h5 className="mb-2 text-2xl font-bold tracking-tight text-white">{userVideo.originalFileName}</h5>

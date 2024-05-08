@@ -1,6 +1,6 @@
 import {DocumentData} from 'firebase/firestore';
 
-type UserVideoStatus = "Uploaded" | "Transcribing" | "Diarizing" | "Segmenting" | "Summarizing Segments" | "Preprocessing Complete"
+type UserVideoStatus = "Uploaded" | "Transcribing" | "Diarizing" | "Segmenting" | "Summarizing Segments" | "Clip Transcripts" | "Preprocessing Complete"
 
 export interface UserVideo {
     videoPath: string;

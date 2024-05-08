@@ -51,7 +51,6 @@ export default function PlaygroundPage() {
                 <span id="landingSubText2">Drive Traffic.</span>
                 <span id="landingSubText3" className="text-primary font-bold">Deliver Results</span>
             </span>
-
         </div>
 
         {/* New Project */}

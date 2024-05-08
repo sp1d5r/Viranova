@@ -18,6 +18,9 @@ export interface Segment {
     latestEndTime: number;
     selfHarmIntent: string;
     videoId: string;
+    segmentStatus: string;
+    shortIdea: string;
+    shortIdeaExplanation: string;
 }
 
 
@@ -40,6 +43,9 @@ export function documentToSegment(docData: DocumentData): Segment {
         transcript: docData.transcript,
         selfHarmIntent: docData.selfHarmIntent,
         videoId: docData.video_id,
+        segmentStatus: docData.segment_status,
+        shortIdea: docData.short_idea,
+        shortIdeaExplanation: docData.short_idea_explanation
     };
 }
 
@@ -62,5 +68,8 @@ export function segmentToDocument(segment: Segment): DocumentData {
         transcriptions: segment.transcript,
         self_harm_intent: segment.selfHarmIntent,
         video_id: segment.videoId,
+        segment_status: segment.segmentStatus,
+        short_idea: segment.shortIdea,
+        short_idea_explanation: segment.shortIdeaExplanation
     };
 }
