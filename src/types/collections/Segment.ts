@@ -1,6 +1,7 @@
 import {DocumentData} from "firebase/firestore";
 
 export interface Segment {
+    id: string;
     earliestStartTime: number;
     endIndex: number;
     flagged: boolean;
@@ -26,6 +27,7 @@ export interface Segment {
 
 export function documentToSegment(docData: DocumentData): Segment {
     return {
+        id: docData.id,
         earliestStartTime: docData.earliest_start_time,
         latestEndTime: docData.latest_end_time,
         endIndex: docData.end_index,

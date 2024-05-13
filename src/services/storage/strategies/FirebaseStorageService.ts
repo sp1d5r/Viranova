@@ -34,8 +34,27 @@ const FirebaseStorageService: StorageService = {
     },
 
     async downloadFile(path: string): Promise<Blob> {
-        throw new Error("downloadFile method not implemented.");
+        if (!path) {
+            throw new Error('Invalid file path.');
+        }
+
+        const storageRef = ref(storage, path);
+        return getDownloadURL(storageRef)
+          .then((url) => {
+              return fetch(url);
+          })
+          .then(response => {
+              if (!response.ok) {
+                  throw new Error('Network response was not ok.');
+              }
+              return response.blob();
+          })
+          .catch((error) => {
+              console.error("Failed to download file:", error);
+              throw error;
+          });
     },
+
 
     async deleteFile(path: string): Promise<void> {
         const storageRef = ref(storage, path);

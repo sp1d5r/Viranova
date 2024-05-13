@@ -41,7 +41,7 @@ export const ExistingProjects: React.FC<ExistingProjectsProps> = ({className=''}
       </div>
 
       { /* Existing Projects Carousel */ }
-      <div className={"w-[70%] flex flex-wrap gap-5 pt-10 justify-center items-center"}>
+      <div className={"w-full md:w-[70%] flex flex-wrap gap-5 pt-10 justify-center items-center"}>
         {
           recentProjects.map((elem, index) => {
             return <ExistingProjectCard videoId={projectsId[index]} userVideo={elem} setRefresh={setRefresh} id={index}/>

@@ -12,6 +12,7 @@ import {VideoMatchingPage} from "./pages/VideoMatchingPage";
 import {NotFound} from "./pages/NotFound";
 import {Settings} from "./pages/Settings";
 import {SegmentVideoMatching} from "./components/segment-video-matching/SegmentVideoMatching";
+import {Shorts} from "./pages/Shorts";
 
 
 function App() {
@@ -40,6 +41,7 @@ function App() {
           <Route path={"/playground"} element={<PlaygroundPage />} />
           <Route path={"/video-handler"} element={<VideoProgress />} />
           <Route path={"/video-temporal-segmentation"} element={<VideoSegments />} />
+          <Route path={"/shorts"} element={<Shorts />} />
 
           <Route path={"*"} element={<NotFound />} />
         </Routes>
