@@ -43,7 +43,7 @@ export const VideoProgress: React.FC<VideoProgressProps> = ({}) => {
     }, []);
 
     useEffect(() => {
-        if (video && (video.status === "Preprocessing Complete" || video.status === "Clip Transcripts")) {
+        if (video && (video.status === "Preprocessing Complete" || video.status === "Clip Transcripts" || video.status === "Create TikTok Ideas")) {
             window.location.href = `/video-temporal-segmentation?video_id=${video_id}`
         }
     }, [video, video_id]);
