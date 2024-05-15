@@ -5,9 +5,10 @@ import gsap from "gsap";
 export interface LoadingProps{
   className?: string
   id: string
+  text?: string
 }
 
-export const LoadingIcon: React.FC<LoadingProps> = ({className = "", id}) => {
+export const LoadingIcon: React.FC<LoadingProps> = ({className = "", id, text="Operating ..."}) => {
   const comp = useRef(null);
 
   useEffect(() => {
@@ -39,7 +40,7 @@ export const LoadingIcon: React.FC<LoadingProps> = ({className = "", id}) => {
             <span id={`loadingLogoA2${id}`} className="text-primary">A</span>
         </span>
       <span className="text-white flex gap-2">
-            <span className="text-primary font-bold">Operating...</span>
+            <span className="text-primary font-bold">{text}</span>
         </span>
     </div>
   </div>

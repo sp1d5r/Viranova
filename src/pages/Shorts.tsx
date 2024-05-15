@@ -1,13 +1,14 @@
 import React, {useEffect, useState} from "react";
 import ScrollableLayout from "../layouts/ScrollableLayout";
-import {useSearchParams} from "react-router-dom";
+import {URLSearchParamsInit, useSearchParams} from "react-router-dom";
 import FirebaseFirestoreService from "../services/database/strategies/FirebaseFirestoreService";
 import {useNotificaiton} from "../contexts/NotificationProvider";
 import {documentToShort, Short} from "../types/collections/Shorts";
 import {ShortSettingsTab} from "../components/shorts/ShortSettingsTab";
-import {SegmentCardProps} from "../components/cards/segment-card/SegmentCard";
 import {documentToSegment, Segment} from "../types/collections/Segment";
 import {TranscriptEditorTab} from "../components/shorts/TranscriptEditorTab";
+import {AttentionTab} from "../components/shorts/AttentionTab";
+import {LoadingIcon} from "../components/loading/Loading";
 
 export interface ShortsProps {
 
@@ -16,12 +17,25 @@ export interface ShortsProps {
 type Tabs = "Short Settings" | "Transcript Editor" | "Attention Capture" | "Export"
 
 export const Shorts: React.FC<ShortsProps> = ({}) => {
-  const [searchParams, _] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const short_id = searchParams.get("short_id");
   const [short, setShort] = useState<Short | undefined>();
+  const [loading, setLoading] = useState(true);
   const [segment, setSegment] = useState<Segment | undefined>();
   const {showNotification} = useNotificaiton();
-  const [tabSelected, setTabSelected] = useState<Tabs>("Short Settings");
+  const initialTab = searchParams.get("tab") as Tabs || "Short Settings";
+  const [tabSelected, setTabSelected] = useState<Tabs>(initialTab);
+
+  useEffect(() => {
+    let params: URLSearchParamsInit = { tab: tabSelected };
+
+    // Assign `short_id` only if it is not null, and ensure it's included as a string.
+    if (short_id !== null) {
+      params = { ...params, short_id: short_id };
+    }
+
+    setSearchParams(params);
+  }, [tabSelected, short_id, setSearchParams]);
 
   useEffect(() => {
     if (short_id){
@@ -29,7 +43,6 @@ export const Shorts: React.FC<ShortsProps> = ({}) => {
         short_id,
         (document) => {
           if (document)  setShort(documentToShort(document));
-          console.log("here")
         },
         (error) => {
           showNotification("Get Document", "Failed to get Short", "error")
@@ -47,16 +60,14 @@ export const Shorts: React.FC<ShortsProps> = ({}) => {
         (error) => {
           showNotification("Get Document", "Failed to get Short", "error")
         })
+      setLoading(false);
     }
   }, [short]);
 
   return <ScrollableLayout className={"flex flex-col gap-2 items-center "}>
-    <div className="max-w-screen-xl w-full flex flex-col text-white px-2">
-      <p className="text-4xl font-bold pt-3 sm:pt-5">The Kitchen</p>
-      <p className="font-bold py-2">Hold on a second and let him cook 🔥</p>
-
-      <div className="md:flex gap-2 h-screen max-h-screen">
-        <ul className="flex flex-row space-x-4 justify-center sm:justify-start my-4 overflow-x-auto md:flex-col md:space-y-4 md:space-x-0 text-sm font-medium text-gray-400 md:mb-0">
+    <div className="max-w-screen-xl w-full flex flex-col text-white px-2 max-h-[90vh]">
+      <div className="md:flex gap-2 h-screen">
+        <ul className="flex-wrap flex flex-row space-x-4 justify-center sm:justify-start my-4 overflow-x-auto md:flex-col md:space-y-4 md:space-x-0 text-sm font-medium text-gray-400 md:mb-0 max-h-[90vh]">
         <li>
             <button disabled={tabSelected === "Short Settings"} onClick={() => {setTabSelected("Short Settings")}} className="inline-flex items-center px-4 py-3 rounded-lg w-full bg-gray-800 hover:bg-gray-700 hover:text-white text-left disabled:text-white disabled:bg-green-600" aria-current="page">
               <svg className="w-4 h-4 me-2 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
@@ -88,6 +99,12 @@ export const Shorts: React.FC<ShortsProps> = ({}) => {
               <span className="hidden md:inline">Export</span>
             </button>
           </li>
+          <div className="w-full h-[50%] relative flex md:justify-center items-end text-white">
+            <div className="md:absolute md:-rotate-90">
+              <p className="text-4xl font-bold pt-3 sm:pt-5 w-full text-nowrap text-primary">The Kitchen</p>
+              <p className="font-bold py-2 text-nowrap">Hold on a second and let him cook 🔥</p>
+            </div>
+          </div>
         </ul>
 
         {
@@ -98,8 +115,16 @@ export const Shorts: React.FC<ShortsProps> = ({}) => {
           tabSelected == "Transcript Editor" && short && short_id && segment && <TranscriptEditorTab shortId={short_id} short={short} segment={segment} />
         }
 
-      </div>
+        {
+          tabSelected == "Attention Capture" && short && short_id && segment && <AttentionTab shortId={short_id} short={short} segment={segment} />
+        }
 
+        {
+          loading && <div className="w-full h-[80vh] flex justify-center items-center">
+            <LoadingIcon id={"shortEditor"} text={"Loading Short Information ..."} className={"my-16 mx-auto animate-pulse"}/>
+          </div>
+        }
+      </div>
     </div>
   </ScrollableLayout>
 }

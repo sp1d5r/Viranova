@@ -33,6 +33,8 @@ export interface Short {
   short_idea_explanation: string,
   video_id: string,
   temp_audio_file: string,
+  short_clipped_video: string,
+  short_video_saliency: string,
 }
 
 
@@ -50,6 +52,8 @@ export function documentToShort(docData: DocumentData): Short {
     short_idea: docData.short_idea,
     short_idea_explanation: docData.short_idea_explanation,
     video_id: docData.video_id,
-    temp_audio_file: docData.temp_audio_file
+    temp_audio_file: docData.temp_audio_file,
+    short_clipped_video: docData.short_clipped_video,
+    short_video_saliency: docData.short_video_saliency,
   };
 }

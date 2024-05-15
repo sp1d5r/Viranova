@@ -78,9 +78,9 @@ export const EditedTranscript: React.FC<EditedTranscriptProps> = ({transcript, o
       {
         transcriptWords.map((elem, index) => {
           if (elem.status == "none") {
-            return <button onClick={() => {buttonPress(index)}} disabled={!editing} className="text-white disabled:bg-gray-900  bg-gray-800 p-[2px] px-[5px] rounded border-gray-500 border ">{elem.word}</button>
+            return <button onClick={() => {buttonPress(index)}} disabled={!editing} className="text-white disabled:bg-gray-900  bg-gray-800 p-[2px] px-[5px] rounded border-gray-500 border font-light text-sm">{elem.word}</button>
           } else if (elem.status == "deleted") {
-            return <button onClick={() => {buttonPress(index)}} disabled={!editing} className="text-white bg-red-900 p-[2px] px-[5px] rounded border-gray-500 border">{elem.word}</button>
+            return <button onClick={() => {buttonPress(index)}} disabled={!editing} className="text-white bg-red-900 p-[2px] px-[5px] rounded border-gray-500 border font-light text-sm">{elem.word}</button>
           } else {
             return <button onClick={() => {buttonPress(index)}} disabled={!editing} className="text-white bg-blue-900 p-[2px] px-[5px] rounded border-gray-500 border">{elem.word}</button>
           }
@@ -131,7 +131,7 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({short, 
   }
 
   return <div className="p-6 text-medium text-gray-400 bg-gray-900 rounded-lg w-full flex flex-col gap-2">
-    <span className="text-xl font-bold text-white mb-2 flex justify-between items-center">
+    <span className="text-xl font-bold text-white mb-2 flex justify-between items-center flex-wrap">
       Transcript Editor
       <div className="inline-flex rounded-md shadow-sm" role="group">
         <button onClick={() => {setEditing(prevState => !prevState)}} type="button" className={` px-4 py-2 text-sm font-medium border rounded-s-lg focus:z-10 focus:ring-2  ${editing ? "bg-red-500 hover:bg-red-700" : "bg-gray-800 hover:bg-gray-700"}  border-gray-700 text-white hover:text-white  focus:ring-blue-500 focus:text-white`}>
@@ -268,9 +268,9 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({short, 
                 {
                   short.transcript.split(" ").map((elem, index) => {
                     if (index < value.start_index || index > value.end_index) {
-                      return <span className="text-white bg-gray-900 p-[2px] px-[5px] rounded border-gray-500 border">{elem}</span>
+                      return <span className="text-white bg-gray-900 p-[2px] px-[5px] rounded border-gray-500 border font-light text-sm">{elem}</span>
                     } else {
-                      return <span className="text-white bg-red-950 p-1 rounded">{elem}</span>
+                      return <span className="text-white bg-red-950 p-1 rounded font-light text-sm">{elem}</span>
                     }
                   })
                 }
