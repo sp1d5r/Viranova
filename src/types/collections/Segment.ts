@@ -22,6 +22,7 @@ export interface Segment {
     segmentStatus: string;
     shortIdea: string;
     shortIdeaExplanation: string;
+    videoSegmentLocation: string;
 }
 
 
@@ -43,11 +44,12 @@ export function documentToSegment(docData: DocumentData): Segment {
         sexualMinors: docData.sexual_minors,
         startIndex: docData.start_index,
         transcript: docData.transcript,
-        selfHarmIntent: docData.selfHarmIntent,
+        selfHarmIntent: docData.self_harm_intent,
         videoId: docData.video_id,
         segmentStatus: docData.segment_status,
         shortIdea: docData.short_idea,
-        shortIdeaExplanation: docData.short_idea_explanation
+        shortIdeaExplanation: docData.short_idea_explanation,
+        videoSegmentLocation: docData.video_segment_location,
     };
 }
 
@@ -72,6 +74,7 @@ export function segmentToDocument(segment: Segment): DocumentData {
         video_id: segment.videoId,
         segment_status: segment.segmentStatus,
         short_idea: segment.shortIdea,
-        short_idea_explanation: segment.shortIdeaExplanation
+        short_idea_explanation: segment.shortIdeaExplanation,
+        video_segment_location: segment.videoSegmentLocation
     };
 }
