@@ -20,6 +20,20 @@ export type Logs = {
   time: Timestamp,
 }
 
+export type Boxes = [number, number, number, number];
+
+export type BoundingBoxes = {
+  boxes: Boxes[];
+}
+
+export type VisualDifference = {
+  frame_differences: number[]
+}
+
+export type SaliencyCaptured = {
+  saliency_vals: number[]
+}
+
 export interface Short {
   id: string,
   start_index: number,
@@ -35,6 +49,11 @@ export interface Short {
   temp_audio_file: string,
   short_clipped_video: string,
   short_video_saliency: string,
+  bounding_boxes?: BoundingBoxes,
+  cuts: number[],
+  total_frame_count: number,
+  visual_difference?: VisualDifference,
+  saliency_values?: SaliencyCaptured,
 }
 
 
@@ -55,5 +74,10 @@ export function documentToShort(docData: DocumentData): Short {
     temp_audio_file: docData.temp_audio_file,
     short_clipped_video: docData.short_clipped_video,
     short_video_saliency: docData.short_video_saliency,
+    bounding_boxes: docData.bounding_boxes ? JSON.parse(docData.bounding_boxes) : undefined,
+    cuts: docData.cuts,
+    total_frame_count: docData.total_frame_count,
+    visual_difference: docData.visual_difference ? JSON.parse(docData.visual_difference) : undefined,
+    saliency_values: docData.saliency_values ? JSON.parse(docData.saliency_values) : undefined,
   };
 }
