@@ -14,7 +14,7 @@ export interface ShortsProps {
 
 }
 
-type Tabs = "Short Settings" | "Transcript Editor" | "Attention Capture" | "Export"
+export type Tabs = "Short Settings" | "Transcript Editor" | "Attention Capture" | "Export"
 
 export const Shorts: React.FC<ShortsProps> = ({}) => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -65,8 +65,8 @@ export const Shorts: React.FC<ShortsProps> = ({}) => {
   }, [short]);
 
   return <ScrollableLayout className={"flex flex-col gap-2 items-center "}>
-    <div className="max-w-screen-xl w-full flex flex-col text-white px-2 max-h-[90vh]">
-      <div className="md:flex gap-2 h-screen">
+    <div className="max-w-screen-xl w-full flex flex-col text-white px-2 ">
+      <div className="md:flex gap-2">
         <ul className="flex-wrap flex flex-row space-x-4 justify-center sm:justify-start my-4 overflow-x-auto md:flex-col md:space-y-4 md:space-x-0 text-sm font-medium text-gray-400 md:mb-0 max-h-[90vh]">
         <li>
             <button disabled={tabSelected === "Short Settings"} onClick={() => {setTabSelected("Short Settings")}} className="inline-flex items-center px-4 py-3 rounded-lg w-full bg-gray-800 hover:bg-gray-700 hover:text-white text-left disabled:text-white disabled:bg-green-600" aria-current="page">
@@ -116,7 +116,7 @@ export const Shorts: React.FC<ShortsProps> = ({}) => {
         }
 
         {
-          tabSelected == "Attention Capture" && short && short_id && segment && <AttentionTab shortId={short_id} short={short} segment={segment} />
+          tabSelected == "Attention Capture" && short && short_id && segment && <AttentionTab shortId={short_id} short={short} segment={segment} setTab={setTabSelected}/>
         }
 
         {

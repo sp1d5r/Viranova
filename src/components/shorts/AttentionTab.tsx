@@ -5,17 +5,20 @@ import {Segment} from "../../types/collections/Segment";
 import {SegmentVideo} from "./attention-options/SegmentVideo";
 import {PreviewShortVideo} from "./attention-options/PreviewShortVideo";
 import {SaliencyVideo} from "./attention-options/SaliencyVideo";
+import {Tabs} from "../../pages/Shorts";
+import {BoundingBoxSuggestions} from "./attention-options/BoundingBoxSuggestions";
 
 export interface AttentionTabProps{
   short: Short;
   shortId: string;
   segment: Segment;
+  setTab: React.Dispatch<React.SetStateAction<Tabs>>;
 }
 
 type AttentionOptions = "View Segment Video" | "Preview Clipped Video" | "Saliency" | "Bounding Box Suggestions";
 const options : AttentionOptions[] = ["View Segment Video", "Preview Clipped Video", "Saliency", "Bounding Box Suggestions"];
 
-export const AttentionTab: React.FC<AttentionTabProps> = ({short, shortId, segment}) => {
+export const AttentionTab: React.FC<AttentionTabProps> = ({short, shortId, segment, setTab}) => {
   const [selectedOption, setSelectedOption] = useState<AttentionOptions>("View Segment Video");
   const {showNotification} = useNotificaiton();
 
@@ -63,9 +66,10 @@ export const AttentionTab: React.FC<AttentionTabProps> = ({short, shortId, segme
         }
       </ul>
 
-      { selectedOption === "View Segment Video" && <SegmentVideo segment={segment} /> }
-      { selectedOption === "Preview Clipped Video" && <PreviewShortVideo short={short} /> }
+      { selectedOption === "View Segment Video" && <SegmentVideo segment={segment} continueButton={() => {setSelectedOption("Preview Clipped Video")}} /> }
+      { selectedOption === "Preview Clipped Video" && <PreviewShortVideo short={short} continueButton={(()=>{setTab("Transcript Editor")})}/> }
       { selectedOption === "Saliency" && <SaliencyVideo short={short} /> }
+      { selectedOption === "Bounding Box Suggestions" && <BoundingBoxSuggestions short={short} /> }
 
     </div>
   );
