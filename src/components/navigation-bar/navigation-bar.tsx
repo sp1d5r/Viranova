@@ -58,7 +58,7 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ className = '' }) 
     const {authState, logout} = useAuth();
     const { showNotification } = useNotificaiton();
 
-    return <div className="w-full flex sticky top-0 bg-background min-h-12 shadow justify-start items-center gap-[90px] inline-flex px-10 py-5 navigation-bar z-50">
+    return <div className="w-full flex sticky top-0 bg-background min-h-12 shadow justify-start items-center gap-[90px] px-10 py-5 navigation-bar z-50">
         {
             menuExpanded && <div className={"absolute z-20 h-[100vh] w-[100vw] top-0 left-0 bg-background flex flex-col px-10 py-5 justify-between"}>
                 <div className="flex justify-start min-h-[50px]">
@@ -129,60 +129,61 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ className = '' }) 
             </div>
         }
 
-        
-        <div className="flex-1 flex justify-start md:flex-initial">
-            <Logo />
-        </div>
-        <div className="border-l border-white h-12 w-[10px] hidden md:flex" />
-        <div className="flex-1 gap-10 hidden md:flex">
-            <HoverableLink expandedOptions={[{
-                title: "Research Paper",
-                description: "A link to the research papaer",
-                link: "/help"
-            }]} name="Research"  left={-30}/>
-            <HoverableLink expandedOptions={[]} name="About" left={-100}/>
-            <p className={"text-center text-stone-50 text-base font-normal"}>Demo</p>
-        </div>
+        <div className="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl w-full gap-5">
+            <div className="flex-1 flex justify-start md:flex-initial">
+                <Logo />
+            </div>
+            <div className="border-l border-white h-12 w-[10px] hidden md:flex" />
+            <div className="flex-1 gap-10 hidden md:flex">
+                <HoverableLink expandedOptions={[{
+                    title: "Research Paper",
+                    description: "A link to the research papaer",
+                    link: "/help"
+                }]} name="Research"  left={-30}/>
+                <HoverableLink expandedOptions={[]} name="About" left={-100}/>
+                <p className={"text-center text-stone-50 text-base font-normal"}>Demo</p>
+            </div>
 
-        <div className={"hidden md:flex gap-5 justify-center items-center "}>
-            <div className="border-l border-white h-12 w-[10px]" />
-            <img src={Notifications} alt={"Notifications"} />
-            { authState.isAuthenticated && <a href="/settings">
-                <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true"
-                     xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                    <path stroke="currentColor" stroke-linecap="square" stroke-linejoin="round" stroke-width="2"
-                          d="M10 19H5a1 1 0 0 1-1-1v-1a3 3 0 0 1 3-3h2m10 1a3 3 0 0 1-3 3m3-3a3 3 0 0 0-3-3m3 3h1m-4 3a3 3 0 0 1-3-3m3 3v1m-3-4a3 3 0 0 1 3-3m-3 3h-1m4-3v-1m-2.121 1.879-.707-.707m5.656 5.656-.707-.707m-4.242 0-.707.707m5.656-5.656-.707.707M12 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
-                </svg>
-            </a>}
-            { authState.isAuthenticated ?
-                <p onClick={() => {
-                    logout(() => {
+            <div className={"hidden md:flex gap-5 justify-center items-center "}>
+                <div className="border-l border-white h-12 w-[10px]" />
+                <img src={Notifications} alt={"Notifications"} />
+                { authState.isAuthenticated && <a href="/settings">
+                    <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true"
+                         xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="square" stroke-linejoin="round" stroke-width="2"
+                              d="M10 19H5a1 1 0 0 1-1-1v-1a3 3 0 0 1 3-3h2m10 1a3 3 0 0 1-3 3m3-3a3 3 0 0 0-3-3m3 3h1m-4 3a3 3 0 0 1-3-3m3 3v1m-3-4a3 3 0 0 1 3-3m-3 3h-1m4-3v-1m-2.121 1.879-.707-.707m5.656 5.656-.707-.707m-4.242 0-.707.707m5.656-5.656-.707.707M12 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+                    </svg>
+                </a>}
+                { authState.isAuthenticated ?
+                  <p onClick={() => {
+                      logout(() => {
                             showNotification(
-                                "Signed Out",
-                                "You've successfully signed out, it might take a second to propagate",
-                                "success"
+                              "Signed Out",
+                              "You've successfully signed out, it might take a second to propagate",
+                              "success"
                             )},
                         () => {
                             showNotification(
-                                "Failed to Sign Out",
-                                "I don't think this is possible... try refreshing.",
-                                "warning"
+                              "Failed to Sign Out",
+                              "I don't think this is possible... try refreshing.",
+                              "warning"
                             )
                         }
-                    )}}
-                   className={"font-bold text-danger"}
-                >
-                    Sign Out
-                </p> :<a href={"/authenticate"}>
-                    <p className={"m-0 text-center text-stone-50 text-base font-normal"}>
-                        Sign Up
-                    </p>
-                </a>}
-        </div>
+                      )}}
+                     className={"font-bold text-danger"}
+                  >
+                      Sign Out
+                  </p> :<a href={"/authenticate"}>
+                      <p className={"m-0 text-center text-stone-50 text-base font-normal"}>
+                          Sign Up
+                      </p>
+                  </a>}
+            </div>
 
-        <div className={"flex md:hidden gap-5 justify-center items-center "} onClick={() => {setMenuExpanded(true)}}>
-            <div className="border-l border-white h-12 w-[10px]" />
-            <img src={Cards} alt={"menu"} className={"h-full"} />
+            <div className={"flex md:hidden gap-5 justify-center items-center "} onClick={() => {setMenuExpanded(true)}}>
+                <div className="border-l border-white h-12 w-[10px]" />
+                <img src={Cards} alt={"menu"} className={"h-full"} />
+            </div>
         </div>
     </div>
 

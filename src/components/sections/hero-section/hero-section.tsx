@@ -8,6 +8,8 @@ import DrivingVideo from "../../../assets/landing-page-assets/WatchingMovie.svg"
 import BuildingBlocks from "../../../assets/landing-page-assets/BuildingBlocks.svg";
 import LayingDown from "../../../assets/landing-page-assets/LayingDown.svg";
 import Segmentation from "../../../assets/landing-page-assets/Segmentation.svg";
+import {BorderButton} from "../../ui/moving-borders";
+import {Vortex} from "../../ui/vortex";
 
 export interface HeroSectionProps {
     className?: string;
@@ -31,9 +33,9 @@ const LandingCard : React.FC<LandingCardProps> = ({imageSrc, cardTitle, cardDesc
 export const HeroSection: React.FC<HeroSectionProps> = ({ className = '' }) => {
     const isMobile = window.innerWidth <= 450;
 
-    return <div
-        className={className + 'container bg-background text-white w-full pt-10 min-h-[80vh] flex gap-5 justify-center items-center md:flex-wrap-reverse  px-5 flex-col-reverse sm:flex-row container'}>
-        <img className={"absolute z-1 top-10 w-[100vw] opacity-75"} src={isMobile ? BackgroundMobile : Background} alt={""}/>
+    return <Vortex
+      baseHue={110}
+        className={className + 'container  text-white w-full pt-10 min-h-[80vh] flex gap-5 justify-center items-center md:flex-wrap-reverse  px-5 flex-col-reverse sm:flex-row container'}>
         <div className={"z-10 flex flex-col gap-10 justify-center items-center"}>
             <div className={"flex justify-center items-center relative "}>
                 <div className={"relative group"}>
@@ -77,8 +79,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ className = '' }) => {
                              cardDescription={"Inference and training powered by blockchain."}/>
             </div>
 
+            <BorderButton duration={2000} >
+                <p className="text-white font-bold tracking-widest px-5">Begin Clipping!</p>
+            </BorderButton>
             <p className={"text-secondary font-bold tracking-widest underline "}>Continue Scrolling</p>
         </div>
-
-    </div>
+    </Vortex>
 };

@@ -1,18 +1,17 @@
 import React from 'react';
 import AvancedTechnology from '../../../assets/landing-page-assets/AdvancedTechnology.svg';
-import VideoMatching from '../../../assets/landing-page-assets/DrivingVideo.png';
 import {useAuth} from "../../../contexts/Authentication";
+import { PinContainer } from "../../ui/3d-pin";
 
 export interface SelfSupervisedLearningSectionProps {
   className?: string;
 }
 
 export const SelfSupervisedLearningSection : React.FC<SelfSupervisedLearningSectionProps> = ({className}) => {
-  const {authState} = useAuth();
 
-  return <section className={className + ' container flex flex-col gap-5 h-[170vh] sm:h-[60vh] justify-start overflow-hidden relative'}>
+  return <section className={className + ' container flex flex-col gap-5   justify-start overflow-hidden relative'}>
     {/* Background ~ eh... it's good enough for now*/}
-    <div className='absolute w-full h-full top-0 left-0 z-10 opacity-50 flex flex-col justify-evenly items-center'>
+    <div className='absolute w-full top-0 left-0 z-10 opacity-50 flex flex-col justify-evenly items-center'>
       {
         [1,2,3].map((item) => {
         return <img key={item} className='rotate-45 p-10 m-5 max-w-max w-[200vw]' src={AvancedTechnology} alt='Advanced Technology' />
@@ -21,7 +20,7 @@ export const SelfSupervisedLearningSection : React.FC<SelfSupervisedLearningSect
     </div>
 
     {/* Foreground */}
-    <div className='absolute z-20 w-full h-full flex flex-col gap-2'>
+    <div className=' z-20 w-full flex flex-col gap-2'>
 
       {/* Title Section */}
       <h1 className='text-title text-white'>Human Reinforcement Learning </h1>
@@ -34,37 +33,58 @@ export const SelfSupervisedLearningSection : React.FC<SelfSupervisedLearningSect
     </span>
 
       {/* Navigation Options */}
-      <div className='flex flex-wrap gap-5 justify-center items-center text-white'>
+      <div className='flex flex-wrap gap-5 justify-center items-center text-white my-5'>
+        <PinContainer
+          title="/video-matching"
+          href="/video-matching"
+        >
+          <div className="flex basis-full flex-col p-4 tracking-tight text-slate-100/50 sm:basis-1/2 w-[20rem] h-[20rem] ">
+            <h3 className="max-w-xs !pb-2 !m-0 font-bold  text-base text-slate-100">
+              Video Matching
+            </h3>
+            <div className="text-base !m-0 !p-0 font-normal">
+            <span className="text-slate-500 ">
+              Our machine learning model automatically attempts to encode videos into a vector representation
+            </span>
+            </div>
+            <div className="flex flex-1 w-full rounded-lg mt-4 bg-gradient-to-br from-green-500 via-purple-500 to-green-500" />
+          </div>
+        </PinContainer>
 
-        <a
-          href={authState.isAuthenticated ? "/video-matching" : "/authenticate?mode=login"}
-          className='bg-white/5 flex flex-col border-primary border  backdrop-blur rounded-xl hover:scale-110 transition-all p-3 justify-center items-center  gap-3 hover:shadow hover:shadow-primary min-w-[150px] max-w-[350px]'>
-          <img src={VideoMatching} alt={'landing card image'} className={'mix-blend-darken h-32 w-32 aspect-square'}/>
-          <p>Video Matching</p>
-          <p>Our machine learning model automatically attempts to encode videos into a vector representation</p>
-          <p>However, it's not perfect... </p>
-          <a className='text-primary font-bold'>Match Videos</a>
-        </a>
+        <PinContainer
+          title="/segmentation"
+          href="/segmentation"
+        >
+          <div className="flex basis-full flex-col p-4 tracking-tight text-slate-100/50 sm:basis-1/2 w-[20rem] h-[20rem] ">
+            <h3 className="max-w-xs !pb-2 !m-0 font-bold  text-base text-slate-100">
+              Segmentation
+            </h3>
+            <div className="text-base !m-0 !p-0 font-normal">
+            <span className="text-slate-500 ">
+              Cleaning up our segmentation into more appropriate models, and tracking segments across time.
+            </span>
+            </div>
+            <div className="flex flex-1 w-full rounded-lg mt-4 bg-gradient-to-br from-purple-500 via-green-500 to-purple-500" />
+          </div>
+        </PinContainer>
 
-        <a
-          href={authState.isAuthenticated ? "/segmentation" : "/authenticate?mode=login"}
-          className='bg-white/5 flex flex-col border-primary border  backdrop-blur rounded-xl hover:scale-110 transition-all p-3 justify-center items-center  gap-3 hover:shadow hover:shadow-primary min-w-[150px] max-w-[350px]'>
-          <img src={VideoMatching} alt={'landing card image'} className={'mix-blend-darken h-32 w-32 aspect-square'}/>
-          <p>Segmentation</p>
-          <p>Cleaning up our segmentation into more appropriate models, and tracking segments across time.</p>
-          <p>This helps our ML model learn how to create nodes in our Deep Graph Learning.</p>
-          <a className='text-primary font-bold'>Perform Segmentation</a>
-        </a>
+        <PinContainer
+          title="/proposals"
+          href="/404"
+        >
+          <div className="flex basis-full flex-col p-4 tracking-tight text-slate-100/50 sm:basis-1/2 w-[20rem] h-[20rem] ">
+            <h3 className="max-w-xs !pb-2 !m-0 font-bold  text-base text-slate-100">
+              Video Proposals
+            </h3>
+            <div className="text-base !m-0 !p-0 font-normal">
+            <span className="text-slate-500 ">
+              Evaluate the shorts generated by our platform. We're using GPT and chain-of-thought to create these shorts
+            </span>
+            </div>
+            <div className="flex flex-1 w-full rounded-lg mt-4 bg-gradient-to-br from-green-500 via-purple-500 to-green-500" />
+          </div>
+        </PinContainer>
 
-        <a
-          href={authState.isAuthenticated ? "/404" : "/authenticate?mode=login"}
-          className='bg-white/5 flex flex-col border-primary border  backdrop-blur rounded-xl hover:scale-110 transition-all p-3 justify-center items-center  gap-3 hover:shadow hover:shadow-primary min-w-[150px] max-w-[350px]'>
-          <img src={VideoMatching} alt={'landing card image'} className={'mix-blend-darken h-32 w-32 aspect-square'}/>
-          <p>Video Proposals</p>
-          <p>Evaluate the shorts generated by our platform. We're using GPT and chain-of-thought to create these shorts</p>
-          <p>Your responses directly feed the model creating better shorts.</p>
-          <a className='text-primary font-bold'>Perform Segmentation</a>
-        </a>
       </div>
 
     </div>

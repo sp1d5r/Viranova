@@ -4,6 +4,8 @@ import Desktop from "../../../assets/icons/Desktop.svg";
 import Mobile from "../../../assets/icons/Mobile.svg";
 import gsap from 'gsap';
 import ScrollTrigger from "gsap/ScrollTrigger";
+import {Vortex} from "../../ui/vortex";
+import {BorderButton} from "../../ui/moving-borders";
 
 export interface NewEraSectionProps {
     className?: string;
@@ -45,19 +47,25 @@ export const NewEraSection: React.FC<NewEraSectionProps> = ({ className = '' }) 
         }
     }, []);
 
-    return <section ref={newEraRef} className={className + "container flex flex-col gap-5 min-h-[50vh] justify-center py-10 overflow-hidden"}>
-        <p id={"new-era-title"} className="text-title text-white z-10">A brand new era...</p>
-        <span id={"new-era-subtitle"} className="text-accent">Traditional methods are focused on longer form content. <span className={"font-bold text-primary"}>Because models don’t know
-            tiktok’s format.</span></span>
-        <div
-            className="flex w-full sm:justify-evenly justify-center items-center gap-20 sm:gap-1">
-            <VideoAnalysisCard src={Desktop} title="Traditional Videos" videoType="Horizontal Videos"
-                               duration="11.7 minute" videosAYear="3.7 million"/>
-            <VideoAnalysisCard src={Mobile} title="Short Formed Content" videoType="Vertical Videos"
-                               duration="33.7 second" videosAYear="33.7 million"/>
+    return <section ref={newEraRef} className={className + "relative container flex flex-col gap-5 min-h-[50vh] justify-center py-10 overflow-hidden"}>
+        <div className="w-full bg-primary -left-5 mx-auto rounded-md h-[30rem] overflow-hidden">
+            <Vortex
+              className="flex items-center flex-col justify-center px-5 md:px-10 py-4 w-full h-full overflow-hidden border-primary border"
+              baseHue={110}
+            >
+                <h2 className="text-white text-4xl md:text-6xl font-bold text-left">
+                    A new era
+                </h2>
+                <p className="text-white text-text md:text-2xl max-w-xl mt-6 text-left">
+                    Use AI to improve the output speed of your content delivery
+                </p>
+                <div className="flex flex-col sm:flex-row items-center gap-4 mt-6">
+                    <BorderButton className="">
+                        Start Clipping
+                    </BorderButton>
+                    <button className="px-4 py-2  text-white ">Contact Team</button>
+                </div>
+            </Vortex>
         </div>
-        <p id={"new-era-sub-text"} className="text-accent">We’ve had years of traditional videos, current models understand them unbelieveably
-            well, they can’t comprehend TikToks. </p>
-        <p id={"new-era-sub-text-2"} className="text-primary text-bold">ViraNova is capable of understanding tiktoks.</p>
     </section>
 };

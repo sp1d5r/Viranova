@@ -8,7 +8,7 @@ export interface HiddenBackgroundTitleProps {
     title?: string;
 }
 
-export const HiddenBackgroundTitle: React.FC<HiddenBackgroundTitleProps> = ({ className = '', title = "Your clips won’t slap if they’re shit" }) => {
+export const HiddenBackgroundTitle: React.FC<HiddenBackgroundTitleProps> = ({ className = '', title = "Your clips won’t slap if they’re boring" }) => {
     const ref = useRef<HTMLDivElement>(null);
 
     useLayoutEffect(() => {
@@ -45,7 +45,7 @@ export const HiddenBackgroundTitle: React.FC<HiddenBackgroundTitleProps> = ({ cl
     return (
       <div ref={ref} className={`${className} w-full relative mt-10 sm:mt-10 flex justify-start items-center text-white`}>
           <img id="hidden-text" className="absolute -top-12 z-1 w-[300vw] max-w-max" src={SpoilerAlert} alt="Spoiler alert" />
-          <p id="hidden-title" className="text-title text-center z-10">{title}</p>
+          <p id="hidden-title" className="text-4xl sm:text-6xl font-bold text-center z-10">{title}</p>
       </div>
     );
 };

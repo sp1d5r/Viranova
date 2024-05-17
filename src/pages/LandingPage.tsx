@@ -9,6 +9,9 @@ import {
     SelfSupervisedLearningSection
 } from "../components/sections/self-supervised-learning-section/SelfSupervisedLearningSection";
 import {useAuth} from "../contexts/Authentication";
+import {TracingBeam} from "../components/ui/tracing-beam";
+import {ReviewSection} from "../components/sections/reviews/ReviewsSection";
+import {BentoGridDemo} from "../components/sections/bento-grid/BentoGridSection";
 
 
 
@@ -57,18 +60,14 @@ export default function LandingPage(){
 
     return <ScrollableLayout className={"gap-2"}>
         <HeroSection />
-        <div className={"relative flex gap-2 z-10"}>
-            <div className={"w-2 h-[80vh] bg-accent sticky top-32 mx-5 rounded-full border border-primary"}>
-                <div style={{height: progress + "%"}}  className={"w-full bg-primary rounded-full"}/>
-            </div>
-            <div className={"flex flex-col gap-2 w-full"}>
+        <TracingBeam className={"relative flex gap-2 z-10 px-5 w-full"}>
+            <div className={"flex flex-col gap-2 w-full  overflow-hidden"}>
                 <WhySection />
-                <NewEraSection />
+                {/*<NewEraSection />*/}
                 <SelfSupervisedLearningSection />
+                <ReviewSection />
+                <BentoGridDemo />
             </div>
-            <div className={"w-2 h-[80vh] "}>
-            </div>
-        </div>
-        <div className={"h-screen"}/>
+        </TracingBeam>
     </ScrollableLayout>
 }
