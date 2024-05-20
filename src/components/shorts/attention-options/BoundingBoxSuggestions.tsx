@@ -1,13 +1,14 @@
 import React, {useEffect, useRef, useState} from "react";
 import {Short} from "../../../types/collections/Shorts";
-import {VideoPlayer} from "../../video-player/VideoPlayer";
 import {FirebaseStorageService} from "../../../services/storage/strategies";
 import {LoadingIcon} from "../../loading/Loading";
-import {carryValue} from "@testing-library/user-event/dist/keyboard/shared";
 import {AreaUnderChart} from "../../charts/AreaUnderChart";
+import FirebaseFirestoreService from "../../../services/database/strategies/FirebaseFirestoreService";
+import {useNotificaiton} from "../../../contexts/NotificationProvider";
 
 export interface BoundingBoxSuggestionsProps{
-  short: Short
+  short: Short;
+  shortId: string;
 }
 
 type VideoInfo = {
@@ -15,9 +16,10 @@ type VideoInfo = {
   saliencyVideo: undefined | string;
 }
 
-export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({short}) => {
+export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({short, shortId}) => {
   const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState<VideoInfo>({clippedVideo: undefined, saliencyVideo: undefined});
+  const {showNotification} = useNotificaiton();
   const [videoUrls, setVideoUrls] = useState<VideoInfo>({clippedVideo: undefined, saliencyVideo: undefined});
   const [opacity, setOpacity] = useState(0);
 
@@ -193,7 +195,40 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({s
 
 
     <div className="inline-flex rounded-md shadow-sm" role="group">
-      <button type="button" className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
+      <button
+        type="button"
+        className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white"
+        onClick={() => {
+          FirebaseFirestoreService.updateDocument(
+            "shorts",
+            shortId,
+            {
+              "short_status": "Determine Video Boundaries",
+              "previous_short_status": "Requested to Determine Video Boundaries"
+            },
+            () => {showNotification("Success", "Requested to find cuts.", "success")},
+            (error) => {showNotification("Failed", error.message, "error")},
+          )
+        }}
+      >
+        Find Cuts
+      </button>
+      <button
+        onClick={() => {
+          FirebaseFirestoreService.updateDocument(
+            "shorts",
+            shortId,
+            {
+              "short_status": "Get Bounding Boxes",
+              "previous_short_status": "Requested to Get Bounding Boxes"
+            },
+            () => {showNotification("Success", "Requested to find cuts.", "success")},
+            (error) => {showNotification("Failed", error.message, "error")},
+          )
+        }}
+        disabled={!short.cuts}
+        type="button"
+        className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white disabled:bg-gray-900 disabled:hover:bg-gray-900">
         Generate Bounding Boxes
       </button>
       <button onClick={() => {}} type="button" className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-e-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">

@@ -66,10 +66,10 @@ export const AttentionTab: React.FC<AttentionTabProps> = ({short, shortId, segme
         }
       </ul>
 
-      { selectedOption === "View Segment Video" && <SegmentVideo segment={segment} continueButton={() => {setSelectedOption("Preview Clipped Video")}} /> }
-      { selectedOption === "Preview Clipped Video" && <PreviewShortVideo short={short} continueButton={(()=>{setTab("Transcript Editor")})}/> }
-      { selectedOption === "Saliency" && <SaliencyVideo short={short} /> }
-      { selectedOption === "Bounding Box Suggestions" && <BoundingBoxSuggestions short={short} /> }
+      { selectedOption === "View Segment Video" && <SegmentVideo segment={segment} segmentId={short.segment_id} continueButton={() => {setSelectedOption("Preview Clipped Video")}} /> }
+      { selectedOption === "Preview Clipped Video" && <PreviewShortVideo short={short} shortId={shortId} continueButton={(()=>{setTab("Transcript Editor")})}/> }
+      { selectedOption === "Saliency" && <SaliencyVideo short={short} shortId={shortId} /> }
+      { selectedOption === "Bounding Box Suggestions" && <BoundingBoxSuggestions short={short} shortId={shortId} /> }
 
     </div>
   );

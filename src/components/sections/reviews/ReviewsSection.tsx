@@ -40,6 +40,8 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({className=""}) => {
 
 
   return <section className={className + ' container flex flex-col gap-5   justify-start overflow-hidden relative'}>
+    <span className="text-title text-white">Designed by us. <span className="text-primary">Created for you.</span></span>
+
     <InfiniteMovingCards
       items={testimonials}
       direction="right"

@@ -19,6 +19,7 @@ export interface Segment {
     latestEndTime: number;
     selfHarmIntent: string;
     videoId: string;
+    previousSegmentStatus: string;
     segmentStatus: string;
     shortIdea: string;
     shortIdeaExplanation: string;
@@ -47,6 +48,7 @@ export function documentToSegment(docData: DocumentData): Segment {
         selfHarmIntent: docData.self_harm_intent,
         videoId: docData.video_id,
         segmentStatus: docData.segment_status,
+        previousSegmentStatus: docData.previous_segment_status,
         shortIdea: docData.short_idea,
         shortIdeaExplanation: docData.short_idea_explanation,
         videoSegmentLocation: docData.video_segment_location,
@@ -72,6 +74,7 @@ export function segmentToDocument(segment: Segment): DocumentData {
         transcriptions: segment.transcript,
         self_harm_intent: segment.selfHarmIntent,
         video_id: segment.videoId,
+        previous_segment_status: segment.previousSegmentStatus,
         segment_status: segment.segmentStatus,
         short_idea: segment.shortIdea,
         short_idea_explanation: segment.shortIdeaExplanation,

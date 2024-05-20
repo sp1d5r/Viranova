@@ -6,8 +6,8 @@ import ScrollableLayout from "../layouts/ScrollableLayout";
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
-    SelfSupervisedLearningSection
-} from "../components/sections/self-supervised-learning-section/SelfSupervisedLearningSection";
+    ContentDeliveryTools
+} from "../components/sections/self-supervised-learning-section/ContentDeliveryTools";
 import {useAuth} from "../contexts/Authentication";
 import {TracingBeam} from "../components/ui/tracing-beam";
 import {ReviewSection} from "../components/sections/reviews/ReviewsSection";
@@ -64,7 +64,7 @@ export default function LandingPage(){
             <div className={"flex flex-col gap-2 w-full  overflow-hidden"}>
                 <WhySection />
                 {/*<NewEraSection />*/}
-                <SelfSupervisedLearningSection />
+                <ContentDeliveryTools />
                 <ReviewSection />
                 <BentoGridDemo />
             </div>

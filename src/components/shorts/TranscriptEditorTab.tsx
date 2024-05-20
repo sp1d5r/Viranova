@@ -161,7 +161,7 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({short, 
                 "short_status": "Generate Audio"
               },
               ()=>{
-                showNotification("Updated operation", "Added new operation", "success");
+                showNotification("Updated operation", "Requested Sound Preview", "success");
                 setDeleteRange({ startIndex: undefined, endIndex: undefined });
               },
               (error) => {
@@ -198,7 +198,7 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({short, 
               "short_status": "Edit Transcript"
             },
             () => {
-              showNotification("Edited", "Began Audio Preview", "success");
+              showNotification("Edited", "Requested AI Extraction", "success");
               setEditing(false);
             },
             (error) => {

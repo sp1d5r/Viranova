@@ -38,9 +38,13 @@ export const WhySection: React.FC<WhySectionProps> = ({ className = '' }) => {
 
     return <section ref={whySection} className={className + "container flex flex-col gap-5 min-h-[40vh] justify-start overflow-hidden"}>
         <HiddenBackgroundTitle />
-        <p id="why-section-1" className="font-light text-primary text-subtitle">Generating TikTok clips is not hard.</p>
-        <p id="why-section-2" className="text-white">You need to generate funny clips that engage your viewers, this means you need to
-            give your videos personality. This lets you build a fan base of paying customers.</p>
-        <p id="why-section-3" className="text-white">This will bring people back to you helping you build that fanbase.</p>
+        <p id="why-section-1" className="text-primary text-subsubtitle font-bold">Generating TikTok clips is not hard.</p>
+        <p id="why-section-2" className="text-white">
+            Leverage AI in your content production to help you grow an audience and maintain a consistent theme.
+        </p>
+        <span id="why-section-3" className="text-white">
+            Avoid <span className="text-primary">unoriginality strikes</span> with our export to capcut features.
+            Integrating into your existing workflow!
+        </span>
     </section>
 };
