@@ -33,8 +33,8 @@ const HoverableLink: React.FC<HoverableLinkProps> = ({ name, expandedOptions, le
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
-            <div className="flex gap-2">
-                <p className="text-center text-stone-50 text-base">{name}</p>
+            <div className="flex gap-2 items-center">
+                <p className="text-center text-stone-50 text-sm font-bold">{name}</p>
                 <img src={ChevronDown} alt="" />
             </div>
             {isHovered && (
@@ -61,26 +61,23 @@ export const TransparentNavigationBar: React.FC<TransparentNavigationBarProps> =
     return <div className="w-full flex fixed top-0 min-h-12 shadow justify-start items-center gap-[90px] px-10 py-5 navigation-bar z-50">
         {
             menuExpanded && <div className={"absolute z-20 h-[100vh] w-[100vw] top-0 left-0 bg-background flex flex-col px-10 py-5 justify-between"}>
-                <div className="flex justify-start min-h-[50px]">
+                <div className="flex justify-start min-h-[50px] my-5">
                     <Logo />
                 </div>
 
-                <div className="border-t border-white w-[80vw]" />
 
                 <div className="gap-5 flex flex-col justify-start py-5">
-                    <p className="text-white"> Navigation options</p>
                     <HoverableLink expandedOptions={[{
                         title: "Research Paper",
                         description: "A link to the research papaer",
                         link: "/help"
                     }]} name="Research" left={-20} />
                     <HoverableLink expandedOptions={[]} name="About" left= {-100}/>
-                    <p className={"text-center text-stone-50 text-base font-normal"}>Demo</p>
+                    <p className={"text-left text-stone-50 text-base font-normal"}>Demo</p>
                 </div>
 
                 <div className={"flex flex-1 gap-5 justify-end items-center flex-col "}>
-                    <div className="border-t border-white h-[10px] w-[80vw]" />
-                    <div className="flex gap-2 w-full px-10">
+                    <div className="flex gap-2 w-full ">
                         <img src={Notifications} alt={"Notifications"} />
                         <p className="text-white">
                             Notifications
@@ -88,9 +85,9 @@ export const TransparentNavigationBar: React.FC<TransparentNavigationBarProps> =
                     </div>
 
                     { authState.isAuthenticated ?
-                      <a href={"/settings"} className="flex gap-2 w-full px-10">
+                      <a href={"/settings"} className="flex gap-2 w-full ">
                           <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                              <path stroke="currentColor" stroke-linecap="square" stroke-linejoin="round" stroke-width="2" d="M10 19H5a1 1 0 0 1-1-1v-1a3 3 0 0 1 3-3h2m10 1a3 3 0 0 1-3 3m3-3a3 3 0 0 0-3-3m3 3h1m-4 3a3 3 0 0 1-3-3m3 3v1m-3-4a3 3 0 0 1 3-3m-3 3h-1m4-3v-1m-2.121 1.879-.707-.707m5.656 5.656-.707-.707m-4.242 0-.707.707m5.656-5.656-.707.707M12 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+                              <path stroke="currentColor" strokeLinecap="square" strokeLinejoin="round" strokeWidth="1" d="M10 19H5a1 1 0 0 1-1-1v-1a3 3 0 0 1 3-3h2m10 1a3 3 0 0 1-3 3m3-3a3 3 0 0 0-3-3m3 3h1m-4 3a3 3 0 0 1-3-3m3 3v1m-3-4a3 3 0 0 1 3-3m-3 3h-1m4-3v-1m-2.121 1.879-.707-.707m5.656 5.656-.707-.707m-4.242 0-.707.707m5.656-5.656-.707.707M12 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
                           </svg>
                           <p className="text-white">
                               User Settings
@@ -122,11 +119,11 @@ export const TransparentNavigationBar: React.FC<TransparentNavigationBarProps> =
                                 Sign Up
                             </p>
                         </a>}
-                    <div className={"w-full flex justify-center items-center border border-red-500 rounded-xl p-5 bg-red-400"} onClick={() => {setMenuExpanded(false)}}>
-                        <p className={"text-white font-bold"}>
-                            Close Menu
-                        </p>
-                    </div>
+
+                    <button type="button" onClick={() => {setMenuExpanded(false)}}  className="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">
+                        Close Menu
+                    </button>
+
                 </div>
 
             </div>
@@ -134,7 +131,6 @@ export const TransparentNavigationBar: React.FC<TransparentNavigationBarProps> =
         <div className="flex-1 flex justify-start md:flex-initial">
             <Logo />
         </div>
-        <div className="border-l border-white h-12 w-[10px] hidden md:flex" />
         <div className="flex-1 gap-10 hidden md:flex">
             <HoverableLink expandedOptions={[{
                 title: "Research Paper",
@@ -142,15 +138,14 @@ export const TransparentNavigationBar: React.FC<TransparentNavigationBarProps> =
                 link: "/help"
             }]} name="Research"  left={-30}/>
             <HoverableLink expandedOptions={[]} name="About" left={-100}/>
-            <p className={"text-center text-stone-50 text-base font-normal"}>Demo</p>
+            <p className={"text-center text-stone-50 text-sm font-bold"}>Demo</p>
         </div>
 
         <div className={"hidden md:flex gap-5 justify-center items-center "}>
-            <div className="border-l border-white h-12 w-[10px]" />
             <img src={Notifications} alt={"Notifications"} />
             <a href="/settings">
-                <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                    <path stroke="currentColor" stroke-linecap="square" stroke-linejoin="round" stroke-width="2" d="M10 19H5a1 1 0 0 1-1-1v-1a3 3 0 0 1 3-3h2m10 1a3 3 0 0 1-3 3m3-3a3 3 0 0 0-3-3m3 3h1m-4 3a3 3 0 0 1-3-3m3 3v1m-3-4a3 3 0 0 1 3-3m-3 3h-1m4-3v-1m-2.121 1.879-.707-.707m5.656 5.656-.707-.707m-4.242 0-.707.707m5.656-5.656-.707.707M12 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+                <svg className="w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" strokeLinecap="square" strokeLinejoin="round" strokeWidth="1" d="M10 19H5a1 1 0 0 1-1-1v-1a3 3 0 0 1 3-3h2m10 1a3 3 0 0 1-3 3m3-3a3 3 0 0 0-3-3m3 3h1m-4 3a3 3 0 0 1-3-3m3 3v1m-3-4a3 3 0 0 1 3-3m-3 3h-1m4-3v-1m-2.121 1.879-.707-.707m5.656 5.656-.707-.707m-4.242 0-.707.707m5.656-5.656-.707.707M12 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
                 </svg>
             </a>
             { authState.isAuthenticated ?
@@ -180,7 +175,6 @@ export const TransparentNavigationBar: React.FC<TransparentNavigationBarProps> =
         </div>
 
         <div className={"flex md:hidden gap-5 justify-center items-center "} onClick={() => {setMenuExpanded(true)}}>
-            <div className="border-l border-white h-12 w-[10px]" />
             <img src={Cards} alt={"menu"} className={"h-full"} />
         </div>
     </div>
