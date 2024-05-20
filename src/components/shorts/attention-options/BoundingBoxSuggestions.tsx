@@ -152,13 +152,13 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({s
           <div className="video-overlay-container w-full mt-5" style={{ position: 'relative' }}>
             {
               videoUrls.clippedVideo &&
-              <video ref={clippedVideoRef} id="videoElement" className="z-10 w-full">
+              <video ref={clippedVideoRef} id="videoElement" className="z-10 w-full" playsInline webkit-playsinline>
                 <source src={videoUrls.clippedVideo} type="video/mp4"/>
               </video>
             }
             {
               videoUrls.saliencyVideo &&
-              <video ref={saliencyVideoRef} id="videoElement" className="absolute top-0 left-0 z-20 w-full" style={{opacity: opacity/100}}>
+              <video ref={saliencyVideoRef} id="videoElement" className="absolute top-0 left-0 z-20 w-full" style={{opacity: opacity/100}} playsInline webkit-playsinline>
                 <source src={videoUrls.saliencyVideo} type="video/mp4"/>
               </video>
             }

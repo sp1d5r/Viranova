@@ -9,6 +9,7 @@ import {documentToSegment, Segment} from "../types/collections/Segment";
 import {TranscriptEditorTab} from "../components/shorts/TranscriptEditorTab";
 import {AttentionTab} from "../components/shorts/AttentionTab";
 import {LoadingIcon} from "../components/loading/Loading";
+import {ExportTab} from "../components/shorts/ExportTab";
 
 export interface ShortsProps {
 
@@ -117,6 +118,10 @@ export const Shorts: React.FC<ShortsProps> = ({}) => {
 
         {
           tabSelected == "Attention Capture" && short && short_id && segment && <AttentionTab shortId={short_id} short={short} segment={segment} setTab={setTabSelected}/>
+        }
+
+        {
+          tabSelected == "Export" && short && short_id && segment && <ExportTab shortId={short_id} short={short} />
         }
 
         {
