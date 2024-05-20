@@ -37,7 +37,7 @@ export const ContentDeliveryTools : React.FC<SelfSupervisedLearningSectionProps>
           title="/video-clipping"
           href="/authenticate"
         >
-          <div className="flex basis-full flex-col p-4 tracking-tight text-slate-100/50 sm:basis-1/2 w-[20rem] h-[20rem] ">
+          <div className="flex basis-full flex-col p-4 tracking-tight text-slate-100/50 sm:basis-1/2 w-[15rem] h-[20rem] ">
             <h3 className="max-w-xs !pb-2 !m-0 font-bold  text-base text-slate-100">
               Video Clipping
             </h3>
@@ -54,7 +54,7 @@ export const ContentDeliveryTools : React.FC<SelfSupervisedLearningSectionProps>
           title="/script-generation"
           href="/authenticate"
         >
-          <div className="flex basis-full flex-col p-4 tracking-tight text-slate-100/50 sm:basis-1/2 w-[20rem] h-[20rem] ">
+          <div className="flex basis-full flex-col p-4 tracking-tight text-slate-100/50 sm:basis-1/2 w-[15rem] h-[20rem] ">
             <h3 className="max-w-xs !pb-2 !m-0 font-bold  text-base text-slate-100">
               Script Writing
             </h3>
@@ -63,15 +63,16 @@ export const ContentDeliveryTools : React.FC<SelfSupervisedLearningSectionProps>
               Using GPTs to mimic the script writing style of any YouTuber.
             </span>
             </div>
-            <div className="flex flex-1 w-full rounded-lg mt-4 bg-gradient-to-br from-purple-500 via-green-500 to-purple-500" />
+            <div className="flex flex-1 w-full rounded-lg mt-4 bg-gradient-to-br from-emerald-700 via-primary to-emerald-700" />
           </div>
         </PinContainer>
 
         <PinContainer
           title="/video-evaluation"
           href="/authenticate"
+          className="w-[15rem]"
         >
-          <div className="flex basis-full flex-col p-4 tracking-tight text-slate-100/50 sm:basis-1/2 w-[20rem] h-[20rem] ">
+          <div className="flex basis-full flex-col p-4 tracking-tight text-slate-100/50 sm:basis-1/2 w-[15rem] h-[20rem]">
             <h3 className="max-w-xs !pb-2 !m-0 font-bold  text-base text-slate-100">
               Video Evaluation
             </h3>
