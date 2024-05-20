@@ -42,7 +42,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ className = '' }) => {
                     <div
                         className={"absolute -inset-0.5 bg-gradient-to-r from-green-500 to-cyan-500 rounded-lg blur opacity-65 group-hover:-inset-1"}></div>
                     <div
-                        className={"relative bg-background text-xl  px-5 py-2 rounded-xl group-hover:text-green-300 transition duration-200"}>
+                        className={"relative bg-background text-xl  px-5 py-2 rounded-xl transition duration-200"}>
                         <p>
                             Powered by the Blockchain
                         </p>

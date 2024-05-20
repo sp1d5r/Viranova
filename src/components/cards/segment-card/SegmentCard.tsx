@@ -287,5 +287,4 @@ export const SegmentCard: React.FC<SegmentCardProps> = ({segmentId}) => {
         </div>
     </div>
   }
-
 }
