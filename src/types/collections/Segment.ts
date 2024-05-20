@@ -1,4 +1,7 @@
 import {DocumentData} from "firebase/firestore";
+import FirebaseDatabaseService from "../../services/database/strategies/FirebaseFirestoreService";
+import {deleteShort, documentToShort, Short} from "./Shorts";
+import {FirebaseStorageService} from "../../services/storage/strategies";
 
 export interface Segment {
     id: string;
@@ -80,4 +83,48 @@ export function segmentToDocument(segment: Segment): DocumentData {
         short_idea_explanation: segment.shortIdeaExplanation,
         video_segment_location: segment.videoSegmentLocation
     };
+}
+
+export const deleteSegment = (segmentId: string) => {
+    FirebaseDatabaseService.getDocument(
+      "topical_segments",
+      segmentId,
+      (data) => {
+          if (data) {
+              const segment: Segment = documentToSegment(data);
+              if (segment.videoSegmentLocation) {
+                FirebaseStorageService.deleteFile(segment.videoSegmentLocation)
+              }
+
+              // Delete the segment video
+              FirebaseDatabaseService.queryDocuments(
+                "shorts",
+                "segment_id",
+                segmentId,
+                "start_index",
+                (tempShorts) => {
+                    for (let tempShort of tempShorts){
+                        if (tempShort) {
+                            const short: Short = documentToShort(tempShort);
+                            deleteShort(short.id);
+                        }
+                    }
+
+                    FirebaseDatabaseService.deleteDocument(
+                      "topical_segments",
+                      segmentId,
+                      () => {
+                          console.log("Successfully deleted segment")
+                      },
+                      () => {
+                          console.error("Failed to delete segment")
+                      }
+                    )
+                },(error)=>{
+                    console.log(`Error... ${error}`)
+                }
+              )
+          }
+      }
+    )
 }

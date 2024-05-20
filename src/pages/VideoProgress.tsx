@@ -9,6 +9,7 @@ import Transcript from "../assets/icons/Transcript.svg"
 import Segments from "../assets/icons/Image.svg";
 import ThumbsUp from "../assets/icons/Thumbs Up.svg";
 import {Meteors} from "../components/ui/meteors";
+import {LoadingIcon} from "../components/loading/Loading";
 
 
 export interface VideoProgressProps {
@@ -51,8 +52,11 @@ export const VideoProgress: React.FC<VideoProgressProps> = ({}) => {
 
     return <ModalLayout>
             <div className="absolute inset-0 h-full w-full bg-gradient-to-r from-emerald-400 to-emerald-700 transform scale-[0.50] bg-primary rounded-xl blur-3xl" />
-        {video && <div className={"relative min-w-[300px] min-h-[300px] w-[50vw] h-[50vh] bg-background rounded-xl flex flex-col justify-center items-center gap-10 text-white border border-primary overflow-hidden  "}>
-            {
+        <div className={"relative min-w-[300px] min-h-[300px] w-[50vw] h-[50vh] bg-background rounded-xl flex flex-col justify-center items-center gap-10 text-white border border-primary overflow-hidden  "}>
+
+            {video ? (
+              <>
+              {
                 video.status === "Uploaded" ? <img className={"animate-spin"} src={Transcript} alt={"Uploaded video"} /> :
                 video.status === "Transcribing" ? <img className={"animate-spin"} src={Transcript} alt={"Uploaded video"} /> :
                 video.status === "Diarizing" ? <img className={"animate-spin"} src={Transcript} alt={"Uploaded video"} /> :
@@ -92,7 +96,11 @@ export const VideoProgress: React.FC<VideoProgressProps> = ({}) => {
                 <br/>
                 If you are stuck here, contact support <a className="text-primary underline">elijahahmad03@gmail.com</a>
             </span>
+          </>
+              ) :
+              <LoadingIcon id={"video-progress"} text={"Loading Video Type"} />
+            }
 
-        </div>}
+        </div>
     </ModalLayout>
 }

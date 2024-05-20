@@ -102,6 +102,10 @@ export const deleteShort = (shortId: string) => {
           FirebaseStorageService.deleteFile(short.short_clipped_video);
         }
 
+        if (short.temp_audio_file) {
+          FirebaseStorageService.deleteFile(short.temp_audio_file);
+        }
+
         if (short.short_video_saliency) {
           FirebaseStorageService.deleteFile(short.short_video_saliency);
         }
@@ -115,7 +119,7 @@ export const deleteShort = (shortId: string) => {
           "shorts",
           shortId,
           () => {
-            console.log("Successfully Deleted short!")
+            console.log("Successfully Deleted short!");
           },
           (error) => {
             console.error("Failed to delete Short:", error.message)
@@ -126,3 +130,4 @@ export const deleteShort = (shortId: string) => {
     }
   )
 }
+
