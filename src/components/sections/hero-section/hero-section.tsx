@@ -35,8 +35,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ className = '' }) => {
 
     return <Vortex
       baseHue={110}
-        className={className + 'container  text-white w-full pt-10 min-h-[80vh] flex gap-5 justify-center items-center md:flex-wrap-reverse  px-5 flex-col-reverse sm:flex-row container'}>
-        <div className={"z-10 flex flex-col gap-10 justify-center items-center"}>
+        className={className + 'container  !p-0 text-white w-full  min-h-[80vh] flex gap-5 justify-center items-center md:flex-wrap-reverse  flex-col-reverse sm:flex-row container'}>
+        <div className={"z-10 flex flex-col gap-10 justify-center items-center bg-background/70 px-5 pt-10"}>
             <div className={"flex justify-center items-center relative "}>
                 <div className={"relative group"}>
                     <div
@@ -68,7 +68,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ className = '' }) => {
             </div>
 
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-5 justify-center">
+            <div className=" hidden sm:grid grid-cols-2 sm:grid-cols-4 gap-5 justify-center">
                 <LandingCard imageSrc={DrivingVideo} cardTitle={"Driving Video"}
                              cardDescription={"Provide the model with a driving video."}/>
                 <LandingCard imageSrc={Segmentation} cardTitle={"Segmentation"}
@@ -79,7 +79,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ className = '' }) => {
                              cardDescription={"Inference and training powered by blockchain."}/>
             </div>
 
-            <BorderButton duration={2000} >
+            <BorderButton duration={2000} onClick={() => {window.location.href="/playground"}}>
                 <p className="text-white font-bold tracking-widest px-5">Begin Clipping!</p>
             </BorderButton>
             <p className={"text-secondary font-bold tracking-widest underline "}>Continue Scrolling</p>

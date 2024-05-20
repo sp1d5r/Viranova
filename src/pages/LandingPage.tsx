@@ -51,11 +51,11 @@ export default function LandingPage(){
         }
     }, []);
 
-    useEffect(() => {
+    /*useEffect(() => {
         if (authState.isAuthenticated) {
             window.location.href = "/playground";
         }
-    }, [authState]);
+    }, [authState]);*/
 
 
     return <ScrollableLayout className={"gap-2"}>
