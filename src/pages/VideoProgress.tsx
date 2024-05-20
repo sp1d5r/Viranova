@@ -8,6 +8,7 @@ import Proposals from "../assets/icons/Email Open.svg";
 import Transcript from "../assets/icons/Transcript.svg"
 import Segments from "../assets/icons/Image.svg";
 import ThumbsUp from "../assets/icons/Thumbs Up.svg";
+import {Meteors} from "../components/ui/meteors";
 
 
 export interface VideoProgressProps {
@@ -49,7 +50,8 @@ export const VideoProgress: React.FC<VideoProgressProps> = ({}) => {
     }, [video, video_id]);
 
     return <ModalLayout>
-        {video && <div className={"min-w-[300px] min-h-[300px] w-[50vw] h-[50vh] bg-background rounded-xl flex flex-col justify-center items-center gap-10 text-white"}>
+            <div className="absolute inset-0 h-full w-full bg-gradient-to-r from-emerald-400 to-emerald-700 transform scale-[0.50] bg-primary rounded-xl blur-3xl" />
+        {video && <div className={"relative min-w-[300px] min-h-[300px] w-[50vw] h-[50vh] bg-background rounded-xl flex flex-col justify-center items-center gap-10 text-white border border-primary overflow-hidden  "}>
             {
                 video.status === "Uploaded" ? <img className={"animate-spin"} src={Transcript} alt={"Uploaded video"} /> :
                 video.status === "Transcribing" ? <img className={"animate-spin"} src={Transcript} alt={"Uploaded video"} /> :
@@ -84,6 +86,12 @@ export const VideoProgress: React.FC<VideoProgressProps> = ({}) => {
                 {video.processingProgress !== 0 && <p>{`${video.processingProgress.toFixed(2)}%`}</p>}
                 {video.queuePosition !== -1 && <p className={"text-danger"}>You are positioned {video.queuePosition} in the queue..</p>}
             </div>
+
+            <span className="text-sm text-gray-300 text-center">
+                Feel free to continue working, we will email you when we're ready for the next step.
+                <br/>
+                If you are stuck here, contact support <a className="text-primary underline">elijahahmad03@gmail.com</a>
+            </span>
 
         </div>}
     </ModalLayout>

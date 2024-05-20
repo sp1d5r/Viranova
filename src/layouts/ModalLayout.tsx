@@ -1,5 +1,6 @@
 import React, {ReactNode} from "react";
 import GreenBackground from "../assets/playground-assets/PlaygroundBackground.png";
+import {BackgroundBeams} from "../components/ui/background-beams";
 
 export interface ModalLayoutProps {
     children: ReactNode
@@ -7,7 +8,8 @@ export interface ModalLayoutProps {
 
 export const ModalLayout : React.FC<ModalLayoutProps> = ({children}) => {
     return <div className={"flex justify-center items-center w-[100vw] h-[100vh]"}>
-        <img className={"w-[100vw] h-[100vh] object-cover absolute z-0"} src={GreenBackground} alt={"bg"}/>
+        <BackgroundBeams />
+
         <div className={"z-10"}>
             {children}
         </div>

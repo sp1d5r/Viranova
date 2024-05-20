@@ -1,4 +1,7 @@
 import {doc, DocumentData, Timestamp} from "firebase/firestore";
+import firebaseFirestoreService from "../../services/database/strategies/FirebaseFirestoreService";
+import FirebaseDatabaseService from "../../services/database/strategies/FirebaseFirestoreService";
+import FirebaseStorageService from "../../services/storage/strategies/FirebaseStorageService";
 
 export type Logs = {
   type: "message",
@@ -82,4 +85,44 @@ export function documentToShort(docData: DocumentData): Short {
     saliency_values: docData.saliency_values ? JSON.parse(docData.saliency_values) : undefined,
     finished_short_location: docData.finished_short_location
   };
+}
+
+
+export const deleteShort = (shortId: string) => {
+  FirebaseDatabaseService.getDocument(
+    "shorts",
+    shortId,
+    (data) => {
+      if (data) {
+        const short : Short = documentToShort(data);
+
+
+        // Delete the corresponding files stored on the document
+        if (short.short_clipped_video) {
+          FirebaseStorageService.deleteFile(short.short_clipped_video);
+        }
+
+        if (short.short_video_saliency) {
+          FirebaseStorageService.deleteFile(short.short_video_saliency);
+        }
+
+        if (short.finished_short_location) {
+          FirebaseStorageService.deleteFile(short.finished_short_location);
+        }
+
+
+        FirebaseDatabaseService.deleteDocument(
+          "shorts",
+          shortId,
+          () => {
+            console.log("Successfully Deleted short!")
+          },
+          (error) => {
+            console.error("Failed to delete Short:", error.message)
+          }
+        )
+
+      }
+    }
+  )
 }
