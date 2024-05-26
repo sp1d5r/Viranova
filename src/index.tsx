@@ -7,17 +7,27 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import {NotificationProvider} from "./contexts/NotificationProvider";
 import {AuthProvider} from "./contexts/Authentication";
+import { PostHogProvider} from 'posthog-js/react'
+
+const options = {
+  api_host: process.env.REACT_APP_PUBLIC_POSTHOG_HOST,
+}
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
   <React.StrictMode>
+    <PostHogProvider
+      apiKey={process.env.REACT_APP_PUBLIC_POSTHOG_KEY}
+      options={options}
+    >
       <AuthProvider>
           <NotificationProvider>
               <App />
           </NotificationProvider>
       </AuthProvider>
+    </PostHogProvider>
   </React.StrictMode>
 );
 
