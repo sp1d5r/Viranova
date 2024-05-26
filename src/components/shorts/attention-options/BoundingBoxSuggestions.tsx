@@ -5,6 +5,7 @@ import {LoadingIcon} from "../../loading/Loading";
 import {AreaUnderChart} from "../../charts/AreaUnderChart";
 import FirebaseFirestoreService from "../../../services/database/strategies/FirebaseFirestoreService";
 import {useNotificaiton} from "../../../contexts/NotificationProvider";
+import "./bounding-box.css";
 
 export interface BoundingBoxSuggestionsProps{
   short: Short;
@@ -19,18 +20,19 @@ type VideoInfo = {
 export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({short, shortId}) => {
   const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState<VideoInfo>({clippedVideo: undefined, saliencyVideo: undefined});
+  const fps = 25;
+  const [pause, setPause] = useState(false);
   const {showNotification} = useNotificaiton();
   const [videoUrls, setVideoUrls] = useState<VideoInfo>({clippedVideo: undefined, saliencyVideo: undefined});
   const [opacity, setOpacity] = useState(0);
+
+  const [currentFrame, setCurrentFrame] = useState(0);
+  const totalFrames = short.total_frame_count;
 
   const clippedVideoRef = useRef<HTMLVideoElement>(null);
   const saliencyVideoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  useEffect(() => {
-    console.log(short.visual_difference);
-    console.log(short.saliency_values);
-  }, [])
 
   function drawBoundingBoxes(ctx: CanvasRenderingContext2D, currentTime: number, video: HTMLVideoElement) {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); // Clear previous drawings
@@ -38,7 +40,7 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({s
     if (short.bounding_boxes && short.bounding_boxes['boxes']) {
       const boxes = short.bounding_boxes['boxes'];
 
-      const frameNumber = Math.floor(currentTime * 30); // Example: videoFrameRate is frames per second
+      const frameNumber = Math.floor(currentTime * fps); // Example: videoFrameRate is frames per second
       const currentBoxes = boxes[frameNumber];
 
       if (currentBoxes) {
@@ -77,16 +79,37 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({s
       const ctx = canvas.getContext('2d');
       video.addEventListener('play', () => {
         const render = () => {
-          if (ctx && !video.paused && !video.ended) {
+          if (ctx && !video.ended) {
             drawBoundingBoxes(ctx, video.currentTime, video);
+            setCurrentFrame(Math.floor(video.currentTime * fps));
             requestAnimationFrame(render);
           }
         };
         requestAnimationFrame(render);
       });
     }
-  }, [canvasRef.current, clippedVideoRef.current]);
+  }, [canvasRef.current, clippedVideoRef.current, currentFrame]);
 
+  useEffect(() => {
+    const clipped = clippedVideoRef.current;
+    const saliency = saliencyVideoRef.current;
+
+    const handleTimeUpdate = () => {
+      if (clipped) {
+        const frameRate = fps; // Adjust this according to your video's frame rate
+        const frame = Math.floor((clipped.currentTime * frameRate));
+        setCurrentFrame(frame);
+      }
+    };
+
+    clipped && clipped.addEventListener('timeupdate', handleTimeUpdate);
+    saliency && saliency.addEventListener('timeupdate', handleTimeUpdate);
+
+    return () => {
+      clipped && clipped.removeEventListener('timeupdate', handleTimeUpdate);
+      saliency && saliency.removeEventListener('timeupdate', handleTimeUpdate);
+    };
+  }, []);
 
   useEffect(() => {
     if (short && short.short_video_saliency) {
@@ -123,6 +146,7 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({s
   }, [short]);
 
   const handlePlayPause = () => {
+
     const clipped = clippedVideoRef.current;
     const saliency = saliencyVideoRef.current;
     if (clipped && saliency) {
@@ -135,11 +159,87 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({s
             console.error("Failed to play clipped video:", err);
           });
         }
+        setPause(false);
       } else {
+        setPause(true);
         clipped.pause();
         saliency.pause();
       }
     }
+  };
+
+  const handleFrameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const frameIndex = parseInt(e.target.value);
+    setCurrentFrame(frameIndex);
+    // Optionally, adjust video playback if needed
+    if (clippedVideoRef.current && saliencyVideoRef.current) {
+      const time = frameIndex / fps;  // Assuming 30 fps for example
+      clippedVideoRef.current.currentTime = time;
+      saliencyVideoRef.current.currentTime = time;
+    }
+  };
+
+
+  const SeekBar = ({currentFrame}: {currentFrame: number}) => {
+    const intervals = short.cuts.slice(0, short.cuts.length - 1).map((cut, index) => {
+      return {start: cut, end: short.cuts[index + 1] - 1};
+    });
+
+    // Optionally, include the last interval if needed, up to totalFrames
+    if (short.cuts.length > 0) {
+      intervals.push({start: short.cuts[short.cuts.length - 1], end: totalFrames - 1});
+    }
+
+    const currentIntervalIndex = intervals.findIndex(interval => currentFrame >= interval.start && currentFrame <= interval.end);
+
+    return <div
+      className="seek-bar relative w-full h-12 bg-emerald-950 border border-primary rounded flex justify-center items-center overflow-hidden">
+      <input
+        type="range"
+        min="0"
+        max={totalFrames - 1}
+        value={currentFrame}
+        onChange={handleFrameChange}
+        className={"slider absolute w-full z-50 opacity-30"}
+      />
+
+      {Array.from({length: totalFrames}, (_, frame) => {
+        let color = 'bg-white/30'; // Default color for non-special frames
+
+        // Determine if the frame is within any interval
+        const intervalIndex = intervals.findIndex(interval => frame >= interval.start && frame <= interval.end);
+        const isCut = short.cuts.includes(frame);
+        const isCurrent = currentFrame === frame;
+
+        if (isCut) {
+          color = 'bg-primary'; // Color for cuts
+        }
+        if (isCurrent) {
+          color = 'bg-red-50'; // Color for the current frame
+        }
+
+
+        if (intervalIndex === currentIntervalIndex) {
+          color = 'bg-blue-300/50'; // Highlight the current interval
+        }
+
+        return (
+          <div
+            key={frame}
+            className={`absolute w-[1px] h-full rounded ${color}`}
+            style={{
+              left: `${(frame / totalFrames) * 100}%`,
+            }}
+          ></div>
+        );
+      })}
+      <div
+        className="absolute w-full h-full bg-gray-950/60"
+        style={{
+          right: `${((totalFrames - 2 - currentFrame) / totalFrames) * 100}%`,
+        }}
+      />
+    </div>;
   };
 
   return <div className="w-full flex flex-col gap-2 items-center">
@@ -162,14 +262,25 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({s
                 <source src={videoUrls.saliencyVideo} type="video/mp4"/>
               </video>
             }
-            <canvas ref={canvasRef} id="canvasOverlay" style={{ position: 'absolute', top: 0, left: 0, zIndex: 50, width: "100%", height: "100%"}}></canvas>
+            <canvas ref={canvasRef} id="canvasOverlay" style={{ position: 'absolute', top: 0, left: 0, zIndex: 45, width: "100%", height: "100%"}}></canvas>
           </div>
           <div className="flex flex-col gap-2 my-2">
             {/* I need to make a media player here - shorts.cuts represents frames where theres a camera cut */}
             {/* and shorts.total_frame_count is the total number of frames... */}
-            <button onClick={handlePlayPause} className="p-2 bg-blue-500 text-white rounded">
-              Play/Pause
-            </button>
+            <div className="flex gap-2">
+              <button onClick={handlePlayPause} type="button" className="text-white border-white border font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 ">
+                {pause ?
+                  <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                    <path fillRule="evenodd" d="M8.6 5.2A1 1 0 0 0 7 6v12a1 1 0 0 0 1.6.8l8-6a1 1 0 0 0 0-1.6l-8-6Z" clipRule="evenodd"/>
+                  </svg> :
+                  <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                    <path fillRule="evenodd" d="M8 5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H8Zm7 0a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1Z" clipRule="evenodd"/>
+                  </svg>
+                }
+                <span className="sr-only">Icon description</span>
+              </button>
+              <SeekBar currentFrame={currentFrame}/>
+            </div>
             <label htmlFor="steps-range" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white w-full">
               Set Saliency Opacity
               <input
