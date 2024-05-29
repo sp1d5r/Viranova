@@ -125,6 +125,7 @@ export const CreateProject : React.FC<CreateProjectProps> = ({}) => {
         uploadTimestamp: Date.now(),
         progressMessage: "Uploading video to transcription queue",
         videoPath: filePath,
+        link: "",
         queuePosition: -1
       }
 

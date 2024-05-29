@@ -79,7 +79,7 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({s
       const ctx = canvas.getContext('2d');
       video.addEventListener('play', () => {
         const render = () => {
-          if (ctx && !video.ended) {
+          if (!video.paused && ctx && !video.ended) {
             drawBoundingBoxes(ctx, video.currentTime, video);
             setCurrentFrame(Math.floor(video.currentTime * fps));
             requestAnimationFrame(render);
@@ -146,7 +146,6 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({s
   }, [short]);
 
   const handlePlayPause = () => {
-
     const clipped = clippedVideoRef.current;
     const saliency = saliencyVideoRef.current;
     if (clipped && saliency) {

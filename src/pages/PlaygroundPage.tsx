@@ -6,10 +6,18 @@ import LogoIcon from "../assets/logo/Scissors.svg";
 import gsap from "gsap";
 import {SquigglyUnderline} from "../components/ui/squiggly-line";
 import {BackgroundBeams} from "../components/ui/background-beams";
+import {useNotificaiton} from "../contexts/NotificationProvider";
+import FirebaseFirestoreService from "../services/database/strategies/FirebaseFirestoreService";
+import {useAuth} from "../contexts/Authentication";
+import {Simulate} from "react-dom/test-utils";
+import submit = Simulate.submit;
 
 export default function PlaygroundPage() {
     const comp = useRef(null);
     const [selectedLink, setSelectedLink] = useState("Clip video");
+    const [youtubeLink, setYouTubeLink] = useState<string>();
+    const { showNotification } = useNotificaiton();
+    const { authState } = useAuth();
 
     useEffect(() => {
         let ctx = gsap.context(() => {
@@ -33,6 +41,62 @@ export default function PlaygroundPage() {
 
     }, []);
 
+    const isValidYouTubeUrl = (url: string) => {
+        // Regular expression to check if the URL is a valid YouTube video URL
+        const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})$/;
+        return youtubeRegex.test(url);
+    }
+
+    const submitYoutubeLink = () => {
+        if (youtubeLink) {
+            if (isValidYouTubeUrl(youtubeLink)) {
+                FirebaseFirestoreService.addDocument("videos", {
+                    uid: authState.user!.uid,
+                    processingProgress: 0,
+                    status: "Link Provided",
+                    previousStatus: "Started...",
+                    uploadTimestamp: Date.now(),
+                    progressMessage: "Performing Download",
+                    queuePosition: -1,
+                    link: youtubeLink,
+                },
+                  (doc_id) => {
+                      showNotification(
+                        "Created Document!",
+                        `Successfully created new document: ${doc_id}`,
+                        "success",
+                        10000
+                      );
+                      window.location.href = `/video-handler?video_id=${doc_id}`
+                  },
+                  () => {
+                      showNotification(
+                        "Error Document Creation",
+                        'Failed to create document... Try again another time maybe?',
+                        "error",
+                        10000
+                      );
+                  }
+                )
+            } else {
+                showNotification("Invalid Link", "Come on... Give me a real link...", "error");
+            }
+        } else {
+            showNotification("No Link", "You need to add a youtube link", "error");
+        }
+
+    }
+
+    const submitButton = () => {
+        if (authState.isAuthenticated && authState.user && authState.user.uid) {
+            if (youtubeLink){
+                submitYoutubeLink();
+            }
+        } else {
+            window.location.href = "/authenticate";
+        }
+    }
+
     return <div ref={comp} className={'relative w-full h-[100vh]'}>
         <TransparentNavigationBar />
 
@@ -54,18 +118,6 @@ export default function PlaygroundPage() {
                 <span id="landingSubText3" className="text-primary font-bold">Deliver Results</span>
             </span>
         </div>
-
-        {/* New Project */}
-        {/*<div className={'w-full h-1/2 max-h-[700px] min-h-[500px] relative'}>*/}
-
-
-        {/*    <img*/}
-        {/*        src={PlaygroundBackground}*/}
-        {/*        alt={'Oh no... I didn\'t load :( '}*/}
-        {/*        className={'absolute h-full w-full object-cover -z-0'}*/}
-        {/*    />*/}
-        {/*    <CreateProject />*/}
-        {/*</div>*/}
 
         <div className="w-full  max-h-[700px] min-h-[600px] flex justify-start items-center flex-col relative sm:px-16 gap-8 pt-24  sm:pt-28 m-auto py-6">
             <BackgroundBeams />
@@ -95,10 +147,24 @@ export default function PlaygroundPage() {
                           <div className="w-full border-b border-accent/20 my-2"/>
                           <label htmlFor="helper-text" className="block my-2 text-sm font-medium text-gray-900 dark:text-white">
                               Or send a YouTube link
-                              <input type="email" id="helper-text" aria-describedby="helper-text-explanation" className="border my-1 text-sm rounded-lg block w-full px-2.5 py-1  bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="youtube.com/w?dsjknvsfv" />
+                              <input
+                                type="link"
+                                id="helper-text"
+                                aria-describedby="helper-text-explanation"
+                                className="border my-1 text-sm rounded-lg block w-full px-2.5 py-1  bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="youtube.com/w?dsjknvsfv"
+                                value={youtubeLink}
+                                onChange={(e) => {setYouTubeLink(e.target.value)}}
+                              />
                           </label>
                           <p id="helper-text-explanation" className="mt-2 text-sm text-gray-500 dark:text-gray-400">Only use YouTube videos you have permission to select.</p>
-                          <button type="button" className="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 my-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Continue</button>
+                          <button
+                            type="button"
+                            className="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 my-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+                            onClick={() => { submitButton() }}
+                          >
+                              Continue
+                          </button>
 
                       </>
                     }

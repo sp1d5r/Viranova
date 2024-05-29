@@ -56,21 +56,21 @@ export const VideoProgress: React.FC<VideoProgressProps> = ({}) => {
 
             {video ? (
               <>
-              {
-                video.status === "Uploaded" ? <img className={"animate-spin"} src={Transcript} alt={"Uploaded video"} /> :
-                video.status === "Transcribing" ? <img className={"animate-spin"} src={Transcript} alt={"Uploaded video"} /> :
-                video.status === "Diarizing" ? <img className={"animate-spin"} src={Transcript} alt={"Uploaded video"} /> :
-                video.status === "Segmenting" ? <img className={"animate-bounce"} src={Segments} alt={"Uploaded video"} /> :
-                video.status === "Summarizing Segments" ? <img className={"animate-bounce"} src={Proposals} alt={"Summarising Segments"} /> :
-                video.status === "Preprocessing Complete" ? <img className={"animate-bounce"} src={ThumbsUp} alt={"Process Complete"} /> :
-                    <img src={ThumbsUp} alt={"Unsure what's going on "} />
-            }
-
-
             <div className={"flex flex-col justify-center items-center"}>
+                {
+                    video.status === "Uploaded" ? <img className={"animate-spin"} src={Transcript} alt={"Uploaded video"} /> :
+                      video.status === "Link Provided" ? <img className={"animate-spin"} src={Transcript} alt={"Uploaded video"} /> :
+                        video.status === "Transcribing" ? <img className={"animate-spin"} src={Transcript} alt={"Uploaded video"} /> :
+                          video.status === "Diarizing" ? <img className={"animate-spin"} src={Transcript} alt={"Uploaded video"} /> :
+                            video.status === "Segmenting" ? <img className={"animate-bounce"} src={Segments} alt={"Uploaded video"} /> :
+                              video.status === "Summarizing Segments" ? <img className={"animate-bounce"} src={Proposals} alt={"Summarising Segments"} /> :
+                                video.status === "Preprocessing Complete" ? <img className={"animate-bounce"} src={ThumbsUp} alt={"Process Complete"} /> :
+                                  <img src={ThumbsUp} alt={"Unsure what's going on "} />
+                }
                 {
                     video.status === "Uploaded" ? <p className={"text-white font-bold text-subsubtitle"}> Video Uploaded! </p> :
                     video.status === "Transcribing" ? <p className={"text-white font-bold text-subsubtitle"}> Transcribing the Video </p> :
+                    video.status === "Link Provided" ? <p className={"text-white font-bold text-subsubtitle"}> Downloading Youtube </p> :
                     // video.status === "Diarizing" ? <p className={"text-white font-bold text-subsubtitle"}> Video Uploaded! </p> :
                     video.status === "Segmenting" ? <p className={"text-white font-bold text-subsubtitle"}> Segmenting Video </p> :
                     video.status === "Summarizing Segments" ? <p className={"text-white font-bold text-subsubtitle"}> Summarizing Segments </p> :

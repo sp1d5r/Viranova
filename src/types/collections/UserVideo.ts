@@ -1,6 +1,6 @@
 import {DocumentData} from 'firebase/firestore';
 
-type UserVideoStatus = "Uploaded" | "Transcribing" | "Diarizing" | "Segmenting" | "Summarizing Segments" | "Clip Transcripts" | "Preprocessing Complete" | "Create TikTok Ideas"
+type UserVideoStatus = "Uploaded" | "Link Provided" | "Transcribing" | "Diarizing" | "Segmenting" | "Summarizing Segments" | "Clip Transcripts" | "Preprocessing Complete" | "Create TikTok Ideas"
 
 export interface UserVideo {
     videoPath: string;
@@ -10,7 +10,9 @@ export interface UserVideo {
     processingProgress: number;
     progressMessage: string;
     uid: string;
+    link?: string;
     queuePosition: number;
+    id?: string;
 }
 
 export function documentToUserVideo(docData: DocumentData): UserVideo {
@@ -22,7 +24,9 @@ export function documentToUserVideo(docData: DocumentData): UserVideo {
         processingProgress: docData.processingProgress,
         progressMessage: docData.progressMessage,
         uid: docData.uid,
+        link: docData.link,
         queuePosition: docData.queuePosition,
+        id: docData.id
     };
 }
 

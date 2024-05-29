@@ -11,7 +11,6 @@ export interface ExistingProjectsProps {
 
 export const ExistingProjects: React.FC<ExistingProjectsProps> = ({className=''}) => {
   const [recentProjects, setRecentProjects] = useState<UserVideo[]>([]);
-  const [projectsId, setProjectsID] = useState<string[]>([]);
   const {authState} = useAuth();
   const [refresh, setRefresh] = useState(false);
 
@@ -23,7 +22,6 @@ export const ExistingProjects: React.FC<ExistingProjectsProps> = ({className=''}
       authState.user && authState.user.uid ? authState.user.uid : '',
       'uid',
       (documents) => {
-        setProjectsID(documents.map((doc) => {return doc.id!}))
         setRecentProjects(documents.map(doc => {
           return documentToUserVideo(doc)
         }).sort((elem1, elem2) => {return elem2.uploadTimestamp - elem1.uploadTimestamp}));
@@ -44,7 +42,7 @@ export const ExistingProjects: React.FC<ExistingProjectsProps> = ({className=''}
       <div className={"w-full md:w-[70%] flex flex-wrap gap-5 pt-10 justify-center items-center"}>
         {
           recentProjects.map((elem, index) => {
-            return <ExistingProjectCard videoId={projectsId[index]} userVideo={elem} setRefresh={setRefresh} id={index}/>
+            return <ExistingProjectCard userVideo={elem} setRefresh={setRefresh} id={index}/>
           })
         }
 
