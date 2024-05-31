@@ -4,13 +4,25 @@ import FirebaseFirestoreService from "../../services/database/strategies/Firebas
 import {useNotificaiton} from "../../contexts/NotificationProvider";
 import {VideoPlayer} from "../video-player/VideoPlayer";
 import {LoadingIcon} from "../loading/Loading";
+import FirebaseDatabaseService from "../../services/database/strategies/FirebaseFirestoreService";
+import {FirebaseStorageService} from "../../services/storage/strategies";
 
 export interface ExportTabProps {
   short: Short;
   shortId: string;
 }
 
+interface ShortTitle {
+  titleTop: string;
+  titleBottom: string;
+}
+
 export const ExportTab :React.FC<ExportTabProps> = ({short, shortId}) => {
+  const [shortTitle, setShortTitle] = useState<ShortTitle>({
+    titleTop: short.short_title_top || '',
+    titleBottom: short.short_title_bottom || ''
+  });
+
   const {showNotification} = useNotificaiton();
 
   return <div className="text-medium text-gray-400 bg-gray-900 rounded-lg w-full flex justify-evenly flex-wrap gap-5 p-8">
@@ -29,34 +41,86 @@ export const ExportTab :React.FC<ExportTabProps> = ({short, shortId}) => {
         Alright! Once you've finished editing the video and posting the video add the link to the TikTok produced here:
       </p>
 
+
+      <div className="mt-3">
+        <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+          Short Title
+          <div className="flex gap-2">
+            <input
+              type="text"
+              id="short-title-top"
+              className="bg-gray-50 border my-2 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              value={shortTitle.titleTop}
+              placeholder="Title Top"
+              onChange={(e) => {setShortTitle(prevState => {
+                return {...prevState, titleTop: e.target.value}
+              })}}
+            />
+            <input
+              type="text"
+              id="short-title-bottom"
+              className="bg-gray-50 border my-2 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              value={shortTitle.titleBottom}
+              placeholder="Title Bottom"
+              onChange={(e) => {setShortTitle(prevState => {
+                return {...prevState, titleBottom: e.target.value}
+              })}}
+            />
+            <button onClick={() => {
+              if (shortTitle) {
+                FirebaseDatabaseService.updateDocument(
+                  'shorts',
+                  shortId,
+                  {
+                    'short_title_top': shortTitle.titleTop,
+                    'short_title_bottom': shortTitle.titleBottom,
+                  },
+                  ()=>{
+                    showNotification("Update Successful", "Updated short title", "success")
+                  },
+                  (error)=>{
+                    showNotification("Update Failed", error.message, "error")
+                  }
+                )
+              }
+            }}
+            className="inline-flex items-center px-4 py-2 my-2 text-sm font-medium border rounded-lg focus:z-10 focus:ring-4 focus:outline-none focus:text-blue-700 bg-gray-800 text-gray-200 border-blue-600 hover:text-white hover:bg-blue-700 focus:ring-blue-700 gap-3"
+              >
+              Update
+              <svg className="w-5 h-5 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M18 14v4.833A1.166 1.166 0 0 1 16.833 20H5.167A1.167 1.167 0 0 1 4 18.833V7.167A1.166 1.166 0 0 1 5.167 6h4.618m4.447-2H20v5.768m-7.889 2.121 7.778-7.778"/>
+              </svg>
+            </button>
+          </div>
+        </label>
+      </div>
+
       <div className="mb-6 mt-3">
         <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
           TikTok Link
           <input type="text" id="default-input" className="bg-gray-50 border my-2 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
         </label>
-
-
       </div>
 
     </div>
 
     <div className="flex flex-col gap-2 flex-1 min-w-[200px] py-3">
       {short.finished_short_location ?
-        <VideoPlayer path={short.finished_short_location} loadingText={"Loading Finished Product"}/>:
+        <VideoPlayer path={short.finished_short_location} loadingText={"Loading Finished Product"}/> :
         <div className="w-full h-full bg-background rounded-xl flex justify-center items-center">
-
           <LoadingIcon id={"exporttab"} text={"Video not generated"} className={"min-h-[200px]"}/>
         </div>
       }
       <div className="w-full flex gap-2">
-        <button type="button" className="text-white bg-[#050708] hover:bg-[#050708]/80 focus:ring-4 focus:outline-none focus:ring-[#050708]/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:hover:bg-[#050708]/40 dark:focus:ring-gray-600 me-2 mb-2 gap-5">
+        <button type="button" className="inline-flex items-center px-4 py-2 my-2 text-sm font-medium border rounded-lg focus:z-10 focus:ring-4 focus:outline-none focus:text-emerald-700 bg-gray-800 text-gray-200 border-emerald-600 hover:text-white hover:bg-emerald-700 focus:ring-emerald-700 gap-3">
           <svg xmlns="http://www.w3.org/2000/svg"  height="30px" width="30px" viewBox="0 0 192 192" fill="none"><path stroke="#ffffff" strokeLinecap="round" strokeLinejoin="round" strokeWidth="15" d="M170 42 22 124v14c0 6.627 5.373 12 12 12h78c6.627 0 12-5.373 12-12v-9.5"/><path stroke="#ffffff" strokeLinecap="round" strokeLinejoin="round" strokeWidth="15" d="M170 150 22 68V54c0-6.627 5.373-12 12-12h78c6.627 0 12 5.373 12 12v9.5"/></svg>
           Export to CapCut
         </button>
 
+
         <button
           type="button"
-          className="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+          className="inline-flex items-center px-4 py-2 my-2 text-sm font-medium border rounded-lg focus:z-10 focus:ring-4 focus:outline-none focus:text-emerald-700 bg-gray-800 text-gray-200 border-emerald-600 hover:text-white hover:bg-emerald-700 focus:ring-emerald-700 gap-3"
           disabled={!short.bounding_boxes}
           onClick={() => {
             FirebaseFirestoreService.updateDocument(
@@ -72,6 +136,41 @@ export const ExportTab :React.FC<ExportTabProps> = ({short, shortId}) => {
           }}
         >
           Preview
+        </button>
+
+        <button
+          type="button"
+          className="inline-flex items-center px-4 py-2 my-2 text-sm font-medium border rounded-lg focus:z-10 focus:ring-4 focus:outline-none focus:text-emerald-700 bg-gray-800 text-gray-200 border-emerald-600 hover:text-white hover:bg-emerald-700 focus:ring-emerald-700 gap-3"
+          disabled={!short.finished_short_location}
+          onClick={() => {
+            FirebaseStorageService.downloadFile(short.finished_short_location).then(
+              (blob) => {
+                const blobUrl = window.URL.createObjectURL(blob);
+
+                // Create a link and set the URL and download attribute
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.setAttribute('download', short.finished_short_location.split("/").filter((_, index) => {
+                  return index > 0
+                }).join('')); // Set the filename here
+
+                // Append to the body, click it, and then remove it
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                // Clean up by revoking the Blob URL after a timeout
+                setTimeout(() => window.URL.revokeObjectURL(blobUrl), 100);
+              }
+            ).catch(
+              (err) => {showNotification('Error', 'Failed to get URL - preview first', 'error')}
+            );
+          }}
+        >
+          Download
+          <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 13V4M7 14H5a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1h-2m-1-5-4 5-4-5m9 8h.01"/>
+          </svg>
         </button>
       </div>
     </div>

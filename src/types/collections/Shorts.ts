@@ -58,6 +58,8 @@ export interface Short {
   visual_difference?: VisualDifference,
   saliency_values?: SaliencyCaptured,
   finished_short_location: string,
+  short_title_top?:string,
+  short_title_bottom?: string,
 }
 
 
@@ -83,7 +85,9 @@ export function documentToShort(docData: DocumentData): Short {
     total_frame_count: docData.total_frame_count,
     visual_difference: docData.visual_difference ? JSON.parse(docData.visual_difference) : undefined,
     saliency_values: docData.saliency_values ? JSON.parse(docData.saliency_values) : undefined,
-    finished_short_location: docData.finished_short_location
+    finished_short_location: docData.finished_short_location,
+    short_title_top: docData.short_title_top,
+    short_title_bottom: docData.short_title_bottom
   };
 }
 

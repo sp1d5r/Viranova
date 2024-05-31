@@ -55,6 +55,23 @@ const FirebaseStorageService: StorageService = {
           });
     },
 
+    async getDownloadURL(path: string): Promise<string> {
+        if (!path) {
+            throw new Error('Path cannot be empty');
+        }
+
+        const storageRef = ref(storage, path);
+        return getDownloadURL(storageRef)
+          .then((downloadURL) => {
+              console.log("URL retrieved:", downloadURL);
+              return downloadURL;
+          })
+          .catch((error) => {
+              console.error("Error fetching download URL:", error);
+              throw error;
+          });
+    },
+
 
     async deleteFile(path: string): Promise<void> {
         const storageRef = ref(storage, path);

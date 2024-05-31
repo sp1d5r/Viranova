@@ -7,12 +7,14 @@ import {documentToUserVideo} from "../../../types/collections/UserVideo";
 import {deleteShort, Short} from "../../../types/collections/Shorts";
 
 export interface SegmentCardProps{
+  currentSegment: Segment,
   segmentId: string,
+  currentTime: number
 }
 
-export const SegmentCard: React.FC<SegmentCardProps> = ({segmentId}) => {
+export const SegmentCard: React.FC<SegmentCardProps> = ({currentSegment, segmentId, currentTime}) => {
   const {showNotification} = useNotificaiton();
-  const [segment, setSegment] = useState<Segment | undefined>();
+  const [segment, setSegment] = useState<Segment>(currentSegment);
   const [shorts, setShorts] = useState<Short[]>([])
   const [fullTranscriptShown, setFullTranscript] = useState(false);
 
@@ -26,7 +28,7 @@ export const SegmentCard: React.FC<SegmentCardProps> = ({segmentId}) => {
         }
       }
     )
-  }, []);
+  }, [segment]);
 
   useEffect(() => {
     if (segment) {
@@ -48,7 +50,7 @@ export const SegmentCard: React.FC<SegmentCardProps> = ({segmentId}) => {
 
   if (segment) {
     return <div
-      className={`flex flex-col gap-2 border border-accent w-full min-h-36 rounded-xl p-5
+      className={`flex flex-col gap-2 border border-accent flex-1 min-h-36 rounded-xl p-5
                             ${segment.flagged ? "border-danger text-danger": "text-white"}
                             `}
       key={segmentId}
@@ -58,7 +60,7 @@ export const SegmentCard: React.FC<SegmentCardProps> = ({segmentId}) => {
           <span className="font-medium">Error!</span> This segment has been flagged for inappropriate content.
         </div>
       }
-      <span className="flex gap-5">
+      <span className="flex gap-5 flex-wrap">
                                 <span className="font-bold text-2xl">Segment: {segmentId}</span>
         {segment.segmentStatus && <span className="bg-green-100 text-green-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300 flex gap-2 items-center">
                                     <div role="status">
