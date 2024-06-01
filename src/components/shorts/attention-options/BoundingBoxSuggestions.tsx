@@ -75,7 +75,7 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({s
   useEffect(() => {
     const canvas = canvasRef.current;
     const video = clippedVideoRef.current;
-    if (canvas && video) {
+    if (canvas && video && short.bounding_boxes) {
       const ctx = canvas.getContext('2d');
       video.addEventListener('play', () => {
         const render = () => {
@@ -278,7 +278,7 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({s
                 }
                 <span className="sr-only">Icon description</span>
               </button>
-              <SeekBar currentFrame={currentFrame}/>
+              {short.cuts && <SeekBar currentFrame={currentFrame}/>}
             </div>
             <label htmlFor="steps-range" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white w-full">
               Set Saliency Opacity
@@ -304,6 +304,7 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({s
 
 
 
+    {!short.cuts && <p className="text-danger font-bold">Press find cuts to get camera cuts</p>}
     <div className="inline-flex rounded-md shadow-sm" role="group">
       <button
         type="button"
@@ -332,7 +333,7 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({s
               "short_status": "Get Bounding Boxes",
               "previous_short_status": "Requested to Get Bounding Boxes"
             },
-            () => {showNotification("Success", "Requested to find cuts.", "success")},
+            () => {showNotification("Success", "Requested Bounding Boxes", "success")},
             (error) => {showNotification("Failed", error.message, "error")},
           )
         }}
