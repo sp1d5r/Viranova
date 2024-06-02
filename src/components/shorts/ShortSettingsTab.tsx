@@ -19,16 +19,19 @@ export const ShortSettingsTab :React.FC<ShortSettingsTabProps> = ({short, shortI
   }
 
   const updateShortDetails = () => {
-    FirebaseFirestoreService.updateDocument(
-      'shorts',
-      shortId,
-      {
-        short_idea: shortIdea,
-        short_idea_explanation: shortIdeaExplanation
-      },
-      () => {showNotification('Updated', 'Updated Short Information', 'success');},
-      (err) => {showNotification('Updated', err.message, 'error');}
-    )
+    if (shortIdea != short.short_idea){
+      FirebaseFirestoreService.updateDocument(
+        'shorts',
+        shortId,
+        {
+          short_idea: shortIdea,
+          short_idea_explanation: shortIdeaExplanation,
+          short_idea_run_id: ''
+        },
+        () => {showNotification('Updated', 'Updated Short Information', 'success');},
+        (err) => {showNotification('Updated', err.message, 'error');}
+      )
+    }
   }
 
   return <div className="p-6 text-medium text-gray-400 bg-gray-900 rounded-lg w-full">
@@ -71,9 +74,10 @@ export const ShortSettingsTab :React.FC<ShortSettingsTabProps> = ({short, shortI
     <p className="bg-gray-900 px-2 py-2 m-2">
       {short.transcript}
     </p>
-    <div className="mb-6">
+    {short.short_run_id && short.short_run_id != "" && <p className="text-rose-600">*Note - Updating short information will de-tag the short idea generation pipeline.
+      Essentially, analytics from this video will not feed into the idea generation stage.</p>}
+    <div className="mb-2">
       <p className="text-white font-bold pt-2">Short Idea:</p>
-
       <label htmlFor="default-input" className="block mb-2 text-sm font-medium text-white">
         <input
           type="text"
@@ -123,5 +127,6 @@ export const ShortSettingsTab :React.FC<ShortSettingsTabProps> = ({short, shortI
         Delete Short
       </button>
     </div>
+    <p>*Note - Updating short information will de-tag the short idea generation pipeline. Essentially, analytics from this video will not feed into the idea generation stage.</p>
   </div>
 }

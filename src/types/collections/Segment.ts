@@ -13,6 +13,7 @@ export interface Segment {
     hate: boolean;
     hateThreatening: boolean;
     index: number;
+    segmentTitle: string;
     segmentSummary: string;
     selfHarm: boolean;
     sexual: boolean;
@@ -26,6 +27,7 @@ export interface Segment {
     segmentStatus: string;
     shortIdea: string;
     shortIdeaExplanation: string;
+    shortRunId: string;
     videoSegmentLocation: string;
 }
 
@@ -43,6 +45,7 @@ export function documentToSegment(docData: DocumentData): Segment {
         hateThreatening: docData.hate_threatening,
         index: docData.index,
         segmentSummary: docData.segment_summary,
+        segmentTitle: docData.segment_title,
         selfHarm: docData.self_harm,
         sexual: docData.sexual,
         sexualMinors: docData.sexual_minors,
@@ -54,6 +57,7 @@ export function documentToSegment(docData: DocumentData): Segment {
         previousSegmentStatus: docData.previous_segment_status,
         shortIdea: docData.short_idea,
         shortIdeaExplanation: docData.short_idea_explanation,
+        shortRunId: docData.short_idea_run_id,
         videoSegmentLocation: docData.video_segment_location,
     };
 }
@@ -70,6 +74,7 @@ export function segmentToDocument(segment: Segment): DocumentData {
         hate_threatening: segment.hateThreatening,
         index: segment.index,
         segment_summary: segment.segmentSummary,
+        segment_title: segment.segmentTitle,
         self_harm: segment.selfHarm,
         sexual: segment.sexual,
         sexual_minors: segment.sexualMinors,
@@ -81,6 +86,7 @@ export function segmentToDocument(segment: Segment): DocumentData {
         segment_status: segment.segmentStatus,
         short_idea: segment.shortIdea,
         short_idea_explanation: segment.shortIdeaExplanation,
+        short_run_id: segment.shortRunId,
         video_segment_location: segment.videoSegmentLocation
     };
 }
