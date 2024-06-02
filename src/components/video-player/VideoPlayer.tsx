@@ -23,7 +23,7 @@ export const VideoPlayer: React.FC<SegmentVideoProps> = ({ className = 'w-full f
         setSource(url);
         setLoading(false);
       }).catch((err) => {
-        setError(err);
+        setError(err.toString());
         setLoading(false);
       });
     } else {

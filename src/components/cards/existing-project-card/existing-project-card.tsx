@@ -1,9 +1,11 @@
-import React from "react";
+import React, {useState} from "react";
 import {UserVideo} from "../../../types/collections/UserVideo";
 import FirebaseDatabaseService from "../../../services/database/strategies/FirebaseFirestoreService";
 import {useNotificaiton} from "../../../contexts/NotificationProvider";
 import {FirebaseStorageService} from "../../../services/storage/strategies";
 import {LoadingIcon} from "../../loading/Loading";
+import {VideoPlayer} from "../../video-player/VideoPlayer";
+import FirebaseFirestoreService from "../../../services/database/strategies/FirebaseFirestoreService";
 export interface ExistingProjectCardProps {
     userVideo: UserVideo,
     setRefresh: React.Dispatch<React.SetStateAction<boolean>>
@@ -12,7 +14,7 @@ export interface ExistingProjectCardProps {
 
 export const ExistingProjectCard: React.FC<ExistingProjectCardProps> = ({userVideo, setRefresh, id}) => {
     const {showNotification} = useNotificaiton();
-
+    const [previewVideo, setPreviewVideo] = useState(false);
 
     const deleteVideo = () => {
         if (userVideo.id){
@@ -30,7 +32,19 @@ export const ExistingProjectCard: React.FC<ExistingProjectCardProps> = ({userVid
     }
 
     return <div className="max-w-sm border  rounded-lg shadow bg-gray-800 border-gray-700 overflow-hidden">
-        <LoadingIcon className="h-35 w-full bg-black py-10" id={id.toString()}/>
+        {userVideo.videoPath && previewVideo ? <VideoPlayer path={userVideo.videoPath}  /> : <div className="w-full flex flex-col bg-black py-4 justify-center items-center">
+            <LoadingIcon className="h-35 w-full bg-black py-10" id={id.toString()} text={""}/>
+            <button
+              type="button"
+              className="inline-flex items-center px-4 py-2 my-2 text-sm font-medium border rounded-lg focus:z-10 focus:ring-4 focus:outline-none focus:text-emerald-700 bg-gray-800 text-gray-200 border-emerald-600 hover:text-white hover:bg-emerald-700 focus:ring-emerald-700 gap-3"
+              onClick={() => {
+                  setPreviewVideo(true);
+              }}
+            >
+                Preview
+            </button>
+        </div>
+        }
 
         <div className="p-5">
             <div>

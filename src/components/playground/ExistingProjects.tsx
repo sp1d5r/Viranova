@@ -3,6 +3,7 @@ import {ExistingProjectCard} from "../cards/existing-project-card/existing-proje
 import {useAuth} from "../../contexts/Authentication";
 import FirebaseFirestoreService from "../../services/database/strategies/FirebaseFirestoreService";
 import {documentToUserVideo, UserVideo} from "../../types/collections/UserVideo";
+import {SquigglyUnderline} from "../ui/squiggly-line";
 
 export interface ExistingProjectsProps {
   className?: string
@@ -11,6 +12,7 @@ export interface ExistingProjectsProps {
 
 export const ExistingProjects: React.FC<ExistingProjectsProps> = ({className=''}) => {
   const [recentProjects, setRecentProjects] = useState<UserVideo[]>([]);
+  const [selectedLink, setSelectedLink] = useState("Projects");
   const {authState} = useAuth();
   const [refresh, setRefresh] = useState(false);
 
@@ -30,11 +32,18 @@ export const ExistingProjects: React.FC<ExistingProjectsProps> = ({className=''}
   }, [authState, refresh]);
 
   return <section className={"w-full border-t border-accent flex justify-center items-center flex-col gap-[10] p-5"}>
+
+
       { /* Existing Projects Title */}
       <div className={"container flex-col justify-center items-start"}>
         <div>
-          <h1 className={"text-title text-white"}>Existing Projects </h1>
-          <p className={"text-gray-500"}>Look through your existing projects to edit or export! </p>
+          <h1 className={"text-title text-white"}>Overview </h1>
+          <SquigglyUnderline
+            navigation={[{name: "Projects"}, {name: "Shorts"}]}
+            setSelectedLink={setSelectedLink}
+            selectedLink={selectedLink}
+          />
+          {selectedLink=="Projects" && <p className={"text-gray-500 my-4"}>Look through your existing projects to edit or export!</p>}
         </div>
       </div>
 
@@ -45,7 +54,6 @@ export const ExistingProjects: React.FC<ExistingProjectsProps> = ({className=''}
             return <ExistingProjectCard userVideo={elem} setRefresh={setRefresh} id={index}/>
           })
         }
-
       </div>
   </section>
 }

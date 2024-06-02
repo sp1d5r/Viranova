@@ -134,7 +134,7 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ className = '' }) 
                     link: "/help"
                 }]} name="Research"  left={-30}/>
                 <HoverableLink expandedOptions={[]} name="About" left={-100}/>
-                <p className={"text-center text-stone-50 text-base font-normal"}>Demo</p>
+                <a href={"/playground"} className={"text-center text-stone-50 text-base font-normal"}>Demo</a>
             </div>
 
             <div className={"hidden md:flex gap-5 justify-center items-center "}>
