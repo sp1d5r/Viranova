@@ -162,7 +162,7 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ className = '' }) 
                             )
                         }
                       )}}
-                     className={"font-bold text-white px-5 py-3 text-center bg-danger rounded-xl border-black border min-w-[120px]"}
+                     className={"font-bold text-white px-5 py-3 text-center bg-rose-700 rounded-xl border-black border min-w-[120px]"}
                   >
                       Sign Out
                   </p> :<a href={"/authenticate"}>

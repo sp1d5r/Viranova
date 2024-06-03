@@ -23,7 +23,7 @@ export interface EditedTranscriptProps {
 
 export interface TranscriptWord {
   word: string,
-  status: "none" | "deleted" | "selected",
+  status: "none" | "deleted" | "selected" | "undeleted",
 }
 
 type DeleteRange = {
@@ -45,6 +45,13 @@ export const EditedTranscript: React.FC<EditedTranscriptProps> = ({transcript, o
           }
         }
       }
+      if (operation.type === "undelete") {
+        for (let i = operation.start_index; i <= operation.end_index; i++) {
+          if (transcriptWord[i]) { // Check if index exists
+            transcriptWord[i].status = 'undeleted';
+          }
+        }
+      }
 
       if (deleteRange.startIndex && deleteRange.endIndex) {
         for (let i = deleteRange.startIndex; i <= deleteRange.endIndex; i++) {
@@ -52,13 +59,15 @@ export const EditedTranscript: React.FC<EditedTranscriptProps> = ({transcript, o
             transcriptWord[i].status = 'selected';
           }
         }
-      }else if (deleteRange.startIndex) {
+      }
+
+      else if (deleteRange.startIndex) {
         transcriptWord[deleteRange.startIndex].status = 'selected';
       }
 
     }
     setTranscriptWords(transcriptWord)
-  }, [deleteRange]);
+  }, [deleteRange, operations]);
 
   const buttonPress = (index: number) => {
     setDeleteRange((prevState) => {
@@ -81,8 +90,10 @@ export const EditedTranscript: React.FC<EditedTranscriptProps> = ({transcript, o
             return <button onClick={() => {buttonPress(index)}} disabled={!editing} className="text-white disabled:bg-gray-900  bg-gray-800 p-[2px] px-[5px] rounded border-gray-500 border font-light text-sm">{elem.word}</button>
           } else if (elem.status == "deleted") {
             return <button onClick={() => {buttonPress(index)}} disabled={!editing} className="text-white bg-red-900 p-[2px] px-[5px] rounded border-gray-500 border font-light text-sm">{elem.word}</button>
+          } else if (elem.status == "undeleted") {
+            return <button onClick={() => {buttonPress(index)}} disabled={!editing} className="text-white bg-green-800 p-[2px] px-[5px] rounded border-green-500 border font-light text-sm">{elem.word}</button>
           } else {
-            return <button onClick={() => {buttonPress(index)}} disabled={!editing} className="text-white bg-blue-900 p-[2px] px-[5px] rounded border-gray-500 border">{elem.word}</button>
+            return <button onClick={() => {buttonPress(index)}} disabled={!editing} className="text-white bg-blue-900 p-[2px] px-[5px] rounded font-light border-gray-500 border">{elem.word}</button>
           }
         })
       }
@@ -130,27 +141,61 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({short, 
     }
   }
 
+  const addUnDeleteOperation = (deleteRange: DeleteRange) => {
+    if (deleteRange.startIndex && deleteRange.endIndex) {
+      const newLogs: Logs[] = short.logs;
+      newLogs.push({
+        type: "undelete",
+        start_index: deleteRange.startIndex,
+        end_index: deleteRange.endIndex,
+        message: `User Manual undelete Between (${deleteRange.startIndex}-${deleteRange.endIndex})`,
+        time: Timestamp.now()
+      })
+      FirebaseDatabaseService.updateDocument(
+        "shorts",
+        shortId,
+        {
+          "logs": newLogs
+        },
+        ()=>{
+          showNotification("Updated operation", "Added new operation", "success");
+          setDeleteRange({ startIndex: undefined, endIndex: undefined });
+        },
+        (error) => {
+          showNotification("Failed Update", "Failed to update document", "error");
+          setDeleteRange({ startIndex: undefined, endIndex: undefined })
+        }
+      )
+    }
+  }
+
+  const removeLastOperation = () => {
+    const newLogs: Logs[] = short.logs;
+    newLogs.pop();
+    FirebaseDatabaseService.updateDocument(
+      "shorts",
+      shortId,
+      {
+        "logs": newLogs
+      },
+      ()=>{
+        showNotification("Updated operation", "Removed last operation", "success");
+        setDeleteRange({ startIndex: undefined, endIndex: undefined });
+      },
+      (error) => {
+        showNotification("Failed Update", "Failed to remove last operation", "error");
+        setDeleteRange({ startIndex: undefined, endIndex: undefined })
+      }
+    )
+  }
+
   return <div className="p-6 text-medium text-gray-400 bg-gray-900 rounded-lg w-full flex flex-col gap-2">
     <span className="text-xl font-bold text-white mb-2 flex justify-between items-center flex-wrap">
       Transcript Editor
-      <div className="inline-flex rounded-md shadow-sm" role="group">
+      { !editing && <div className="inline-flex rounded-md shadow-sm" role="group">
         <button onClick={() => {setEditing(prevState => !prevState)}} type="button" className={` px-4 py-2 text-sm font-medium border rounded-s-lg focus:z-10 focus:ring-2  ${editing ? "bg-red-500 hover:bg-red-700" : "bg-gray-800 hover:bg-gray-700"}  border-gray-700 text-white hover:text-white  focus:ring-blue-500 focus:text-white`}>
-          {editing ? "Quit Editing" : "Edit Transcript"}
+          Edit Transcript
         </button>
-        { editing &&
-          <button
-            onClick={() => {
-              addDeleteOperation(deleteRange)
-            }}
-            disabled={!editing}
-            type="button"
-            className="px-4 py-2 text-sm font-medium border focus:z-10 focus:ring-2 bg-gray-800 border-gray-700 text-white hover:text-white hover:bg-gray-700 focus:ring-blue-500 focus:text-white"
-          >
-            Complete
-          </button>
-        }
-
-
         <button
           onClick={() => {
             FirebaseDatabaseService.updateDocument(
@@ -209,7 +254,37 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({short, 
         }} type="button" className="px-4 py-2 text-sm font-medium border rounded-e-lg focus:z-10 focus:ring-2 bg-green-800 border-gray-700 text-white hover:text-white hover:bg-green-700 focus:ring-blue-500 focus:text-white">
           AI Generation
         </button>
-      </div>
+      </div> }
+      { editing && <div className="inline-flex rounded-md shadow-sm" role="group">
+        <button onClick={() => {setEditing(prevState => !prevState)}} type="button" className={` px-4 py-2 text-sm font-medium border rounded-s-lg focus:z-10 focus:ring-2  ${editing ? "bg-red-500 hover:bg-red-700" : "bg-gray-800 hover:bg-gray-700"}  border-gray-700 text-white hover:text-white  focus:ring-blue-500 focus:text-white`}>
+          Quit Edit
+        </button>
+        <button
+          onClick={() => {addDeleteOperation(deleteRange)}}
+          type="button"
+          className="px-4 py-2 text-sm font-medium border focus:z-10 focus:ring-2 bg-red-800 border-red-700 text-white hover:text-white hover:bg-red-700 focus:ring-red-500 focus:text-white"
+        >
+          Delete Selected Range
+        </button>
+
+        <button
+          onClick={() => {addUnDeleteOperation(deleteRange)}}
+          disabled={!editing}
+          type="button"
+          className="px-4 py-2 text-sm font-medium border focus:z-10 focus:ring-2 bg-green-800 border-green-700 text-white hover:text-white hover:bg-green-700 focus:ring-green-500 focus:text-white"
+        >
+          UnDelete Selected Range
+        </button>
+
+
+        <button
+          onClick={() => {removeLastOperation()}}
+          type="button"
+          className="px-4 py-2 text-sm font-medium border rounded-e-lg focus:z-10 focus:ring-2 bg-violet-800 border-violet-700 text-white hover:text-white hover:bg-violet-700 focus:ring-violet-500 focus:text-white"
+        >
+          Remove Last Operation
+        </button>
+      </div> }
     </span>
     <p className="mb-2">Edit the Transcript below before continuing on with visual attention analysis...</p>
 
@@ -271,6 +346,25 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({short, 
                       return <span className="text-white bg-gray-900 p-[2px] px-[5px] rounded border-gray-500 border font-light text-sm">{elem}</span>
                     } else {
                       return <span className="text-white bg-red-950 p-1 rounded font-light text-sm">{elem}</span>
+                    }
+                  })
+                }
+              </span>
+            </li>
+          } else if (value.type == "undelete") {
+            return <li className="mb-10 ms-4">
+              <div className="absolute w-3 h-3 rounded-full mt-1.5 -start-1.5 border border-blue-900 bg-blue-700"></div>
+              <time className="mb-1 text-sm font-normal leading-nonetext-gray-500">{value.time.toDate().toString()}</time>
+              <h3 className="text-lg font-semibold text-blue-500">Editing</h3>
+              <p className="text-base font-normal text-gray-500 dark:text-gray-400">{value.message}</p>
+
+              <span className="flex flex-wrap gap-1 my-2">
+                {
+                  short.transcript.split(" ").map((elem, index) => {
+                    if (index < value.start_index || index > value.end_index) {
+                      return <span className="text-white bg-gray-900 p-[2px] px-[5px] rounded border-gray-500 border font-light text-sm">{elem}</span>
+                    } else {
+                      return <span className="text-white bg-green-950 p-1 rounded font-light text-sm">{elem}</span>
                     }
                   })
                 }

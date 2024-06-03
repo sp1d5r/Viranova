@@ -14,6 +14,12 @@ export type Logs = {
   end_index: number,
   time: Timestamp
 } | {
+  type: "undelete",
+  message: string,
+  start_index: number,
+  end_index: number,
+  time: Timestamp
+} | {
   type: "success",
   message: string,
   time: Timestamp
@@ -48,7 +54,7 @@ export interface Short {
   short_status: string,
   short_idea: string,
   short_idea_explanation: string,
-  short_run_id: string,
+  short_idea_run_id: string,
   video_id: string,
   temp_audio_file: string,
   short_clipped_video: string,
@@ -77,7 +83,7 @@ export function documentToShort(docData: DocumentData): Short {
     short_status: docData.short_status,
     short_idea: docData.short_idea,
     short_idea_explanation: docData.short_idea_explanation,
-    short_run_id: docData.short_run_id,
+    short_idea_run_id: docData.short_idea_run_id,
     video_id: docData.video_id,
     temp_audio_file: docData.temp_audio_file,
     short_clipped_video: docData.short_clipped_video,
