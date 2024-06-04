@@ -1,11 +1,12 @@
-import React, {useEffect, useRef, useState} from "react";
-import {Short} from "../../../types/collections/Shorts";
+import React, {useEffect, useMemo, useRef, useState} from "react";
+import {BoundingBoxes, Short} from "../../../types/collections/Shorts";
 import {FirebaseStorageService} from "../../../services/storage/strategies";
 import {LoadingIcon} from "../../loading/Loading";
 import {AreaUnderChart} from "../../charts/AreaUnderChart";
 import FirebaseFirestoreService from "../../../services/database/strategies/FirebaseFirestoreService";
 import {useNotificaiton} from "../../../contexts/NotificationProvider";
 import "./bounding-box.css";
+import ManualOverrideControls from "./bounding-boxes/ManualOverrideSegment";
 
 export interface BoundingBoxSuggestionsProps{
   short: Short;
@@ -19,76 +20,34 @@ type VideoInfo = {
 
 export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({short, shortId}) => {
   const [loading, setLoading] = useState(true);
-  const [errors, setErrors] = useState<VideoInfo>({clippedVideo: undefined, saliencyVideo: undefined});
-  const fps = 25;
+  const fps = short.fps;
   const [pause, setPause] = useState(false);
   const {showNotification} = useNotificaiton();
   const [videoUrls, setVideoUrls] = useState<VideoInfo>({clippedVideo: undefined, saliencyVideo: undefined});
   const [opacity, setOpacity] = useState(0);
-
   const [currentFrame, setCurrentFrame] = useState(0);
-  const totalFrames = short.total_frame_count;
-
   const clippedVideoRef = useRef<HTMLVideoElement>(null);
   const saliencyVideoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [internalBoundingBoxes, setInternalBoundingBoxes] = useState<BoundingBoxes | undefined>(short.bounding_boxes);
 
-
-  function drawBoundingBoxes(ctx: CanvasRenderingContext2D, currentTime: number, video: HTMLVideoElement) {
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); // Clear previous drawings
-
-    if (short.bounding_boxes && short.bounding_boxes['boxes']) {
-      const boxes = short.bounding_boxes['boxes'];
-
-      const frameNumber = Math.floor(currentTime * fps); // Example: videoFrameRate is frames per second
-      const currentBoxes = boxes[frameNumber];
-
-      if (currentBoxes) {
-        const [x, y, width, height] = currentBoxes;
-
-        // Get original video dimensions
-        const originalWidth = video.videoWidth;
-        const originalHeight = video.videoHeight;
-
-        // Get canvas dimensions
-        const canvasWidth = ctx.canvas.width;
-        const canvasHeight = ctx.canvas.height;
-
-        // Calculate scaling factors
-        const widthScale = canvasWidth / originalWidth;
-        const heightScale = canvasHeight / originalHeight;
-
-        // Scale bounding box coordinates
-        const scaledX = x * widthScale;
-        const scaledY = y * heightScale;
-        const scaledWidth = width * widthScale;
-        const scaledHeight = height * heightScale;
-
-        // Draw scaled bounding box
-        ctx.strokeStyle = 'red';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(scaledX, scaledY, scaledWidth, scaledHeight);
-      }
-    }
-  }
 
   useEffect(() => {
-    const canvas = canvasRef.current;
     const video = clippedVideoRef.current;
-    if (canvas && video && short.bounding_boxes) {
-      const ctx = canvas.getContext('2d');
-      video.addEventListener('play', () => {
-        const render = () => {
-          if (!video.paused && ctx && !video.ended) {
-            drawBoundingBoxes(ctx, video.currentTime, video);
-            setCurrentFrame(Math.floor(video.currentTime * fps));
-            requestAnimationFrame(render);
-          }
-        };
-        requestAnimationFrame(render);
-      });
-    }
-  }, [canvasRef.current, clippedVideoRef.current, currentFrame]);
+
+    const handleTimeUpdate = () => {
+      if (video) {
+        const frameRate = fps;  // Adjust according to video frame rate
+        const frame = Math.floor(video.currentTime * frameRate);
+        setCurrentFrame(frame);
+      }
+    };
+
+    video && video.addEventListener('timeupdate', handleTimeUpdate);
+
+    return () => {
+      video && video.removeEventListener('timeupdate', handleTimeUpdate);
+    };
+  }, [clippedVideoRef.current, internalBoundingBoxes]);
 
   useEffect(() => {
     const clipped = clippedVideoRef.current;
@@ -145,6 +104,26 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({s
     }
   }, [short]);
 
+  const clipPath = useMemo(() => {
+    if (!internalBoundingBoxes) return "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)";
+
+    const box = internalBoundingBoxes.boxes[currentFrame];
+    const left = (box[0] / short.width) * 100;
+    const top = (box[1] / short.height) * 100;
+    const right = ((box[0] + box[2]) / short.width) * 100;
+    const bottom = ((box[1] + box[3]) / short.height) * 100;
+
+    return `polygon(
+    0% 0%, 100% 0%, 100% 100%, 0% 100%,
+    0% ${top}%,
+    ${left}% ${top}%,
+    ${left}% ${bottom}%,
+    ${right}% ${bottom}%,
+    ${right}% ${top}%,
+    0% ${top}%
+  )`;
+  }, [currentFrame, internalBoundingBoxes, short.width, short.height]);
+
   const handlePlayPause = () => {
     const clipped = clippedVideoRef.current;
     const saliency = saliencyVideoRef.current;
@@ -178,68 +157,65 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({s
     }
   };
 
+  const SeekBar = ({ currentFrame, totalFrames, cuts }: { currentFrame:number, totalFrames:number, cuts:number[] }) => {
+    const intervals = [];
+    let start = 0;
 
-  const SeekBar = ({currentFrame}: {currentFrame: number}) => {
-    const intervals = short.cuts.slice(0, short.cuts.length - 1).map((cut, index) => {
-      return {start: cut, end: short.cuts[index + 1] - 1};
+    // Define intervals based on cuts
+    cuts.forEach((cut, index) => {
+      intervals.push({ start, end: cut });
+      start = cut + 1;
     });
 
-    // Optionally, include the last interval if needed, up to totalFrames
-    if (short.cuts.length > 0) {
-      intervals.push({start: short.cuts[short.cuts.length - 1], end: totalFrames - 1});
+    // Add the last interval if necessary
+    if (start <= totalFrames - 1) {
+      intervals.push({ start, end: totalFrames - 1 });
     }
 
-    const currentIntervalIndex = intervals.findIndex(interval => currentFrame >= interval.start && currentFrame <= interval.end);
+    return (
+      <div className="seek-bar relative w-full h-12 rounded-lg overflow-hidden">
+        <input
+          type="range"
+          min="0"
+          max={totalFrames - 1}
+          value={currentFrame}
+          onChange={handleFrameChange}
+          className="slider absolute w-full z-50 opacity-30"
+        />
 
-    return <div
-      className="seek-bar relative w-full h-12 bg-emerald-950 border border-primary rounded flex justify-center items-center overflow-hidden">
-      <input
-        type="range"
-        min="0"
-        max={totalFrames - 1}
-        value={currentFrame}
-        onChange={handleFrameChange}
-        className={"slider absolute w-full z-50 opacity-30"}
-      />
+        {intervals.map((interval, index) => {
+          const isWithinInterval = currentFrame >= interval.start && currentFrame <= interval.end;
 
-      {Array.from({length: totalFrames}, (_, frame) => {
-        let color = 'bg-white/30'; // Default color for non-special frames
+          // Calculate width of the progress within the interval
+          const progressWidth = currentFrame > interval.start
+            ? Math.min(100, (currentFrame - interval.start) / (interval.end - interval.start + 1) * 100)
+            : 0;
 
-        // Determine if the frame is within any interval
-        const intervalIndex = intervals.findIndex(interval => frame >= interval.start && frame <= interval.end);
-        const isCut = short.cuts.includes(frame);
-        const isCurrent = currentFrame === frame;
+          return (
+            <div
+              key={index}
+              className={`absolute h-full rounded-md border border-emerald-500  ${isWithinInterval ? 'border border-blue-500 bg-emerald-950' : 'border border-emerald-500 bg-gray-700'}`}
+              style={{
+                left: `${(interval.start / totalFrames) * 100}%`,
+                width: `${((interval.end - interval.start + 1) / totalFrames) * 100}%`,
+              }}
+            >
+              <div className="absolute w-full h-full rounded overflow-hidden">
+                <div
+                  className="h-full bg-emerald-700"
+                  style={{
+                    width: `${progressWidth}%`
+                  }}
+                />
+              </div>
+            </div>
+          );
+        })}
 
-        if (isCut) {
-          color = 'bg-primary'; // Color for cuts
-        }
-        if (isCurrent) {
-          color = 'bg-red-50'; // Color for the current frame
-        }
-
-
-        if (intervalIndex === currentIntervalIndex) {
-          color = 'bg-blue-300/50'; // Highlight the current interval
-        }
-
-        return (
-          <div
-            key={frame}
-            className={`absolute w-[1px] h-full rounded ${color}`}
-            style={{
-              left: `${(frame / totalFrames) * 100}%`,
-            }}
-          ></div>
-        );
-      })}
-      <div
-        className="absolute w-full h-full bg-gray-950/60"
-        style={{
-          right: `${((totalFrames - 2 - currentFrame) / totalFrames) * 100}%`,
-        }}
-      />
-    </div>;
+      </div>
+    );
   };
+
 
   return <div className="w-full flex flex-col gap-2 items-center">
     {
@@ -247,8 +223,8 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({s
         <div className="w-full h-full flex justify-center items-center py-16">
           <LoadingIcon id={"video-player-loader"} text={"Loading Videos..."}/>
         </div> :
-        <div className="flex  w-full flex-col gap-2 h-full">
-          <div className="video-overlay-container w-full mt-5" style={{ position: 'relative' }}>
+        <div className="flex  w-full flex-col gap-2 h-full overflow-hidden">
+          <div className="relative video-overlay-container w-full mt-5 overflow-hidden">
             {
               videoUrls.clippedVideo &&
               <video ref={clippedVideoRef} id="videoElement" className="z-10 w-full" playsInline webkit-playsinline>
@@ -261,11 +237,66 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({s
                 <source src={videoUrls.saliencyVideo} type="video/mp4"/>
               </video>
             }
-            <canvas ref={canvasRef} id="canvasOverlay" style={{ position: 'absolute', top: 0, left: 0, zIndex: 45, width: "100%", height: "100%"}}></canvas>
+            {internalBoundingBoxes && <div className="absolute top-0 left-0 w-full h-full bg-primary opacity-50" style={{
+              clipPath: clipPath
+            }}
+            />
+            }
+
+            {internalBoundingBoxes && <div
+              className="absolute border-2 border-primary border-dashed"
+              style={{
+                width: `${(internalBoundingBoxes.boxes[currentFrame][2] / short.width) * 100}%`,
+                height: `${(internalBoundingBoxes.boxes[currentFrame][3] / short.height) * 100}%`,
+                top: `${(internalBoundingBoxes.boxes[currentFrame][1] / short.height) * 100}%`,
+                left: `${(internalBoundingBoxes.boxes[currentFrame][0] / short.width) * 100}%`,
+              }}/>}
+          </div>
+          <div className="w-full flex justify-center">
+            {!short.cuts && <p className="text-danger font-bold">Press find cuts to get camera cuts</p>}
+            <div className="inline-flex rounded-md shadow-sm" role="group">
+              <button
+                type="button"
+                className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white"
+                onClick={() => {
+                  FirebaseFirestoreService.updateDocument(
+                    "shorts",
+                    shortId,
+                    {
+                      "short_status": "Determine Video Boundaries",
+                      "previous_short_status": "Requested to Determine Video Boundaries"
+                    },
+                    () => {showNotification("Success", "Requested to find cuts.", "success")},
+                    (error) => {showNotification("Failed", error.message, "error")},
+                  )
+                }}
+              >
+                Find Cuts
+              </button>
+              <button
+                onClick={() => {
+                  FirebaseFirestoreService.updateDocument(
+                    "shorts",
+                    shortId,
+                    {
+                      "short_status": "Get Bounding Boxes",
+                      "previous_short_status": "Requested to Get Bounding Boxes"
+                    },
+                    () => {showNotification("Success", "Requested Bounding Boxes", "success")},
+                    (error) => {showNotification("Failed", error.message, "error")},
+                  )
+                }}
+                disabled={!short.cuts}
+                type="button"
+                className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white disabled:bg-gray-900 disabled:hover:bg-gray-900">
+                Generate Bounding Boxes
+              </button>
+              <button onClick={() => {}} type="button" className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-e-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
+                Re-Adjust Transcript
+              </button>
+            </div>
           </div>
           <div className="flex flex-col gap-2 my-2">
-            {/* I need to make a media player here - shorts.cuts represents frames where theres a camera cut */}
-            {/* and shorts.total_frame_count is the total number of frames... */}
             <div className="flex gap-2">
               <button onClick={handlePlayPause} type="button" className="text-white border-white border font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 ">
                 {pause ?
@@ -278,7 +309,7 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({s
                 }
                 <span className="sr-only">Icon description</span>
               </button>
-              {short.cuts && <SeekBar currentFrame={currentFrame}/>}
+              {short.cuts && <SeekBar currentFrame={currentFrame} totalFrames={short.total_frame_count} cuts={short.cuts}/>}
             </div>
             <label htmlFor="steps-range" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white w-full">
               Set Saliency Opacity
@@ -298,53 +329,8 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({s
         </div>
     }
 
-    {
-      short.visual_difference && short.saliency_values && <AreaUnderChart  saliencyCaptured={short.saliency_values} visualDifference={short.visual_difference}/>
-    }
+    {internalBoundingBoxes && <ManualOverrideControls cuts={short.cuts} totalFrames={short.total_frame_count} currentFrame={currentFrame} internalBoundingBoxes={internalBoundingBoxes} setInternalBoundingBoxes={setInternalBoundingBoxes} shortId={shortId} short={short} />}
 
-
-
-    {!short.cuts && <p className="text-danger font-bold">Press find cuts to get camera cuts</p>}
-    <div className="inline-flex rounded-md shadow-sm" role="group">
-      <button
-        type="button"
-        className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white"
-        onClick={() => {
-          FirebaseFirestoreService.updateDocument(
-            "shorts",
-            shortId,
-            {
-              "short_status": "Determine Video Boundaries",
-              "previous_short_status": "Requested to Determine Video Boundaries"
-            },
-            () => {showNotification("Success", "Requested to find cuts.", "success")},
-            (error) => {showNotification("Failed", error.message, "error")},
-          )
-        }}
-      >
-        Find Cuts
-      </button>
-      <button
-        onClick={() => {
-          FirebaseFirestoreService.updateDocument(
-            "shorts",
-            shortId,
-            {
-              "short_status": "Get Bounding Boxes",
-              "previous_short_status": "Requested to Get Bounding Boxes"
-            },
-            () => {showNotification("Success", "Requested Bounding Boxes", "success")},
-            (error) => {showNotification("Failed", error.message, "error")},
-          )
-        }}
-        disabled={!short.cuts}
-        type="button"
-        className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white disabled:bg-gray-900 disabled:hover:bg-gray-900">
-        Generate Bounding Boxes
-      </button>
-      <button onClick={() => {}} type="button" className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-e-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
-        Re-Adjust Transcript
-      </button>
-    </div>
+    {/*{ short.visual_difference && short.saliency_values && <AreaUnderChart  saliencyCaptured={short.saliency_values} visualDifference={short.visual_difference}/> }*/}
   </div>
 }

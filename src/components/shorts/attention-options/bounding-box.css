@@ -15,7 +15,7 @@
 .slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 5px;
+    width: 2px;
     height: 100px;
     background: #0061c2;
     cursor: pointer;
