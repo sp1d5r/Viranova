@@ -7,6 +7,7 @@ import {PreviewShortVideo} from "./attention-options/PreviewShortVideo";
 import {SaliencyVideo} from "./attention-options/SaliencyVideo";
 import {Tabs} from "../../pages/Shorts";
 import {BoundingBoxSuggestions} from "./attention-options/BoundingBoxSuggestions";
+import {LoadingIcon} from "../loading/Loading";
 
 export interface AttentionTabProps{
   short: Short;
@@ -66,10 +67,12 @@ export const AttentionTab: React.FC<AttentionTabProps> = ({short, shortId, segme
         }
       </ul>
 
-      { selectedOption === "View Segment Video" && <SegmentVideo segment={segment} segmentId={short.segment_id} continueButton={() => {setSelectedOption("Preview Clipped Video")}} /> }
-      { selectedOption === "Preview Clipped Video" && <PreviewShortVideo short={short} shortId={shortId} continueButton={(()=>{setTab("Transcript Editor")})}/> }
-      { selectedOption === "Saliency" && <SaliencyVideo short={short} shortId={shortId} /> }
-      { selectedOption === "Bounding Box Suggestions" && <BoundingBoxSuggestions short={short} shortId={shortId} /> }
+      { !short.pending_operation && selectedOption === "View Segment Video" && <SegmentVideo segment={segment} segmentId={short.segment_id} continueButton={() => {setSelectedOption("Preview Clipped Video")}} /> }
+      { !short.pending_operation && selectedOption === "Preview Clipped Video" && <PreviewShortVideo short={short} shortId={shortId} continueButton={(()=>{setTab("Transcript Editor")})}/> }
+      { !short.pending_operation && selectedOption === "Saliency" && <SaliencyVideo short={short} shortId={shortId} /> }
+      { !short.pending_operation && selectedOption === "Bounding Box Suggestions" && <BoundingBoxSuggestions short={short} shortId={shortId} /> }
+
+      { short.pending_operation && <LoadingIcon id={"something"} text={"Performing Operation"} className="my-10"/> }
 
     </div>
   );

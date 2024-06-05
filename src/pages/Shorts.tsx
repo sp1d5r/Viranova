@@ -43,7 +43,10 @@ export const Shorts: React.FC<ShortsProps> = ({}) => {
       FirebaseFirestoreService.listenToDocument("shorts",
         short_id,
         (document) => {
-          if (document)  setShort(documentToShort(document));
+          if (document) {
+            const shortDocumentVal = documentToShort(document);
+            setShort(shortDocumentVal);
+          }
         },
         (error) => {
           showNotification("Get Document", "Failed to get Short", "error")
@@ -65,7 +68,29 @@ export const Shorts: React.FC<ShortsProps> = ({}) => {
     }
   }, [short]);
 
-  return <ScrollableLayout className={"flex flex-col gap-2 items-center "}>
+  return <ScrollableLayout className={"flex flex-col gap-2 items-center relative"}>
+    {short && short.pending_operation && (
+      <div className="fixed bottom-0 min-h-20 my-5 mx-auto w-[90%] sm:w-[50%] rounded-xl shadow-xl border-2 bg-background/90 border-white z-50 flex flex-col p-4" style={{zIndex: 100}}>
+        <div className="w-full flex justify-between flex-wrap text-white pb-2">
+          <div className="flex gap-2 items-center flex-wrap">
+            <p className="font-bold text-md">Progress Message:</p>
+            <p>{short.progress_message}</p>
+          </div>
+          <p className="text-white text-sm">{short.last_updated.toDate().toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+          }) + ' ' + short.last_updated.toDate().toLocaleTimeString('en-GB', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+          })}</p>
+        </div>
+        <div className={"w-[80%] outline outline-white rounded-full h-2 bg-secondary m-auto"}>
+          <div className={"bg-accent h-2 rounded-full transition-all"} style={{width: `${short.update_progress}%`}}></div>
+        </div>
+      </div>)
+    }
     <div className="max-w-screen-xl w-full flex flex-col text-white px-2 ">
       <div className="md:flex gap-2">
         <ul className="flex-wrap flex flex-row space-x-4 justify-center sm:justify-start my-4 overflow-x-auto md:flex-col md:space-y-4 md:space-x-0 text-sm font-medium text-gray-400 md:mb-0 max-h-[90vh]">
@@ -129,6 +154,8 @@ export const Shorts: React.FC<ShortsProps> = ({}) => {
             <LoadingIcon id={"shortEditor"} text={"Loading Short Information ..."} className={"my-16 mx-auto animate-pulse"}/>
           </div>
         }
+
+
       </div>
     </div>
   </ScrollableLayout>

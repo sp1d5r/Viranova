@@ -70,6 +70,13 @@ export interface Short {
   finished_short_location: string,
   short_title_top?:string,
   short_title_bottom?: string,
+  uid?: string,
+  update_progress: number,
+  progress_message: string,
+  last_updated: Timestamp,
+  pending_operation: boolean,
+  background_audio: string,
+  background_percentage: number,
 }
 
 
@@ -101,7 +108,14 @@ export function documentToShort(docData: DocumentData): Short {
     saliency_values: docData.saliency_values ? JSON.parse(docData.saliency_values) : undefined,
     finished_short_location: docData.finished_short_location,
     short_title_top: docData.short_title_top,
-    short_title_bottom: docData.short_title_bottom
+    short_title_bottom: docData.short_title_bottom,
+    uid: docData.uid,
+    update_progress: docData.update_progress,
+    progress_message: docData.progress_message,
+    last_updated: docData.last_updated as Timestamp,
+    pending_operation: docData.pending_operation,
+    background_audio: docData.background_audio,
+    background_percentage: docData.background_percentage,
   };
 }
 

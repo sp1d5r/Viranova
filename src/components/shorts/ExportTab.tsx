@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Short} from "../../types/collections/Shorts";
 import FirebaseFirestoreService from "../../services/database/strategies/FirebaseFirestoreService";
 import {useNotificaiton} from "../../contexts/NotificationProvider";
@@ -6,6 +6,8 @@ import {VideoPlayer} from "../video-player/VideoPlayer";
 import {LoadingIcon} from "../loading/Loading";
 import FirebaseDatabaseService from "../../services/database/strategies/FirebaseFirestoreService";
 import {FirebaseStorageService} from "../../services/storage/strategies";
+import {StockAudio} from "../../types/collections/StockAudio";
+import {AudioPlayer} from "../audio/AudioPlayer";
 
 export interface ExportTabProps {
   short: Short;
@@ -22,8 +24,27 @@ export const ExportTab :React.FC<ExportTabProps> = ({short, shortId}) => {
     titleTop: short.short_title_top || '',
     titleBottom: short.short_title_bottom || ''
   });
+  const [stockAudio, setStockAudio] = useState<StockAudio[]>([]);
+  const [audioSelected, setAudioSelected] = useState({
+    audioSelected:-1,
+    backgroundAudioPercentage: short.background_percentage,
+  });
 
   const {showNotification} = useNotificaiton();
+
+  useEffect(() => {
+    FirebaseFirestoreService.getAllDocuments(
+      "stock-audio",
+      (docs) => {
+        if (docs && docs.length > 0) {
+          setStockAudio(docs.map((elem) => elem as StockAudio));
+        }
+      },
+      () => {
+        showNotification("Stock Audio", "Failed to get stock audio options", "error")
+      }
+    )
+  }, []);
 
   return <div className="text-medium text-gray-400 bg-gray-900 rounded-lg w-full flex justify-evenly flex-wrap gap-5 p-8">
     <div className="flex flex-col flex-1 gap-2 min-w-[200px] py-2">
@@ -42,8 +63,8 @@ export const ExportTab :React.FC<ExportTabProps> = ({short, shortId}) => {
       </p>
 
 
-      <div className="mt-3">
-        <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+      <div className="mt-2">
+        <label className="block text-sm font-medium text-gray-900 dark:text-white">
           Short Title
           <div className="flex gap-2">
             <input
@@ -95,12 +116,83 @@ export const ExportTab :React.FC<ExportTabProps> = ({short, shortId}) => {
         </label>
       </div>
 
+      <div className="mt-2 items-center">
+        <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+          Background Audio
+          {audioSelected.audioSelected != -1 && <AudioPlayer path={stockAudio[audioSelected.audioSelected].storageLocation} />}
+          <div className="flex gap-2 items-center">
+            <form className="max-w-sm flex gap-2 items-center">
+              <select id="stock-audio-options" onChange={(e) => {setAudioSelected(prevState => {
+                return {
+                  ...prevState,
+                  audioSelected: parseInt(e.target.value)
+                }
+              })}} className="border text-sm rounded-lg block w-[50%] p-2.5 h-10 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500">
+                <option selected={audioSelected.audioSelected == -1}>Choose a track</option>
+                {
+                  stockAudio.map((elem, index) => {
+                    return <option value={index} selected={audioSelected.audioSelected == index}>{elem.songName}</option>
+                  })
+                }
+              </select>
+              <input
+                type="number"
+                min={0}
+                max={100}
+                id="short-title-bottom"
+                className="bg-gray-50 border my-2 border-gray-300 w-[50%] text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                value={audioSelected.backgroundAudioPercentage}
+                placeholder="Audio %"
+                onChange={(e) => {
+                  setAudioSelected(prevState => {
+                    return {
+                      ...prevState,
+                      backgroundAudioPercentage: parseInt(e.target.value)
+                    }
+                  })
+                }}
+              />
+            </form>
+            <button onClick={() => {
+              if (audioSelected.audioSelected >= 0 && audioSelected.backgroundAudioPercentage >= 0 && audioSelected.backgroundAudioPercentage <= 100) {
+                FirebaseDatabaseService.updateDocument(
+                  'shorts',
+                  shortId,
+                  {
+                    'background_audio': stockAudio[audioSelected.audioSelected].id,
+                    'background_percentage': audioSelected.backgroundAudioPercentage,
+                  },
+                  ()=>{
+                    showNotification("Update Successful", "Added Background Audio", "success")
+                  },
+                  (error)=>{
+                    showNotification("Update Failed", error.message, "error")
+                  }
+                )
+              }
+            }}
+                    className="inline-flex items-center px-4 py-2 my-2 text-sm font-medium border rounded-lg focus:z-10 focus:ring-4 focus:outline-none focus:text-blue-700 bg-gray-800 text-gray-200 border-violet-600 hover:text-white hover:bg-violet-700 focus:ring-violet-700 gap-3"
+            >
+              Add
+              <svg className="w-5 h-5 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                <path fillRule="evenodd" d="M17.316 4.052a.99.99 0 0 0-.9.14c-.262.19-.416.495-.416.82v8.566a4.573 4.573 0 0 0-2-.464c-1.99 0-4 1.342-4 3.443 0 2.1 2.01 3.443 4 3.443 1.99 0 4-1.342 4-3.443V6.801c.538.5 1 1.219 1 2.262 0 .56.448 1.013 1 1.013s1-.453 1-1.013c0-1.905-.956-3.18-1.86-3.942a6.391 6.391 0 0 0-1.636-.998 4 4 0 0 0-.166-.063l-.013-.005-.005-.002h-.002l-.002-.001ZM4 5.012c-.552 0-1 .454-1 1.013 0 .56.448 1.013 1 1.013h9c.552 0 1-.453 1-1.013 0-.559-.448-1.012-1-1.012H4Zm0 4.051c-.552 0-1 .454-1 1.013 0 .56.448 1.013 1 1.013h9c.552 0 1-.454 1-1.013 0-.56-.448-1.013-1-1.013H4Zm0 4.05c-.552 0-1 .454-1 1.014 0 .559.448 1.012 1 1.012h4c.552 0 1-.453 1-1.012 0-.56-.448-1.013-1-1.013H4Z" clipRule="evenodd"/>
+              </svg>
+            </button>
+          </div>
+        </label>
+      </div>
+
+
+
       <div className="mb-6 mt-3">
         <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
           TikTok Link
           <input type="text" id="default-input" className="bg-gray-50 border my-2 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
         </label>
       </div>
+
+
+
 
     </div>
 
@@ -116,7 +208,6 @@ export const ExportTab :React.FC<ExportTabProps> = ({short, shortId}) => {
           <svg xmlns="http://www.w3.org/2000/svg"  height="30px" width="30px" viewBox="0 0 192 192" fill="none"><path stroke="#ffffff" strokeLinecap="round" strokeLinejoin="round" strokeWidth="15" d="M170 42 22 124v14c0 6.627 5.373 12 12 12h78c6.627 0 12-5.373 12-12v-9.5"/><path stroke="#ffffff" strokeLinecap="round" strokeLinejoin="round" strokeWidth="15" d="M170 150 22 68V54c0-6.627 5.373-12 12-12h78c6.627 0 12 5.373 12 12v9.5"/></svg>
           Export to CapCut
         </button>
-
 
         <button
           type="button"

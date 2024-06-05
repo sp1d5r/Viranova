@@ -90,9 +90,9 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
 };
 
 const NotificationMessage: React.FC<{ title: string; message: string; type: 'info' | 'warning' | 'error' | 'success' }> = ({ title, message, type }) => {
-    const backgroundColor = type === 'error' ? 'danger' : type === 'warning' ? 'warning' : type === 'success' ? 'success' : 'info';
+    const backgroundColor = type === 'error' ? 'red' : type === 'warning' ? 'yellow' : type === 'success' ? 'green' : 'blue';
     return (
-      <div className={`rounded-xl border-2 border-black p-5 text-white flex flex-col bg-${backgroundColor} m-5`}>
+      <div className={`rounded-xl border-2 border-black p-5 text-white flex flex-col m-5`} style={{backgroundColor: backgroundColor}}>
           <p className={"font-bold"}>{title}</p>
           <p>{message}</p>
       </div>

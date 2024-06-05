@@ -7,6 +7,7 @@ import {documentToUserVideo} from "../../../types/collections/UserVideo";
 import {deleteShort, Short} from "../../../types/collections/Shorts";
 import LangSmithFeedback from "../../../services/langchain";
 import {ReviewLangchainLogs} from "../../review-langchain-run/ReviewLangchainLog";
+import {useAuth} from "../../../contexts/Authentication";
 
 export interface SegmentCardProps{
   currentSegment: Segment,
@@ -19,6 +20,7 @@ export const SegmentCard: React.FC<SegmentCardProps> = ({currentSegment, segment
   const [segment, setSegment] = useState<Segment>(currentSegment);
   const [shorts, setShorts] = useState<Short[]>([])
   const [fullTranscriptShown, setFullTranscript] = useState(false);
+  const {authState} = useAuth();
 
   useEffect(() => {
     FirebaseFirestoreService.listenToDocument(
@@ -184,7 +186,8 @@ export const SegmentCard: React.FC<SegmentCardProps> = ({currentSegment, segment
                   "end_index": segment.endIndex,
                   "error_count": 5,
                   "short_status": "Short Creation Began",
-                  "previous_short_status": "Short Creation Began"
+                  "previous_short_status": "Short Creation Began",
+                  "uid": authState.user?.uid,
                 },
                 (shortId)=>{
                   window.location.href = `/shorts?short_id=${shortId}`
@@ -281,10 +284,28 @@ export const SegmentCard: React.FC<SegmentCardProps> = ({currentSegment, segment
             </svg>
             Delete Segment
           </button>
-          <button type="button" className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-900 bg-transparent border border-gray-900 rounded-e-lg hover:bg-gray-900 hover:text-white focus:z-10 focus:ring-2 focus:ring-gray-500 focus:bg-gray-900 focus:text-white dark:border-white dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:bg-gray-700">
-            <svg className="w-3 h-3 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M14.707 7.793a1 1 0 0 0-1.414 0L11 10.086V1.5a1 1 0 0 0-2 0v8.586L6.707 7.793a1 1 0 1 0-1.414 1.414l4 4a1 1 0 0 0 1.416 0l4-4a1 1 0 0 0-.002-1.414Z"/>
-              <path d="M18 12h-2.55l-2.975 2.975a3.5 3.5 0 0 1-4.95 0L4.55 12H2a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2Zm-3 5a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"/>
+          <button
+            type="button"
+            className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-900 bg-transparent border border-gray-900 rounded-e-lg hover:bg-gray-900 hover:text-white focus:z-10 focus:ring-2 focus:ring-gray-500 focus:bg-gray-900 focus:text-white dark:border-white dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:bg-gray-700"
+            onClick={() => {
+              FirebaseFirestoreService.updateDocument(
+                "topical_segments",
+                segmentId,
+                {
+                  "segment_status": "Regenerate Short",
+                  "previous_segment_status": "Requested Regenerate Short"
+                },
+                () => {
+                  showNotification("Requested Update", "Generating Short", "success")
+                },
+                () => {
+                  showNotification("Requested Update", "Failed to generate idea", "error")
+                }
+              )
+            }}
+          >
+            <svg className="w-5 h-5 mr-2 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.651 7.65a7.131 7.131 0 0 0-12.68 3.15M18.001 4v4h-4m-7.652 8.35a7.13 7.13 0 0 0 12.68-3.15M6 20v-4h4"/>
             </svg>
             Regenerate Short Idea
           </button>

@@ -18,6 +18,7 @@ export interface DatabaseService {
     queryDocuments<T extends Identifiable>(collectionPath: string, queryField: string, queryValue: any, orderByField: string, onSuccess?:SuccessCallback<T[]>, onFailure?:FailureCallback): Promise<void>;
     getRandomDocument<T>(collectionPath: string, onSuccess?: SuccessCallback<T | null>, onFailure?: FailureCallback): Promise<void>;
     queryDocumentById<T>(collectionPath: string, docId: string, onSuccess?: SuccessCallback<T>, onFailure?: FailureCallback): void;
+    getAllDocuments<T>(collectionPath: string, onSuccess?: SuccessCallback<T[]>, onFailure?: FailureCallback): Promise<void>;
 }
 
 export default DatabaseService;

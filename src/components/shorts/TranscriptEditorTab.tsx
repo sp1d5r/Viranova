@@ -289,7 +289,7 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({short, 
     <p className="mb-2">Edit the Transcript below before continuing on with visual attention analysis...</p>
 
     {
-      short.temp_audio_file && short.temp_audio_file !== "Loading ..." && (
+      short.temp_audio_file && short.temp_audio_file !== "Loading..." && (
         <>
           <div className="font-bold text-white flex w-full justify-between">
             <p>Preview Audio</p>

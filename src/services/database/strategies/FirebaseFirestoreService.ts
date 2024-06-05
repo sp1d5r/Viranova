@@ -24,8 +24,6 @@ const db = getFirestore(app);
 type QueryResult<T> = T & { id: string };
 
 const FirebaseDatabaseService: DatabaseService = {
-
-
     async addDocument(collectionPath: string, data: any, onSuccess?: SuccessCallback<string>, onFailure?: FailureCallback): Promise<void> {
         try {
             const safeData: WithFieldValue<DocumentData> = data;
@@ -141,6 +139,22 @@ const FirebaseDatabaseService: DatabaseService = {
             } else {
                 if (onSuccess) onSuccess(null); // No documents found
             }
+        } catch (error) {
+            if (onFailure) onFailure(error as FirestoreError);
+        }
+    },
+
+    async getAllDocuments<T>(collectionPath: string, onSuccess?: SuccessCallback<T[]>, onFailure?: FailureCallback): Promise<void> {
+        try {
+            const collectionRef = collection(db, collectionPath);
+            const querySnapshot = await getDocs(collectionRef);
+            const documents: QueryResult<T>[] = [];
+            querySnapshot.forEach((doc) => {
+                const data = doc.data() as T;
+                const result: QueryResult<T> = { ...data, id: doc.id };
+                documents.push(result);
+            });
+            if (onSuccess) onSuccess(documents);
         } catch (error) {
             if (onFailure) onFailure(error as FirestoreError);
         }
