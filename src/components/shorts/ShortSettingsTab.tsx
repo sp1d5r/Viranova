@@ -35,8 +35,6 @@ export const ShortSettingsTab :React.FC<ShortSettingsTabProps> = ({short, shortI
   }
 
   return <div className="p-6 text-medium text-gray-400 bg-gray-900 rounded-lg w-full">
-
-
     <nav className="flex my-2 mb-4 px-5 py-3 text-gray-700 border border-gray-200 rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700" aria-label="Breadcrumb">
       <ol className="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse ">
         <li className="inline-flex items-center">

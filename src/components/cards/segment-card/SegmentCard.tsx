@@ -187,6 +187,7 @@ export const SegmentCard: React.FC<SegmentCardProps> = ({currentSegment, segment
                   "error_count": 5,
                   "short_status": "Short Creation Began",
                   "previous_short_status": "Short Creation Began",
+                  "pending_operation": false,
                   "uid": authState.user?.uid,
                 },
                 (shortId)=>{

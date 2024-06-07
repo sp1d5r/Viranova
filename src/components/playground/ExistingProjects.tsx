@@ -4,6 +4,9 @@ import {useAuth} from "../../contexts/Authentication";
 import FirebaseFirestoreService from "../../services/database/strategies/FirebaseFirestoreService";
 import {documentToUserVideo, UserVideo} from "../../types/collections/UserVideo";
 import {SquigglyUnderline} from "../ui/squiggly-line";
+import {ExistingShortCard} from "../cards/existing-short-card/ExistingShortCard";
+import {documentToShort, Short} from "../../types/collections/Shorts";
+import {toNumber} from "lodash";
 
 export interface ExistingProjectsProps {
   className?: string
@@ -12,12 +15,12 @@ export interface ExistingProjectsProps {
 
 export const ExistingProjects: React.FC<ExistingProjectsProps> = ({className=''}) => {
   const [recentProjects, setRecentProjects] = useState<UserVideo[]>([]);
+  const [recentShorts, setRecentShorts] = useState<Short[]>([]);
   const [selectedLink, setSelectedLink] = useState("Projects");
   const {authState} = useAuth();
   const [refresh, setRefresh] = useState(false);
 
   useEffect(() => {
-    // Extract all the recent projects from the user.
     FirebaseFirestoreService.queryDocuments(
       '/videos',
       'uid',
@@ -29,6 +32,20 @@ export const ExistingProjects: React.FC<ExistingProjectsProps> = ({className=''}
         }).sort((elem1, elem2) => {return elem2.uploadTimestamp - elem1.uploadTimestamp}));
       }
       )
+  }, [authState, refresh]);
+
+  useEffect(() => {
+    FirebaseFirestoreService.queryDocuments(
+      '/shorts',
+      'uid',
+      authState.user && authState.user.uid ? authState.user.uid : '',
+      'uid',
+      (documents) => {
+        setRecentShorts(documents.map(doc => {
+          return documentToShort(doc)
+        }).sort((elem1, elem2) => {return toNumber(elem2.last_updated) - toNumber(elem1.last_updated)}));
+      }
+    )
   }, [authState, refresh]);
 
   return <section className={"w-full border-t border-accent flex justify-center items-center flex-col gap-[10] p-5"}>
@@ -50,10 +67,17 @@ export const ExistingProjects: React.FC<ExistingProjectsProps> = ({className=''}
       { /* Existing Projects Carousel */ }
       <div className={"w-full md:w-[70%] flex flex-wrap gap-5 pt-10 justify-center items-center"}>
         {
-          recentProjects.map((elem, index) => {
+          selectedLink=="Projects" && recentProjects.map((elem, index) => {
             return <ExistingProjectCard userVideo={elem} setRefresh={setRefresh} id={index}/>
           })
         }
+
+        {
+          selectedLink=="Shorts" && recentShorts.map((elem, index) => {
+            return <ExistingShortCard short={elem} />
+          })
+        }
+
       </div>
   </section>
 }

@@ -77,6 +77,7 @@ export interface Short {
   pending_operation: boolean,
   background_audio: string,
   background_percentage: number,
+  tiktok_link: string,
 }
 
 
@@ -116,6 +117,7 @@ export function documentToShort(docData: DocumentData): Short {
     pending_operation: docData.pending_operation,
     background_audio: docData.background_audio,
     background_percentage: docData.background_percentage,
+    tiktok_link: docData.tiktok_link,
   };
 }
 

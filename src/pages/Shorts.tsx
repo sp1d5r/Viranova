@@ -43,6 +43,7 @@ export const Shorts: React.FC<ShortsProps> = ({}) => {
       FirebaseFirestoreService.listenToDocument("shorts",
         short_id,
         (document) => {
+        console.log(document);
           if (document) {
             const shortDocumentVal = documentToShort(document);
             setShort(shortDocumentVal);
@@ -59,7 +60,11 @@ export const Shorts: React.FC<ShortsProps> = ({}) => {
       FirebaseFirestoreService.listenToDocument("topical_segments",
         short.segment_id,
         (document) => {
-          if (document)  setSegment(documentToSegment(document));
+          console.log(document);
+          if (document) {
+            console.log("segment doc:", document);
+            setSegment(documentToSegment(document));
+          }
         },
         (error) => {
           showNotification("Get Document", "Failed to get Short", "error")
