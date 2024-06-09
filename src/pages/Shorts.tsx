@@ -10,6 +10,7 @@ import {TranscriptEditorTab} from "../components/shorts/TranscriptEditorTab";
 import {AttentionTab} from "../components/shorts/AttentionTab";
 import {LoadingIcon} from "../components/loading/Loading";
 import {ExportTab} from "../components/shorts/ExportTab";
+import {Timestamp} from "firebase/firestore";
 
 export interface ShortsProps {
 
@@ -73,6 +74,29 @@ export const Shorts: React.FC<ShortsProps> = ({}) => {
     }
   }, [short]);
 
+  const [isOlderThanTwoMinutes, setIsOlderThanTwoMinutes] = useState(false);
+
+  useEffect(() => {
+    // Function to fetch the last updated timestamp from Firestore
+
+    // Function to check if the last updated timestamp is older than 2 minutes
+    const checkTimestamp = () => {
+      if (short && short.last_updated) {
+        const now = Timestamp.now();
+        const diffInSeconds = now.seconds - short.last_updated.seconds;
+        const diffInMinutes = diffInSeconds / 60;
+        setIsOlderThanTwoMinutes(diffInMinutes > 5);
+        console.log(diffInMinutes)
+      }
+    };
+
+    // Set an interval to check the timestamp every minute
+    const interval = setInterval(checkTimestamp, 1000);
+
+    // Clean up the interval on component unmount
+    return () => clearInterval(interval);
+  }, [short]);
+
   return <ScrollableLayout className={"flex flex-col gap-2 items-center relative"}>
     {short && short.pending_operation && (
       <div className="fixed bottom-0 min-h-20 my-5 mx-auto w-[90%] sm:w-[50%] rounded-xl shadow-xl border-2 bg-background/90 border-white z-50 flex flex-col p-4" style={{zIndex: 100}}>
@@ -81,7 +105,7 @@ export const Shorts: React.FC<ShortsProps> = ({}) => {
             <p className="font-bold text-md">Progress Message:</p>
             <p>{short.progress_message}</p>
           </div>
-          <p className="text-white text-sm">{short.last_updated.toDate().toLocaleDateString('en-GB', {
+          {short.last_updated && <p className="text-white text-sm">{short.last_updated.toDate().toLocaleDateString('en-GB', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric',
@@ -89,10 +113,13 @@ export const Shorts: React.FC<ShortsProps> = ({}) => {
             hour: '2-digit',
             minute: '2-digit',
             second: '2-digit',
-          })}</p>
+          })}</p>}
         </div>
-        <div className={"w-[80%] outline outline-white rounded-full h-2 bg-secondary m-auto"}>
-          <div className={"bg-accent h-2 rounded-full transition-all"} style={{width: `${short.update_progress}%`}}></div>
+        <div className="w-full flex justify-between flex-wrap text-white ">
+          <div className={"w-[80%] outline outline-white rounded-full h-2 bg-secondary m-auto"}>
+            <div className={"bg-accent h-2 rounded-full transition-all"} style={{width: `${short.update_progress}%`}}></div>
+          </div>
+          {short.last_updated && isOlderThanTwoMinutes && <button className="inline-flex items-center px-4 py-2 my-2 text-sm font-medium border rounded-lg focus:z-10 focus:ring-4 focus:outline-none focus:text-red-700 bg-gray-800 text-gray-200 border-red-600 hover:text-white hover:bg-red-700 focus:ring-red-700 gap-3">Quit</button>}
         </div>
       </div>)
     }

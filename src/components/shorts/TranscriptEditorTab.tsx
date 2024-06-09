@@ -71,11 +71,15 @@ export const EditedTranscript: React.FC<EditedTranscriptProps> = ({transcript, o
 
   const buttonPress = (index: number) => {
     setDeleteRange((prevState) => {
-      if (prevState.startIndex) {
+      if (prevState.startIndex ) {
         if (prevState.endIndex) {
           return { startIndex: undefined, endIndex: undefined }
         } else {
-          return {...prevState, endIndex: index}
+          if (index >= prevState.startIndex){
+            return {...prevState, endIndex: index}
+          } else {
+            return {startIndex: index, endIndex: prevState.startIndex}
+          }
         }
       } else {
         return {...prevState, startIndex: index}
@@ -314,28 +318,32 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({short, 
           if (value.type == "message") {
             return <li className="mb-2 ms-4">
               <div className="absolute w-3 h-3 bg-gray-200 rounded-full mt-1.5 -start-1.5 border border-white dark:border-gray-900 dark:bg-gray-700"></div>
-              <time className="mb-1 text-sm font-normal leading-none text-gray-500">{value.time.toDate().toString()}</time>
+              {value.time && <time
+                className="mb-1 text-sm font-normal leading-none text-gray-500">{value.time.toDate().toString()}</time>}
               <h3 className="text-lg font-semibold text-white">Server Message</h3>
               <p className="mb-4 text-base font-normal text-gray-400">{value.message}</p>
             </li>;
           } else if (value.type == "error") {
             return <li className="mb-2 ms-4">
               <div className="absolute w-3 h-3 rounded-full mt-1.5 -start-1.5 border border-red-900 bg-red-700"></div>
-              <time className="mb-1 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">{value.time.toDate().toString()}</time>
+              {value.time && <time
+                className="mb-1 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">{value.time.toDate().toString()}</time>}
               <h3 className="text-lg font-semibold text-red-500">Error Message</h3>
               <p className="text-base font-normal text-gray-400">{value.message}</p>
             </li>
           } else if (value.type == "success") {
             return <li className="mb-2 ms-4">
               <div className="absolute w-3 h-3 rounded-full mt-1.5 -start-1.5 border border-green-900 bg-green-700"></div>
-              <time className="mb-1 text-sm font-normal leading-nonetext-gray-500">{value.time.toDate().toString()}</time>
+              {value.time && <time
+                className="mb-1 text-sm font-normal leading-nonetext-gray-500">{value.time.toDate().toString()}</time>}
               <h3 className="text-lg font-semibold text-green-500">Success!</h3>
               <p className="text-base font-normal text-gray-500 dark:text-gray-400">{value.message}</p>
             </li>
           } else if (value.type == "delete") {
             return <li className="mb-10 ms-4">
               <div className="absolute w-3 h-3 rounded-full mt-1.5 -start-1.5 border border-blue-900 bg-blue-700"></div>
-              <time className="mb-1 text-sm font-normal leading-nonetext-gray-500">{value.time.toDate().toString()}</time>
+              {value.time && <time
+                className="mb-1 text-sm font-normal leading-nonetext-gray-500">{value.time.toDate().toString()}</time>}
               <h3 className="text-lg font-semibold text-blue-500">Editing</h3>
               <p className="text-base font-normal text-gray-500 dark:text-gray-400">{value.message}</p>
 
@@ -354,7 +362,8 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({short, 
           } else if (value.type == "undelete") {
             return <li className="mb-10 ms-4">
               <div className="absolute w-3 h-3 rounded-full mt-1.5 -start-1.5 border border-blue-900 bg-blue-700"></div>
-              <time className="mb-1 text-sm font-normal leading-nonetext-gray-500">{value.time.toDate().toString()}</time>
+              {value.time && <time
+                className="mb-1 text-sm font-normal leading-nonetext-gray-500">{value.time.toDate().toString()}</time>}
               <h3 className="text-lg font-semibold text-blue-500">Editing</h3>
               <p className="text-base font-normal text-gray-500 dark:text-gray-400">{value.message}</p>
 

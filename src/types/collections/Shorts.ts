@@ -1,5 +1,4 @@
 import {doc, DocumentData, Timestamp} from "firebase/firestore";
-import firebaseFirestoreService from "../../services/database/strategies/FirebaseFirestoreService";
 import FirebaseDatabaseService from "../../services/database/strategies/FirebaseFirestoreService";
 import FirebaseStorageService from "../../services/storage/strategies/FirebaseStorageService";
 

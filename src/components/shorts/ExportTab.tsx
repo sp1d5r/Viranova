@@ -45,7 +45,7 @@ export const ExportTab :React.FC<ExportTabProps> = ({short, shortId}) => {
         showNotification("Stock Audio", "Failed to get stock audio options", "error")
       }
     )
-  }, []);
+  }, [short]);
 
   return <div className="text-medium text-gray-400 bg-gray-900 rounded-lg w-full flex justify-evenly flex-wrap gap-5 p-8">
     <div className="flex flex-col flex-1 gap-2 min-w-[200px] py-2">
