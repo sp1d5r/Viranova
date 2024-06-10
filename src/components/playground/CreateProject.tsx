@@ -60,7 +60,7 @@ export const CreateProject : React.FC<CreateProjectProps> = ({}) => {
       return;
     }
 
-    const fileSizeLimit = 70 * 1024 * 1024; // 5 MB
+    const fileSizeLimit = 2000 * 1024 * 1024; // 5 MB
     if (file.size > fileSizeLimit) {
       const errorMessages = [
         `This file's got more weight than we can lift 🏋️‍♂️. Keep it under ${(fileSizeLimit / 1024 / 1024).toFixed(2)}MB, please.`,

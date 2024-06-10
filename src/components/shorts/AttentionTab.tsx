@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Short} from "../../types/collections/Shorts";
 import {useNotificaiton} from "../../contexts/NotificationProvider";
 import {Segment} from "../../types/collections/Segment";
@@ -8,6 +8,7 @@ import {SaliencyVideo} from "./attention-options/SaliencyVideo";
 import {Tabs} from "../../pages/Shorts";
 import {BoundingBoxSuggestions} from "./attention-options/BoundingBoxSuggestions";
 import {LoadingIcon} from "../loading/Loading";
+import Stepper from "../stepper/Stepper";
 
 export interface AttentionTabProps{
   short: Short;
@@ -21,7 +22,24 @@ const options : AttentionOptions[] = ["View Segment Video", "Preview Clipped Vid
 
 export const AttentionTab: React.FC<AttentionTabProps> = ({short, shortId, segment, setTab}) => {
   const [selectedOption, setSelectedOption] = useState<AttentionOptions>("View Segment Video");
+  const [currentTab, setCurrentTab] = useState(0);
   const {showNotification} = useNotificaiton();
+
+  useEffect(() => {
+    setCurrentTab(0);
+
+    if (short.short_clipped_video) {
+      setCurrentTab(1);
+    }
+
+    if (short.saliency_values) {
+      setCurrentTab(2);
+    }
+
+    if (short.bounding_boxes) {
+      setCurrentTab(3);
+    }
+  }, [short]);
 
   return (
     <div className="p-6 text-medium text-gray-400 bg-gray-900 rounded-lg w-full">
@@ -43,35 +61,25 @@ export const AttentionTab: React.FC<AttentionTabProps> = ({short, shortId, segme
           }
         </select>
       </div>
-      <ul className="hidden text-sm font-medium text-center text-gray-500 rounded-lg shadow sm:flex dark:divide-gray-700 dark:text-gray-400">
-        {
-          options.map((elem, index) => {
-            if (elem === selectedOption) {
-              return (
-                <li className="w-full focus-within:z-10">
-                  <button onClick={() => {setSelectedOption(elem)}} className="inline-block h-full w-full p-4 text-gray-900 bg-gray-100 border-x border-gray-200 dark:border-gray-700 focus:ring-4 focus:ring-blue-300 active focus:outline-none dark:bg-gray-700 dark:text-white" aria-current="page">
-                    {elem}
-                  </button>
-                </li>
-              )
-            } else {
-              return (
-                <li className="w-full focus-within:z-10">
-                  <button onClick={() => {setSelectedOption(elem)}} className="inline-block h-full w-full p-4 bg-white border-r border-gray-200 dark:border-gray-700 hover:text-gray-700 hover:bg-gray-50 focus:ring-4 focus:ring-blue-300 focus:outline-none dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700">
-                    {elem}
-                  </button>
-                </li>
-              )
-            }
-          })
-        }
-      </ul>
 
-      { !short.pending_operation && selectedOption === "View Segment Video" && <SegmentVideo segment={segment} segmentId={short.segment_id} continueButton={() => {setSelectedOption("Preview Clipped Video")}} /> }
-      { !short.pending_operation && selectedOption === "Preview Clipped Video" && <PreviewShortVideo short={short} shortId={shortId} continueButton={(()=>{setTab("Transcript Editor")})}/> }
-      { !short.pending_operation && selectedOption === "Saliency" && <SaliencyVideo short={short} shortId={shortId} /> }
-      { !short.pending_operation && selectedOption === "Bounding Box Suggestions" && <BoundingBoxSuggestions short={short} shortId={shortId} /> }
+      <Stepper
+        steps={[
+          {title: "Segment Video", details: "View segment video"},
+          {title: "Clipped Video", details: "Preview clipped video"},
+          {title: "Saliency", details: "Preview clipped saliency"},
+          {title: "Bounding Boxes", details: "Create bounding boxes"},
+        ]}
+        currentStep={currentTab}
+        onStepClick={
+          (value: number) => {
+            setCurrentTab(value);
+          }
+        } />
 
+      { !short.pending_operation && options[currentTab] === "View Segment Video" && <SegmentVideo segment={segment} segmentId={short.segment_id} continueButton={() => {setSelectedOption("Preview Clipped Video")}} /> }
+      { !short.pending_operation && options[currentTab] === "Preview Clipped Video" && <PreviewShortVideo short={short} shortId={shortId} continueButton={(()=>{setTab("Transcript Editor")})}/> }
+      { !short.pending_operation && options[currentTab] === "Saliency" && <SaliencyVideo short={short} shortId={shortId} /> }
+      { !short.pending_operation && options[currentTab] === "Bounding Box Suggestions" && <BoundingBoxSuggestions short={short} shortId={shortId} /> }
       { short.pending_operation && <LoadingIcon id={"something"} text={"Performing Operation"} className="my-10"/> }
 
     </div>

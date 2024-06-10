@@ -13,6 +13,64 @@ export const Settings:React.FC<SettingsProps> = () => {
     value4: true,
   })
 
+  const tabs = [
+    {
+      title: 'Add Open AI Access Token',
+      content: (
+        <div>
+          <span className="mb-2 text-gray-500 dark:text-gray-400">
+            You are required to dress presentably when dealing with our students. However, there is no explicit dress code as such you are required to provide your own uniform.
+          </span>
+          <br />
+          <button
+            type="button"
+            className="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800 disabled:dark:bg-green-400 disabled:bg-green-600"
+            onClick={() => {}}
+          >
+            Agree
+          </button>
+        </div>
+      ),
+    },
+    {
+      title: 'TikTok Integration',
+      content: (
+        <div>
+          <span className="mb-2 text-gray-500 dark:text-gray-400">
+            Link your TikTok account to post directly to TikTok.
+          </span>
+          <br />
+          <button
+            type="button"
+            className="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800 disabled:dark:bg-green-400 disabled:bg-green-600"
+            onClick={() => {}}
+          >
+            Agree
+          </button>
+        </div>
+      ),
+    },
+    {
+      title: 'Request Features',
+      content: (
+        <div>
+          <span className="mb-2 text-gray-500 dark:text-gray-400">
+            Link your TikTok account to post directly to TikTok.
+          </span>
+          <br />
+          <button
+            type="button"
+            className="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800 disabled:dark:bg-green-400 disabled:bg-green-600"
+            onClick={() => {}}
+          >
+            Agree
+          </button>
+        </div>
+      ),
+    },
+  ];
+
+
   return <ScrollableLayout>
     <section className="container my-5">
 

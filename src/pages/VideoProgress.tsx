@@ -51,12 +51,12 @@ export const VideoProgress: React.FC<VideoProgressProps> = ({}) => {
     }, [video, video_id]);
 
     return <ModalLayout>
-            <div className="absolute inset-0 h-full w-full bg-gradient-to-r from-emerald-400 to-emerald-700 transform scale-[0.50] bg-primary rounded-xl blur-3xl" />
-        <div className={"relative min-w-[300px] min-h-[300px] w-[50vw] h-[50vh] bg-background rounded-xl flex flex-col justify-center items-center gap-10 text-white border border-primary overflow-hidden  "}>
+        <div className="absolute inset-0 h-full w-full bg-gradient-to-r from-emerald-400 to-emerald-700 transform scale-[0.50] bg-primary rounded-xl blur-3xl" />
+        <div className={"relative min-w-[300px] min-h-[300px] w-[50vw] h-[50vh] bg-background rounded-xl flex flex-col justify-center items-center gap-10 text-white border border-primary overflow-hidden p-2"}>
 
             {video ? (
               <>
-            <div className={"flex flex-col justify-center items-center"}>
+            <div className={"flex flex-col justify-center items-center text-center"}>
                 {
                     video.status === "Uploaded" ? <img className={"animate-spin"} src={Transcript} alt={"Uploaded video"} /> :
                       video.status === "Link Provided" ? <img className={"animate-spin"} src={Transcript} alt={"Uploaded video"} /> :
