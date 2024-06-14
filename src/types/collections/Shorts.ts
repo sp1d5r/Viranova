@@ -1,6 +1,7 @@
 import {doc, DocumentData, Timestamp} from "firebase/firestore";
 import FirebaseDatabaseService from "../../services/database/strategies/FirebaseFirestoreService";
 import FirebaseStorageService from "../../services/storage/strategies/FirebaseStorageService";
+import {BackendServerMetadata} from "./BackendServerMetadata";
 
 export type Logs = {
   type: "message",
@@ -42,7 +43,7 @@ export type SaliencyCaptured = {
   saliency_vals: number[]
 }
 
-export interface Short {
+export interface Short extends BackendServerMetadata{
   id: string,
   start_index: number,
   end_index: number,

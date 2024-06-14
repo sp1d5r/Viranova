@@ -119,7 +119,26 @@ export const Shorts: React.FC<ShortsProps> = ({}) => {
           <div className={"w-[80%] outline outline-white rounded-full h-2 bg-secondary m-auto"}>
             <div className={"bg-accent h-2 rounded-full transition-all"} style={{width: `${short.update_progress}%`}}></div>
           </div>
-          {short.last_updated && isOlderThanTwoMinutes && <button className="inline-flex items-center px-4 py-2 my-2 text-sm font-medium border rounded-lg focus:z-10 focus:ring-4 focus:outline-none focus:text-red-700 bg-gray-800 text-gray-200 border-red-600 hover:text-white hover:bg-red-700 focus:ring-red-700 gap-3">Quit</button>}
+          {short.last_updated && isOlderThanTwoMinutes && <button
+            onClick={() => {
+              if (short_id) {
+                FirebaseFirestoreService.updateDocument(
+                  "shorts",
+                  short_id,
+                  {
+                    backend_status: "Completed",
+                    pending_operation: false,
+                  },
+                  () => {
+                    showNotification("Cancelled Operation", "Be careful of concurrency errors.", "success")
+                  },
+                  (err) => {
+                    showNotification("Failed to Update", err.message, "error");
+                  }
+                )
+              }
+            }}
+            className="inline-flex items-center px-4 py-2 my-2 text-sm font-medium border rounded-lg focus:z-10 focus:ring-4 focus:outline-none focus:text-red-700 bg-gray-800 text-gray-200 border-red-600 hover:text-white hover:bg-red-700 focus:ring-red-700 gap-3">Quit</button>}
         </div>
       </div>)
     }

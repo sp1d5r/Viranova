@@ -7,6 +7,7 @@ export interface ManualOverrideControlProps {
   currentFrame: number;
   totalFrames: number;
   cuts: number [];
+  setCuts: React.Dispatch<React.SetStateAction<number[]>>
   internalBoundingBoxes: BoundingBoxes;
   setInternalBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBoxes | undefined>>;
   shortId: string;
@@ -20,7 +21,7 @@ interface BoxMovementPos {
   y: number
 }
 
-const ManualOverrideControls: React.FC<ManualOverrideControlProps> = ({ currentFrame, totalFrames, cuts, internalBoundingBoxes, setInternalBoundingBoxes, shortId, short }) => {
+const ManualOverrideControls: React.FC<ManualOverrideControlProps> = ({ currentFrame, totalFrames, cuts, setCuts, internalBoundingBoxes, setInternalBoundingBoxes, shortId, short }) => {
   const [currentIntervalIndex, setCurrentIntervalIndex] = useState<number | undefined>();
   const {showNotification} = useNotificaiton();
   const [editedBoundingBoxes, setEditedBoundingBoxes] = useState(internalBoundingBoxes);
@@ -126,6 +127,45 @@ const ManualOverrideControls: React.FC<ManualOverrideControlProps> = ({ currentF
             className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:outline-none focus:ring-gray-100 focus:text-blue-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-gray-700 gap-3"
           >
             Static Box Move
+            <svg className="w-5 h-5 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 4h4m0 0v4m0-4-5 5M8 20H4m0 0v-4m0 4 5-5"/>
+            </svg>
+          </button>
+          <button
+            onClick={() => {
+              const newCuts = [...cuts];
+              newCuts.push(currentFrame);
+              newCuts.sort((a,b) => a-b);
+              console.log("New sorts", newCuts)
+              setCuts(newCuts);
+            }}
+            className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:outline-none focus:ring-gray-100 focus:text-blue-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-gray-700 gap-3"
+          >
+            Add a Cut
+            <svg className="w-5 h-5 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 4h4m0 0v4m0-4-5 5M8 20H4m0 0v-4m0 4 5-5"/>
+            </svg>
+          </button>
+          <button
+            onClick={() => {
+              FirebaseFirestoreService.updateDocument(
+                "shorts",
+                shortId,
+                {
+                  cuts: cuts
+                },
+                () => {
+                  showNotification(
+                    "Updated cuts",
+                    "Updated all the cuts",
+                    "success"
+                  )
+                }
+              )
+            }}
+            className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-emerald-200 rounded-lg hover:bg-emerald-100 hover:text-white focus:z-10 focus:ring-4 focus:outline-none focus:ring-emerald-100 focus:text-emerald-700 dark:bg-emerald-800 dark:text-gray-200 dark:border-emerald-600 dark:hover:text-white dark:hover:bg-emerald-700 dark:focus:ring-emerald-700 gap-3"
+          >
+            Submit Cut
             <svg className="w-5 h-5 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
               <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 4h4m0 0v4m0-4-5 5M8 20H4m0 0v-4m0 4 5-5"/>
             </svg>

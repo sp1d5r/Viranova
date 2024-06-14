@@ -2,8 +2,9 @@ import {DocumentData} from "firebase/firestore";
 import FirebaseDatabaseService from "../../services/database/strategies/FirebaseFirestoreService";
 import {deleteShort, documentToShort, Short} from "./Shorts";
 import {FirebaseStorageService} from "../../services/storage/strategies";
+import {BackendServerMetadata} from "./BackendServerMetadata";
 
-export interface Segment {
+export interface Segment extends BackendServerMetadata {
     id: string;
     earliestStartTime: number;
     endIndex: number;

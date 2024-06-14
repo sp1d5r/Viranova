@@ -5,4 +5,7 @@ export default createBoard({
     name: 'NewEraSection',
     Board: () => <NewEraSection />,
     isSnippet: true,
+    environmentProps: {
+windowWidth: 802
+}
 });

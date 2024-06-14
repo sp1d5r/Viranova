@@ -9,6 +9,7 @@ import {Tabs} from "../../pages/Shorts";
 import {BoundingBoxSuggestions} from "./attention-options/BoundingBoxSuggestions";
 import {LoadingIcon} from "../loading/Loading";
 import Stepper from "../stepper/Stepper";
+import AfterEffects from "./attention-options/AfterEffects";
 
 export interface AttentionTabProps{
   short: Short;
@@ -17,8 +18,8 @@ export interface AttentionTabProps{
   setTab: React.Dispatch<React.SetStateAction<Tabs>>;
 }
 
-type AttentionOptions = "View Segment Video" | "Preview Clipped Video" | "Saliency" | "Bounding Box Suggestions";
-const options : AttentionOptions[] = ["View Segment Video", "Preview Clipped Video", "Saliency", "Bounding Box Suggestions"];
+type AttentionOptions = "View Segment Video" | "Preview Clipped Video" | "Saliency" | "Bounding Box Suggestions" | "After Effects";
+const options : AttentionOptions[] = ["View Segment Video", "Preview Clipped Video", "Saliency", "Bounding Box Suggestions", "After Effects"];
 
 export const AttentionTab: React.FC<AttentionTabProps> = ({short, shortId, segment, setTab}) => {
   const [selectedOption, setSelectedOption] = useState<AttentionOptions>("View Segment Video");
@@ -32,11 +33,11 @@ export const AttentionTab: React.FC<AttentionTabProps> = ({short, shortId, segme
       setCurrentTab(1);
     }
 
-    if (short.saliency_values) {
+    if (short.short_video_saliency) {
       setCurrentTab(2);
     }
 
-    if (short.bounding_boxes) {
+    if (short.cuts) {
       setCurrentTab(3);
     }
   }, [short]);
@@ -68,6 +69,7 @@ export const AttentionTab: React.FC<AttentionTabProps> = ({short, shortId, segme
           {title: "Clipped Video", details: "Preview clipped video"},
           {title: "Saliency", details: "Preview clipped saliency"},
           {title: "Bounding Boxes", details: "Create bounding boxes"},
+          {title: "After Effects", details: "Add final touches"},
         ]}
         currentStep={currentTab}
         onStepClick={
@@ -80,6 +82,7 @@ export const AttentionTab: React.FC<AttentionTabProps> = ({short, shortId, segme
       { !short.pending_operation && options[currentTab] === "Preview Clipped Video" && <PreviewShortVideo short={short} shortId={shortId} continueButton={(()=>{setTab("Transcript Editor")})}/> }
       { !short.pending_operation && options[currentTab] === "Saliency" && <SaliencyVideo short={short} shortId={shortId} /> }
       { !short.pending_operation && options[currentTab] === "Bounding Box Suggestions" && <BoundingBoxSuggestions short={short} shortId={shortId} /> }
+      { !short.pending_operation && options[currentTab] === "After Effects" && <AfterEffects short={short} shortId={shortId} />}
       { short.pending_operation && <LoadingIcon id={"something"} text={"Performing Operation"} className="my-10"/> }
 
     </div>

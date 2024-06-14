@@ -2,7 +2,6 @@ import React, {useEffect, useMemo, useRef, useState} from "react";
 import {BoundingBoxes, Short} from "../../../types/collections/Shorts";
 import {FirebaseStorageService} from "../../../services/storage/strategies";
 import {LoadingIcon} from "../../loading/Loading";
-import {AreaUnderChart} from "../../charts/AreaUnderChart";
 import FirebaseFirestoreService from "../../../services/database/strategies/FirebaseFirestoreService";
 import {useNotificaiton} from "../../../contexts/NotificationProvider";
 import "./bounding-box.css";
@@ -26,14 +25,29 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({s
   const [videoUrls, setVideoUrls] = useState<VideoInfo>({clippedVideo: undefined, saliencyVideo: undefined});
   const [opacity, setOpacity] = useState(0);
   const [currentFrame, setCurrentFrame] = useState(0);
+  const [cuts, setCuts] = useState<number[]>(short.cuts? short.cuts : []);
   const clippedVideoRef = useRef<HTMLVideoElement>(null);
   const saliencyVideoRef = useRef<HTMLVideoElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [audioUrl, setAudioUrl] = useState("");
   const [internalBoundingBoxes, setInternalBoundingBoxes] = useState<BoundingBoxes | undefined>(short.bounding_boxes);
 
+  useEffect(() => {
+    if (short && short.temp_audio_file) {
+      setLoading(true);
+      FirebaseStorageService.downloadFile(short.temp_audio_file).then((res) => {
+        const url = URL.createObjectURL(res);
+        setAudioUrl(url);
+        setLoading(false);
+      }).catch((err) => {
+        setLoading(false);
+        console.error("Failed to load audio file:", err);
+      });
+    }
+  }, [short]);
 
   useEffect(() => {
     const video = clippedVideoRef.current;
-
     const handleTimeUpdate = () => {
       if (video) {
         const frameRate = fps;  // Adjust according to video frame rate
@@ -54,10 +68,13 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({s
     const saliency = saliencyVideoRef.current;
 
     const handleTimeUpdate = () => {
-      if (clipped) {
-        const frameRate = fps; // Adjust this according to your video's frame rate
-        const frame = Math.floor((clipped.currentTime * frameRate));
+      if (clippedVideoRef.current) {
+        const frameRate = fps;
+        const frame = Math.floor(clippedVideoRef.current.currentTime * frameRate);
         setCurrentFrame(frame);
+        if (audioRef.current) {
+          audioRef.current.currentTime = clippedVideoRef.current.currentTime;
+        }
       }
     };
 
@@ -69,6 +86,8 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({s
       saliency && saliency.removeEventListener('timeupdate', handleTimeUpdate);
     };
   }, []);
+
+  console.log(cuts);
 
   useEffect(() => {
     if (short && short.short_video_saliency) {
@@ -127,12 +146,14 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({s
   const handlePlayPause = () => {
     const clipped = clippedVideoRef.current;
     const saliency = saliencyVideoRef.current;
-    if (clipped && saliency) {
+    const audio = audioRef.current;
+    if (clipped && saliency && audio) {
       if (clipped.paused) {
         const playPromise = clipped.play();
         if (playPromise !== undefined) {
           playPromise.then(() => {
             saliency.play().catch(err => console.error("Failed to play saliency video:", err));
+            audio.play().catch(err => console.error("Failed to play audio:", err));
           }).catch(err => {
             console.error("Failed to play clipped video:", err);
           });
@@ -142,6 +163,7 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({s
         setPause(true);
         clipped.pause();
         saliency.pause();
+        audio.pause();
       }
     }
   };
@@ -154,6 +176,9 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({s
       const time = frameIndex / fps;  // Assuming 30 fps for example
       clippedVideoRef.current.currentTime = time;
       saliencyVideoRef.current.currentTime = time;
+      if (audioRef.current){
+        audioRef.current.currentTime= time;
+      }
     }
   };
 
@@ -227,7 +252,7 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({s
           <div className="relative video-overlay-container w-full mt-5 overflow-hidden">
             {
               videoUrls.clippedVideo &&
-              <video ref={clippedVideoRef} id="videoElement" className="z-10 w-full" playsInline webkit-playsinline>
+              <video ref={clippedVideoRef} id="videoElement" className="z-10 w-full" muted playsInline webkit-playsinline>
                 <source src={videoUrls.clippedVideo} type="video/mp4"/>
               </video>
             }
@@ -252,48 +277,51 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({s
                 left: `${(internalBoundingBoxes.boxes[currentFrame][0] / short.width) * 100}%`,
               }}/>}
           </div>
-          <div className="w-full flex justify-center">
+          <div className="w-full flex flex-col justify-center">
             {!short.cuts && <p className="text-danger font-bold">Press find cuts to get camera cuts</p>}
-            <div className="inline-flex rounded-md shadow-sm" role="group">
-              <button
-                type="button"
-                className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white"
-                onClick={() => {
-                  FirebaseFirestoreService.updateDocument(
-                    "shorts",
-                    shortId,
-                    {
-                      "short_status": "Determine Video Boundaries",
-                      "previous_short_status": "Requested to Determine Video Boundaries"
-                    },
-                    () => {showNotification("Success", "Requested to find cuts.", "success")},
-                    (error) => {showNotification("Failed", error.message, "error")},
-                  )
-                }}
-              >
-                Find Cuts
-              </button>
-              <button
-                onClick={() => {
-                  FirebaseFirestoreService.updateDocument(
-                    "shorts",
-                    shortId,
-                    {
-                      "short_status": "Get Bounding Boxes",
-                      "previous_short_status": "Requested to Get Bounding Boxes"
-                    },
-                    () => {showNotification("Success", "Requested Bounding Boxes", "success")},
-                    (error) => {showNotification("Failed", error.message, "error")},
-                  )
-                }}
-                disabled={!short.cuts}
-                type="button"
-                className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white disabled:bg-gray-900 disabled:hover:bg-gray-900">
-                Generate Bounding Boxes
-              </button>
-              <button onClick={() => {}} type="button" className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-e-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
-                Re-Adjust Transcript
-              </button>
+            <div className="flex gap-2">
+              <div className="inline-flex rounded-md shadow-sm" role="group">
+                <button
+                  type="button"
+                  className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white"
+                  onClick={() => {
+                    FirebaseFirestoreService.updateDocument(
+                      "shorts",
+                      shortId,
+                      {
+                        "short_status": "Determine Video Boundaries",
+                        "previous_short_status": "Requested to Determine Video Boundaries"
+                      },
+                      () => {showNotification("Success", "Requested to find cuts.", "success")},
+                      (error) => {showNotification("Failed", error.message, "error")},
+                    )
+                  }}
+                >
+                  Find Cuts
+                </button>
+                <button
+                  onClick={() => {
+                    FirebaseFirestoreService.updateDocument(
+                      "shorts",
+                      shortId,
+                      {
+                        "short_status": "Get Bounding Boxes",
+                        "previous_short_status": "Requested to Get Bounding Boxes"
+                      },
+                      () => {showNotification("Success", "Requested Bounding Boxes", "success")},
+                      (error) => {showNotification("Failed", error.message, "error")},
+                    )
+                  }}
+                  disabled={!short.cuts}
+                  type="button"
+                  className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white disabled:bg-gray-900 disabled:hover:bg-gray-900">
+                  Generate Bounding Boxes
+                </button>
+                <button onClick={() => {}} type="button" className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-e-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
+                  Re-Adjust Transcript
+                </button>
+              </div>
+              <audio ref={audioRef}  src={audioUrl} id="audioElement" controls />
             </div>
           </div>
           <div className="flex flex-col gap-2 my-2">
@@ -309,7 +337,7 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({s
                 }
                 <span className="sr-only">Icon description</span>
               </button>
-              {short.cuts && <SeekBar currentFrame={currentFrame} totalFrames={short.total_frame_count} cuts={short.cuts}/>}
+              {cuts && <SeekBar currentFrame={currentFrame} totalFrames={short.total_frame_count} cuts={cuts}/>}
             </div>
             <label htmlFor="steps-range" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white w-full">
               Set Saliency Opacity
@@ -329,7 +357,7 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({s
         </div>
     }
 
-    {internalBoundingBoxes && <ManualOverrideControls cuts={short.cuts} totalFrames={short.total_frame_count} currentFrame={currentFrame} internalBoundingBoxes={internalBoundingBoxes} setInternalBoundingBoxes={setInternalBoundingBoxes} shortId={shortId} short={short} />}
+    {internalBoundingBoxes && <ManualOverrideControls cuts={cuts} setCuts={setCuts} totalFrames={short.total_frame_count} currentFrame={currentFrame} internalBoundingBoxes={internalBoundingBoxes} setInternalBoundingBoxes={setInternalBoundingBoxes} shortId={shortId} short={short} />}
 
     {/*{ short.visual_difference && short.saliency_values && <AreaUnderChart  saliencyCaptured={short.saliency_values} visualDifference={short.visual_difference}/> }*/}
   </div>

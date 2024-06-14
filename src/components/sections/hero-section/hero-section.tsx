@@ -35,8 +35,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ className = '' }) => {
 
     return <Vortex
       baseHue={110}
-        className={className + 'container  !p-0 text-white w-full  min-h-[80vh] flex gap-5 justify-center items-center md:flex-wrap-reverse  flex-col-reverse sm:flex-row container'}>
-        <div className={"z-10 flex flex-col gap-10 justify-center items-center bg-background/70 px-5 pt-10"}>
+        className={className + '!p-0 text-white w-full min-h-[80vh] flex gap-5 justify-center items-center md:flex-wrap-reverse  flex-col-reverse sm:flex-row'}>
+        <div className={"z-10 flex flex-col gap-10 justify-center items-center bg-background/70 px-5 pt-10 w-full"}>
             <div className={"flex justify-center items-center relative "}>
                 <div className={"relative group"}>
                     <div
@@ -44,7 +44,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ className = '' }) => {
                     <div
                         className={"relative bg-background text-xl  px-5 py-2 rounded-xl transition duration-200"}>
                         <p>
-                            Powered by the Blockchain
+                            Powered by Artificial Intelligence
                         </p>
                     </div>
                 </div>
@@ -53,30 +53,29 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ className = '' }) => {
 
             <div className={"flex gap-5 justify-center"}>
                 <img className={"hidden md:flex h-20"} src={PeaceLeft} alt={"peace fingers left"}/>
-                <div className={"flex flex-col gap-2"}>
+                <div className={"flex flex-col gap-2 items-center"}>
                     <span className={"text-title m-0 text-center relative"}>
-                        Block Chain Powered {" "}
+                        Machine Learning Powered {" "}
                         <span className={"text-primary relative"}>
-                            Computer Vision
+                            Video Clipping
                             <img className={"absolute right-0 -bottom-0.5"} src={Underline} alt={"_"}/>
                         </span>
                     </span>
-                    <p>Step into a new era of business connections powered by AI, designed exclusively for the Web3
-                        domain.</p>
+                    <p>Use AI to create short-formed content that resonates with your audience.</p>
                 </div>
                 <img className={"hidden md:flex h-20"} src={PeaceRight} alt={"peace fingers right"}/>
             </div>
 
 
-            <div className=" hidden sm:grid grid-cols-2 sm:grid-cols-4 gap-5 justify-center">
+            <div className=" hidden sm:grid grid-cols-2 sm:grid-cols-3 gap-5 justify-center">
                 <LandingCard imageSrc={DrivingVideo} cardTitle={"Driving Video"}
                              cardDescription={"Provide the model with a driving video."}/>
                 <LandingCard imageSrc={Segmentation} cardTitle={"Segmentation"}
                              cardDescription={"Perform Temporal and Spacial Segmentation."}/>
                 <LandingCard imageSrc={LayingDown} cardTitle={"Metric Driven"}
                              cardDescription={"Fine-tune videos for your audience."}/>
-                <LandingCard imageSrc={BuildingBlocks} cardTitle={"Blockchain Powered"}
-                             cardDescription={"Inference and training powered by blockchain."}/>
+                {/*<LandingCard imageSrc={BuildingBlocks} cardTitle={"Blockchain Powered"}*/}
+                {/*             cardDescription={"Inference and training powered by blockchain."}/>*/}
             </div>
 
             <BorderButton duration={2000} onClick={() => {window.location.href="/playground"}}>

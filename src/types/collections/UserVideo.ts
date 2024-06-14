@@ -1,8 +1,9 @@
 import {DocumentData} from 'firebase/firestore';
+import {BackendServerMetadata, ServerStatus} from "./BackendServerMetadata";
 
 type UserVideoStatus = "Uploaded" | "Link Provided" | "Transcribing" | "Diarizing" | "Segmenting" | "Summarizing Segments" | "Clip Transcripts" | "Preprocessing Complete" | "Create TikTok Ideas"
 
-export interface UserVideo {
+export interface UserVideo extends BackendServerMetadata{
     videoPath: string;
     originalFileName: string;
     uploadTimestamp: number;
@@ -26,7 +27,8 @@ export function documentToUserVideo(docData: DocumentData): UserVideo {
         uid: docData.uid,
         link: docData.link,
         queuePosition: docData.queuePosition,
-        id: docData.id
+        id: docData.id,
+        backend_status: docData.backend_status
     };
 }
 
