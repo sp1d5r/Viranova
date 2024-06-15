@@ -1,0 +1,11 @@
+/* Base state of hoverable elements */
+.hoverable {
+    transition: transform 0.3s ease; /* Transition for smooth animation */
+    border-width: 2px; /* Example initial border width */
+}
+
+/* Hover state changes when parent is hovered */
+#drop_zone:hover .hoverable {
+    transform: rotate(0deg);
+    border-width: 1px; /* Adjust properties as necessary */
+}

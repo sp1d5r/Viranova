@@ -132,36 +132,37 @@ export default function PlaygroundPage() {
         <div className="w-full  max-h-[700px] min-h-[600px] flex justify-start items-center flex-col relative sm:px-16 gap-8 pt-24  sm:pt-28 m-auto py-6">
             <BackgroundBeams />
 
-            <div className="w-[60%] min-w-[350px] flex justify-start items-center flex-col gap-8 my-8">
-                <div className="w-full min-h-[200px] bg-white/5  sm:backdrop-blur-sm border-primary border rounded-xl text-white p-4">
-                  <p className="text-2xl font-bold">Clip Video</p>
-                <CreateProject />
-                  <div className="w-full border-b border-accent/20 my-2"/>
-                  <label htmlFor="helper-text" className="block my-2 text-sm font-medium text-gray-900 dark:text-white">
-                      Or send a YouTube link
-                      <input
-                        type="link"
-                        id="helper-text"
-                        aria-describedby="helper-text-explanation"
-                        className="border my-1 text-sm rounded-lg block w-full px-2.5 py-1  bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="youtube.com/w?dsjknvsfv"
-                        value={youtubeLink}
-                        onChange={(e) => {setYouTubeLink(e.target.value)}}
-                      />
-                  </label>
-                  <p id="helper-text-explanation" className="mt-2 text-sm text-gray-500 dark:text-gray-400">Only use YouTube videos you have permission to select.</p>
-                  <button
-                    type="button"
-                    className="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 my-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
-                    onClick={() => { submitButton() }}
-                  >
-                      Continue
-                  </button>
-                  {uploadProgress!==0 && <div className={"w-[300px] outline outline-black rounded-full h-2.5"}>
-                      <div className={"bg-accent outline-black outline  h-2.5 rounded-full"} style={{width: `${uploadProgress}%`}}></div>
-                  </div>}
+            <div className="w-[60%] min-w-[350px] flex   justify-start items-center flex-col gap-8 my-8">
+                <div className="w-full min-h-[200px] z-0 overflow-hidden border-primary border rounded-xl text-white p-4">
+                    <p className="text-2xl font-bold">Clip Video</p>
+                    <div className="bg-white/0"> {/* Ensure this div is completely transparent */}
+                        <CreateProject />
+                    </div>
+                    <div className="w-full border-b border-accent/20 my-2"/>
+                    <label htmlFor="helper-text" className="block my-2 text-sm font-medium text-gray-900 dark:text-white">
+                        Or send a YouTube link
+                        <input
+                          type="link"
+                          id="helper-text"
+                          aria-describedby="helper-text-explanation"
+                          className="border my-1 text-sm rounded-lg block w-full px-2.5 py-1  bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="youtube.com/w?dsjknvsfv"
+                          value={youtubeLink}
+                          onChange={(e) => {setYouTubeLink(e.target.value)}}
+                        />
+                    </label>
+                    <p id="helper-text-explanation" className="mt-2 text-sm text-gray-500 dark:text-gray-400">Only use YouTube videos you have permission to select.</p>
+                    <button
+                      type="button"
+                      className="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 my-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+                      onClick={() => { submitButton() }}
+                    >
+                        Continue
+                    </button>
+                    {uploadProgress!==0 && <div className={"w-[300px] outline outline-black rounded-full h-2.5"}>
+                        <div className={"bg-accent outline-black outline  h-2.5 rounded-full"} style={{width: `${uploadProgress}%`}}></div>
+                    </div>}
                 </div>
-
             </div>
         </div>
 

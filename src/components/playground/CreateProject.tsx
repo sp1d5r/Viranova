@@ -15,6 +15,32 @@ function getRandomString(strings: string[]): string {
   return strings[randomIndex];
 }
 
+interface WrapperProps {
+  children: React.ReactNode
+}
+
+const WrapperComponent:React.FC<WrapperProps> = ({children}: {children:React.ReactNode}) => {
+  return (
+    <div className="relative flex justify-center items-center">
+      {/* Background top */}
+      <div className="absolute bottom-full -z-10 right-0 h-screen w-screen bg-white/10 backdrop-blur-sm"></div>
+
+      {/* Background bottom */}
+      <div className="absolute bottom-0 -z-10 left-full right-0 h-screen w-screen bg-white/10 backdrop-blur-sm"></div>
+
+      {/* Background left */}
+      <div className="absolute top-full -z-10 left-0 h-screen w-screen bg-white/10 backdrop-blur-sm"></div>
+
+      {/* Background right */}
+      <div className="absolute top-0 -z-10 right-full  h-screen w-screen bg-white/10 backdrop-blur-sm"></div>
+
+      {/* DragDropFileUpload Component */}
+      {children}
+
+    </div>
+  );
+};
+
 export const CreateProject : React.FC<CreateProjectProps> = ({}) => {
   const { showNotification } = useContext(NotificationContext);
   const { authState } = useAuth();
@@ -186,12 +212,14 @@ export const CreateProject : React.FC<CreateProjectProps> = ({}) => {
   };
 
   return <div
-    className={"relative flex w-full h-full flex-col justify-center items-center gap-5 z-10"}
+    className={"relative flex w-full h-full flex-col justify-center items-center gap-5"}
   >
-    <DragDropFileUpload text={uploadProgress === 0 ? "Upload Video" : uploadProgress === 100 ? "File Uploaded!": `(${uploadProgress.toFixed(2)}%) \n Uploading Video...`} dragOverHandler={dragOverHandler} dropHandler={dropHandler} handleFileInputChange={handleFileInputChange}/>
-    {files.map((file) => (
-      <p className={"text-primary font-bold"}>{file.name}</p>
-    ))}
+    <WrapperComponent>
+      <DragDropFileUpload text={uploadProgress === 0 ? "Upload Video" : uploadProgress === 100 ? "File Uploaded!": `(${uploadProgress.toFixed(2)}%) \n Uploading Video...`} dragOverHandler={dragOverHandler} dropHandler={dropHandler} handleFileInputChange={handleFileInputChange}/>
+      {files.map((file) => (
+        <p className={"text-primary font-bold"}>{file.name}</p>
+      ))}
+    </WrapperComponent>
     {uploadProgress!==0 && <div className={"w-[300px] outline outline-black rounded-full h-2.5"}>
       <div className={"bg-accent outline-black outline  h-2.5 rounded-full"} style={{width: `${uploadProgress}%`}}></div>
     </div>}
