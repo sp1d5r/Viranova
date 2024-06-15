@@ -22,8 +22,8 @@ export const DragDropFileUpload:React.FC<DragDropFileUploadProps> = ({text, drop
         onClick={openFileDialog}
         className={"border-white border hover:border-2 hover:bg-white/5 flex justify-center items-center relative w-[250px] h-[150px] hover:rounded-3xl overflow-hidden hover:scale-105 transition-all"}
     >
-        <div className={"rotate-45 border-primary border hover:border-2  absolute w-[250px] h-[150px] overflow-hidden hover:scale-105 transition-all hoverable"} />
-        <div className={"-rotate-45 border-primary border hover:border-2 absolute w-[250px] h-[150px]  overflow-hidden hover:scale-105 transition-all hoverable"} />
+        <div className={"rotate-45  rounded-full  border-primary border hover:border-2  absolute w-[250px] h-[150px] overflow-hidden hover:scale-105 transition-all hoverable"} />
+        <div className={"-rotate-45  rounded-full border-primary border hover:border-2 absolute w-[250px] h-[150px]  overflow-hidden hover:scale-105 transition-all hoverable"} />
         <input
             type="file"
             ref={fileInputRef}

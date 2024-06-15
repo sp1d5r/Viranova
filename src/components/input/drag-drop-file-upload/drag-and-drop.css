@@ -8,4 +8,5 @@
 #drop_zone:hover .hoverable {
     transform: rotate(0deg);
     border-width: 1px; /* Adjust properties as necessary */
+    border-radius: 0;
 }
