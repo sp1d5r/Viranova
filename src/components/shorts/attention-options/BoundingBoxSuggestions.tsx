@@ -262,7 +262,7 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({s
                 <source src={videoUrls.saliencyVideo} type="video/mp4"/>
               </video>
             }
-            {internalBoundingBoxes && <div className="absolute top-0 left-0 w-full h-full bg-primary opacity-50" style={{
+            {internalBoundingBoxes && <div className="absolute top-0 left-0 w-full h-full bg-primary opacity-50 z-50" style={{
               clipPath: clipPath
             }}
             />

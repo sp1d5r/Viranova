@@ -65,7 +65,13 @@ export const ReviewLangchainLogs : React.FC<ReviewLangchainLogProps> = ({runId})
             </label>
           </div>
           <button
-            onClick={() => {setCommentSection({visible: false, comment: ""})}}
+            onClick={() => {
+              LangSmithFeedback.addFeedback({runId: runId, score: -1, comment: commentSection.comment}).then(() => {
+                showNotification('Feedback Added', 'This will be noted during generation.', 'info');
+              }).catch((err) => {
+                showNotification('Feedback Failed', err.toString(), 'error');
+              })
+            }}
             className="inline-flex items-center px-4 py-2 my-2 text-sm font-medium border rounded-lg focus:z-10 focus:ring-4 focus:outline-none focus:text-emerald-700 bg-gray-800 text-gray-200 border-emerald-600 hover:text-white hover:bg-emerald-700 focus:ring-emerald-700 gap-3"
           >
             <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">

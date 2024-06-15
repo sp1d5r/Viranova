@@ -101,7 +101,7 @@ export const VideoSegments: React.FC<VideoSegmentsProps> = ({}) => {
         if (segments) {
             const elem = segments.at(index);
             if (elem) {
-                return <div className="flex-1 min-w-[300px] flex flex-col p-3 gap-2">
+                return <div className="flex-1 min-w-[100px] flex flex-col p-3 gap-2">
                     <p className="text-3xl font-bold text-white mb-2">{elem.segmentTitle}</p>
                     <p className="text-base text-stone-200">{elem.segmentSummary}</p>
                     <div className="flex-1"/>
@@ -151,8 +151,8 @@ export const VideoSegments: React.FC<VideoSegmentsProps> = ({}) => {
             <div className="w-full flex flex-col gap-2">
                 <div className="flex-1 flex flex-col gap-2 justify-start items-center">
 
-                    <div className="w-full flex gap-2 justify-center flex-wrap ">
-                        {video && video.videoPath && <VideoPlayer className={"max-w-screen-lg sm:h-[50vh]"} path={video.videoPath} loadingText={"Loading Video..."} setCurrentTime={(time) => setCurrentTime(time)} seekTo={seekTo}/>}
+                    <div className="w-full flex gap-2 justify-center flex-wrap sm:flex-nowrap ">
+                        {video && video.videoPath && <VideoPlayer className={"max-w-screen-lg w-[60%] sm:h-[50vh]"} path={video.videoPath} loadingText={"Loading Video..."} setCurrentTime={(time) => setCurrentTime(time)} seekTo={seekTo}/>}
                         {
                             currentSegment != -1 && <CurrentSegmentInformation index={currentSegment} />
                         }
