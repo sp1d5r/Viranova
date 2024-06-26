@@ -135,7 +135,7 @@ export default function PlaygroundPage() {
             <div className="w-[60%] min-w-[350px] flex   justify-start items-center flex-col gap-8 my-8">
                 <div className="w-full min-h-[200px] z-0 overflow-hidden border-primary border rounded-xl text-white p-4">
                     <p className="text-2xl font-bold">Clip Video</p>
-                    <div className="bg-white/0"> {/* Ensure this div is completely transparent */}
+                    <div className="bg-white/0 py-5"> {/* Ensure this div is completely transparent */}
                         <CreateProject />
                     </div>
                     <div className="w-full border-b border-accent/20 my-2"/>

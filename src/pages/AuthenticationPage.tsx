@@ -52,7 +52,7 @@ export default function AuthenticationPage() {
         console.log('Logging in with', formData);
         login(formData.email, formData.password, () => {
             window.location.href="/playground"
-        }, ()=>{showNotification("Authentication Issue", "Fuck u cunt.", "error", 5000)})
+        }, ()=>{showNotification("Authentication Issue", "Failed to authenticate..", "error", 5000)})
     };
 
     return <ScrollableLayout>
