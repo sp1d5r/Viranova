@@ -13,6 +13,8 @@ import {NotFound} from "./pages/NotFound";
 import {Settings} from "./pages/Settings";
 import {SegmentVideoMatching} from "./components/segment-video-matching/SegmentVideoMatching";
 import {Shorts} from "./pages/Shorts";
+import TermsOfServicePages from "./pages/TermsOfServicePage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 
 
 function App() {
@@ -23,6 +25,9 @@ function App() {
           <Route path="/" element={
               <LandingPage />
           } />
+
+          <Route path="/terms-of-service" element={<TermsOfServicePages />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
 
           {/* User Pages */}
           <Route path={"/authenticate"} element={<AuthenticationPage />} />

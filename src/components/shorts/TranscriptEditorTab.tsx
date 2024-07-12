@@ -314,7 +314,7 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({short, 
     <ol ref={scrollRef} className="relative border-s border-gray-200 dark:border-gray-700 m-5 flex flex-col-reverse overflow-y-scroll flex-1">
       {/* Log - Message */}
       {
-        short.logs.map((value, index) => {
+        short.logs.reverse().map((value, index) => {
           if (value.type == "message") {
             return <li className="mb-2 ms-4">
               <div className="absolute w-3 h-3 bg-gray-200 rounded-full mt-1.5 -start-1.5 border border-white dark:border-gray-900 dark:bg-gray-700"></div>
@@ -380,7 +380,7 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({short, 
               </span>
             </li>
           }
-        }).reverse()
+        })
       }
     </ol>
   </div>
