@@ -6,7 +6,7 @@ export interface FooterProps {
 }
 
 export const Footer: React.FC<FooterProps> = () => {
-  return <footer className="rounded-lg shadow bg-emerald-950/30 m-4 z-50 text-white my-16">
+  return <footer className="rounded-lg shadow bg-emerald-950/30 m-4 z-50 text-white my-16 w-[95%]">
     <div className="w-full max-w-screen-xl mx-auto p-4 md:py-8">
       <div className="sm:flex sm:items-center sm:justify-between">
         <a href="https://flowbite.com/" className="flex items-center mb-4 sm:mb-0 space-x-3 rtl:space-x-reverse">

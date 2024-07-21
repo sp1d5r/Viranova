@@ -8,6 +8,7 @@ import FirebaseDatabaseService from "../../services/database/strategies/Firebase
 import {FirebaseStorageService} from "../../services/storage/strategies";
 import {StockAudio} from "../../types/collections/StockAudio";
 import {AudioPlayer} from "../audio/AudioPlayer";
+import {PingVisualiser} from "./export-tab/PingVisualiser";
 
 export interface ExportTabProps {
   short: Short;
@@ -18,6 +19,28 @@ interface ShortTitle {
   titleTop: string;
   titleBottom: string;
 }
+
+type dataCollectionType = 'Static Collection' | 'Dynamic Decay' | 'Data Freak';
+
+interface DataCollectionType {
+  collectionType: dataCollectionType,
+  description: string,
+}
+
+const dataCollectionMethodologies : DataCollectionType[] = [
+  {
+    collectionType: 'Static Collection',
+    description: 'Once a day, every day for 6 days.'
+  },
+  {
+    collectionType: 'Dynamic Decay',
+    description: 'Every hour for first 12 hours, then every 2 hours for next 12 hours, then daily for 5 days.'
+  },
+  {
+    collectionType: 'Data Freak',
+    description: 'Every hour for first 24 hours, then every 2 hours for next 24 hours, then every 4 hours for next 24 hours, finally every 12 hours for 3 days.'
+  },
+]
 
 export const ExportTab :React.FC<ExportTabProps> = ({short, shortId}) => {
   const [shortTitle, setShortTitle] = useState<ShortTitle>({
@@ -30,7 +53,7 @@ export const ExportTab :React.FC<ExportTabProps> = ({short, shortId}) => {
     backgroundAudioPercentage: short.background_percentage,
   });
   const [tikTokLink, setTikTokLink] = useState(short.tiktok_link);
-
+  const [selectedDataCollection, setSelectedDataCollection] = useState<DataCollectionType>(dataCollectionMethodologies[0]);
   const {showNotification} = useNotificaiton();
 
   useEffect(() => {
@@ -184,36 +207,56 @@ export const ExportTab :React.FC<ExportTabProps> = ({short, shortId}) => {
       </div>
 
 
-
-      <div className="mb-6 mt-3 flex gap-2 w-full items-center">
-        <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white flex-1">
-          TikTok Link
-          <input type="text" id="default-input" className=" bg-gray-50 border my-2 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
-        </label>
-        <button onClick={() => {
-          if (shortTitle) {
-            FirebaseDatabaseService.updateDocument(
-              'shorts',
-              shortId,
-              {
-                'tiktok_link': tikTokLink,
-              },
-              ()=>{
-                showNotification("Update Successful", "Updated short tiktok", "success")
-              },
-              (error)=>{
-                showNotification("Update Failed", error.message, "error")
-              }
-            )
-          }
-        }}
-                className="inline-flex items-center px-4 py-2 my-2 h-10 text-sm font-medium border rounded-lg focus:z-10 focus:ring-4 focus:outline-none focus:text-cyan-700 bg-gray-800 text-gray-200 border-cyan-600 hover:text-white hover:bg-cyan-700 focus:ring-cyan-700 gap-3"
-        >
-          Update
-          <svg className="w-5 h-5 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M18 14v4.833A1.166 1.166 0 0 1 16.833 20H5.167A1.167 1.167 0 0 1 4 18.833V7.167A1.166 1.166 0 0 1 5.167 6h4.618m4.447-2H20v5.768m-7.889 2.121 7.778-7.778"/>
-          </svg>
-        </button>
+      <div className="flex flex-col text-white">
+        <p className="mb-0">Handle Analytics</p>
+        <div className="flex gap-2 w-full items-center justify-center">
+          <label className="block text-sm font-medium  flex-1">
+            <input type="text" id="default-input" onChange={(e) => {setTikTokLink(e.target.value)}} className=" bg-gray-50 border my-2 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+          </label>
+          <button onClick={() => {
+            if (shortTitle) {
+              FirebaseDatabaseService.updateDocument(
+                'shorts',
+                shortId,
+                {
+                  'tiktok_link': tikTokLink,
+                },
+                ()=>{
+                  showNotification("Update Successful", "Updated short tiktok", "success")
+                },
+                (error)=>{
+                  showNotification("Update Failed", error.message, "error")
+                }
+              )
+            }
+          }}
+                  className="inline-flex items-center px-4 py-2 my-2 text-sm font-medium border rounded-lg focus:z-10 focus:ring-4 focus:outline-none focus:text-cyan-700 bg-gray-800 text-gray-200 border-cyan-600 hover:text-white hover:bg-cyan-700 focus:ring-cyan-700 gap-3"
+          >
+            Update
+            <svg className="w-5 h-5 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M18 14v4.833A1.166 1.166 0 0 1 16.833 20H5.167A1.167 1.167 0 0 1 4 18.833V7.167A1.166 1.166 0 0 1 5.167 6h4.618m4.447-2H20v5.768m-7.889 2.121 7.778-7.778"/>
+            </svg>
+          </button>
+        </div>
+        <div className="flex flex-col gap-1">
+          <div className="flex justify-evenly items-center">
+            {dataCollectionMethodologies.map((elem) => {
+              return <button
+                disabled={elem.collectionType==selectedDataCollection.collectionType}
+                className="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-teal-300 to-lime-300 group-hover:from-teal-300 group-hover:to-lime-300 group-disabled:from-teal-300 group-disabled:to-lime-300 dark:text-white dark:hover:text-gray-900 focus:ring-4 focus:outline-none focus:ring-lime-200 dark:focus:ring-lime-800"
+                onClick={() => {
+                  setSelectedDataCollection(elem);
+                }}
+              >
+                <span className="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0 group-disabled:bg-opacity-0 group-disabled:text-gray-900 group-disabled:font-bold">
+                {elem.collectionType}
+                </span>
+              </button>
+            })}
+          </div>
+          <p>{selectedDataCollection.description}</p>
+          <PingVisualiser dataType={selectedDataCollection.collectionType} />
+        </div>
       </div>
     </div>
 

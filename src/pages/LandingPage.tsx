@@ -58,10 +58,10 @@ export default function LandingPage(){
     }, [authState]);*/
 
 
-    return <ScrollableLayout className={"gap-2"}>
+    return <ScrollableLayout className={"gap-2 bg-black"}>
         <HeroSection />
         <TracingBeam className={"relative flex gap-2 z-10 px-5 w-full"}>
-            <div className={"flex flex-col gap-2 w-full  overflow-hidden"}>
+            <div className={"flex flex-col gap-2 w-full"}>
                 <WhySection />
                 {/*<NewEraSection />*/}
                 <ContentDeliveryTools />
