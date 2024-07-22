@@ -12,6 +12,7 @@ import {useAuth} from "../contexts/Authentication";
 import {TracingBeam} from "../components/ui/tracing-beam";
 import {ReviewSection} from "../components/sections/reviews/ReviewsSection";
 import {BentoGridDemo} from "../components/sections/bento-grid/BentoGridSection";
+import {BentoGridFeatures} from "../components/sections/bento-grid-features/BentoGridFeatures";
 
 
 
@@ -62,6 +63,7 @@ export default function LandingPage(){
         <HeroSection />
         <TracingBeam className={"relative flex gap-2 z-10 px-5 w-full"}>
             <div className={"flex flex-col gap-2 w-full"}>
+                <BentoGridFeatures />
                 <WhySection />
                 {/*<NewEraSection />*/}
                 <ContentDeliveryTools />
