@@ -61,7 +61,7 @@ export const WhySection: React.FC<WhySectionProps> = ({ className = '' }) => {
 
 
             <div className="flex flex-col flex-1 h-full gap-2 min-w-[250px] min-h-[300px]">
-                <img src={Boring} alt="Copywritten content" className="h-[150px] m-auto" />
+                <img src={Boring} alt="Copywritten content" className="w-[150px] m-auto" />
                 <div className="border-t border-white flex flex-col p-2  text-white h-[150px]">
                     <p className="text-subsubtitle">It's Boring...</p>
                     <p>The videos you're creating are just boring... </p>
