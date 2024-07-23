@@ -35,7 +35,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ className = '' }) => {
 
     return <Vortex
       baseHue={110}
-        className={className + '!p-0 text-white w-full min-h-[70vh] flex gap-5 justify-center items-end md:flex-wrap-reverse flex-col-reverse sm:flex-row'}>
+        className={className + '!p-0 text-white w-full min-h-[70vh] flex gap-5 justify-center items-end md:flex-wrap-reverse flex-col-reverse sm:flex-row bg-emerald-950/40'}>
         <div className={"z-10 flex flex-col gap-10 justify-center items-center px-5 pt-10 w-full h-full"}>
             <div className={"flex justify-center items-center relative "}>
                 <div className={"relative group"}>
@@ -56,7 +56,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ className = '' }) => {
                 <div className={"flex flex-col gap-2 items-center"}>
                     <span className={"text-title m-0 text-center relative"}>
                         Machine Learning Powered {" "}
-                        <span className={"text-primary relative"}>
+                        <span className={"text-[#35DC32] relative"}>
                             Video Clipping
                             <img className={"absolute right-0 -bottom-0.5"} src={Underline} alt={"_"}/>
                         </span>
