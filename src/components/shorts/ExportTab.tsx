@@ -9,6 +9,8 @@ import {FirebaseStorageService} from "../../services/storage/strategies";
 import {StockAudio} from "../../types/collections/StockAudio";
 import {AudioPlayer} from "../audio/AudioPlayer";
 import {PingVisualiser} from "./export-tab/PingVisualiser";
+import {Timestamp} from "firebase/firestore";
+import {Task} from "../../types/collections/Task";
 
 export interface ExportTabProps {
   short: Short;
@@ -42,6 +44,33 @@ const dataCollectionMethodologies : DataCollectionType[] = [
   },
 ]
 
+const createTaskSchedule = (collectionType: dataCollectionType): number[] => {
+  const now = Date.now();
+  const utcNow = now - (now % 1000); // Round to the nearest second
+  const hour = 60 * 60 * 1000;
+  const day = 24 * hour;
+
+  switch (collectionType) {
+    case 'Static Collection':
+      return Array.from({ length: 6 }, (_, i) => utcNow + (i + 1) * day);
+    case 'Dynamic Decay':
+      return [
+        ...Array.from({ length: 12 }, (_, i) => utcNow + (i + 1) * hour),
+        ...Array.from({ length: 6 }, (_, i) => utcNow + 12 * hour + (i + 1) * 2 * hour),
+        ...Array.from({ length: 5 }, (_, i) => utcNow + 24 * hour + (i + 1) * day)
+      ];
+    case 'Data Freak':
+      return [
+        ...Array.from({ length: 24 }, (_, i) => utcNow + (i + 1) * hour),
+        ...Array.from({ length: 12 }, (_, i) => utcNow + 24 * hour + (i + 1) * 2 * hour),
+        ...Array.from({ length: 6 }, (_, i) => utcNow + 48 * hour + (i + 1) * 4 * hour),
+        ...Array.from({ length: 6 }, (_, i) => utcNow + 72 * hour + (i + 1) * 12 * hour)
+      ];
+    default:
+      return [];
+  }
+};
+
 export const ExportTab :React.FC<ExportTabProps> = ({short, shortId}) => {
   const [shortTitle, setShortTitle] = useState<ShortTitle>({
     titleTop: short.short_title_top || '',
@@ -55,6 +84,27 @@ export const ExportTab :React.FC<ExportTabProps> = ({short, shortId}) => {
   const [tikTokLink, setTikTokLink] = useState(short.tiktok_link);
   const [selectedDataCollection, setSelectedDataCollection] = useState<DataCollectionType>(dataCollectionMethodologies[0]);
   const {showNotification} = useNotificaiton();
+
+  const scheduleAnalyticsTasks = async () => {
+    const taskSchedule = createTaskSchedule(selectedDataCollection.collectionType);
+    const tasks: Task[] = taskSchedule.map((scheduledTime) => ({
+      status: 'Pending',
+      scheduledTime: Timestamp.fromMillis(scheduledTime),
+      operation: 'Analytics',
+      taskResultId: `${shortId}_${scheduledTime}`,
+      shortId: shortId,
+      tikTokLink: tikTokLink
+    }));
+
+    try {
+      await Promise.all(tasks.map(task =>
+        FirebaseFirestoreService.addDocument('tasks', task)
+      ));
+      showNotification("Success", `Scheduled ${tasks.length} analytics tasks`, "success");
+    } catch (error) {
+      showNotification("Failed", "Error scheduling analytics tasks", "error");
+    }
+  };
 
   useEffect(() => {
     FirebaseFirestoreService.getAllDocuments(
@@ -211,32 +261,14 @@ export const ExportTab :React.FC<ExportTabProps> = ({short, shortId}) => {
         <p className="mb-0">Handle Analytics</p>
         <div className="flex gap-2 w-full items-center justify-center">
           <label className="block text-sm font-medium  flex-1">
-            <input type="text" id="default-input" onChange={(e) => {setTikTokLink(e.target.value)}} className=" bg-gray-50 border my-2 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+            <input
+              type="text"
+              id="default-input"
+              onChange={(e) => {setTikTokLink(e.target.value)}}
+              className=" bg-gray-50 border my-2 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              value={tikTokLink}
+            />
           </label>
-          <button onClick={() => {
-            if (shortTitle) {
-              FirebaseDatabaseService.updateDocument(
-                'shorts',
-                shortId,
-                {
-                  'tiktok_link': tikTokLink,
-                },
-                ()=>{
-                  showNotification("Update Successful", "Updated short tiktok", "success")
-                },
-                (error)=>{
-                  showNotification("Update Failed", error.message, "error")
-                }
-              )
-            }
-          }}
-                  className="inline-flex items-center px-4 py-2 my-2 text-sm font-medium border rounded-lg focus:z-10 focus:ring-4 focus:outline-none focus:text-cyan-700 bg-gray-800 text-gray-200 border-cyan-600 hover:text-white hover:bg-cyan-700 focus:ring-cyan-700 gap-3"
-          >
-            Update
-            <svg className="w-5 h-5 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M18 14v4.833A1.166 1.166 0 0 1 16.833 20H5.167A1.167 1.167 0 0 1 4 18.833V7.167A1.166 1.166 0 0 1 5.167 6h4.618m4.447-2H20v5.768m-7.889 2.121 7.778-7.778"/>
-            </svg>
-          </button>
         </div>
         <div className="flex flex-col gap-1">
           <div className="flex justify-evenly items-center">
@@ -256,6 +288,33 @@ export const ExportTab :React.FC<ExportTabProps> = ({short, shortId}) => {
           </div>
           <p>{selectedDataCollection.description}</p>
           <PingVisualiser dataType={selectedDataCollection.collectionType} />
+          <button onClick={() => {
+            if (tikTokLink) {
+              FirebaseFirestoreService.updateDocument(
+                'shorts',
+                shortId,
+                {
+                  'tiktok_link': tikTokLink,
+                },
+                async () => {
+                  showNotification("Update Successful", "Updated short TikTok link", "success");
+                  await scheduleAnalyticsTasks();
+                },
+                (error) => {
+                  showNotification("Update Failed", error.message, "error")
+                }
+              )
+            } else {
+              showNotification("Error", "Please provide a TikTok link", "error");
+            }
+          }}
+                  className="inline-flex items-center  justify-center px-4 py-2 my-2 text-sm font-medium border rounded-lg focus:z-10 focus:ring-4 focus:outline-none focus:text-cyan-700 bg-gray-800 text-gray-200 border-cyan-600 hover:text-white hover:bg-cyan-700 focus:ring-cyan-700 gap-3"
+          >
+            Schedule Analytics
+            <svg className="w-5 h-5 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M18 14v4.833A1.166 1.166 0 0 1 16.833 20H5.167A1.167 1.167 0 0 1 4 18.833V7.167A1.166 1.166 0 0 1 5.167 6h4.618m4.447-2H20v5.768m-7.889 2.121 7.778-7.778"/>
+            </svg>
+          </button>
         </div>
       </div>
     </div>
