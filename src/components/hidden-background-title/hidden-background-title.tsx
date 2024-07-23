@@ -35,7 +35,7 @@ export const HiddenBackgroundTitle: React.FC<HiddenBackgroundTitleProps> = ({ cl
             // Optionally, manage how the spoiler image behaves
             tl.fromTo(
               '#hidden-text',
-              { x: 0, opacity: 0.5 }, // Start position
+              { x: 0, opacity: 0.9 }, // Start position
               { x: -200, opacity: 1, duration: 1 }, // End position
               "<" // Start this animation at the same time as the title
             );
