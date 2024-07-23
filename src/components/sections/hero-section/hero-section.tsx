@@ -35,7 +35,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ className = '' }) => {
 
     return <Vortex
       baseHue={110}
-        className={className + '!p-0 text-white w-full min-h-[70vh] flex gap-5 justify-center items-end md:flex-wrap-reverse flex-col-reverse sm:flex-row bg-emerald-950/40'}>
+        className={className + '!p-0 text-white w-full min-h-[70vh] flex gap-5 justify-center border-t border-primary items-end md:flex-wrap-reverse flex-col-reverse sm:flex-row bg-gradient-to-b from-emerald-950/80 via-emerald-950/60 to-emerald-950/0'}>
         <div className={"z-10 flex flex-col gap-10 justify-center items-center px-5 pt-10 w-full h-full"}>
             <div className={"flex justify-center items-center relative "}>
                 <div className={"relative group"}>

@@ -9,34 +9,36 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({className=""}) => {
   const testimonials = [
     {
       quote:
-        "It was the best of times, it was the worst of times, it was the age of wisdom, it was the age of foolishness, it was the epoch of belief, it was the epoch of incredulity, it was the season of Light, it was the season of Darkness, it was the spring of hope, it was the winter of despair.",
-      name: "Charles Dickens",
-      title: "A Tale of Two Cities",
+        "This platform has revolutionized the way we create and distribute short-form content. The AI-driven clips are spot-on and have significantly boosted our engagement.",
+      name: "Alex Johnson",
+      title: "Content Strategist at MediaWorks",
     },
     {
       quote:
-        "To be, or not to be, that is the question: Whether 'tis nobler in the mind to suffer The slings and arrows of outrageous fortune, Or to take Arms against a Sea of troubles, And by opposing end them: to die, to sleep.",
-      name: "William Shakespeare",
-      title: "Hamlet",
-    },
-    {
-      quote: "All that we see or seem is but a dream within a dream.",
-      name: "Edgar Allan Poe",
-      title: "A Dream Within a Dream",
+        "Thanks to this tool, we can now effortlessly generate high-quality clips from our lengthy webinars. It's a game-changer for our social media strategy!",
+      name: "Sarah Lee",
+      title: "Marketing Manager at TechGurus",
     },
     {
       quote:
-        "It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.",
-      name: "Jane Austen",
-      title: "Pride and Prejudice",
+        "The AI clipping tool has saved us countless hours. The analytics feedback loop ensures our content keeps getting better and resonates with our audience.",
+      name: "David Smith",
+      title: "Founder of StartupX",
     },
     {
       quote:
-        "Call me Ishmael. Some years ago—never mind how long precisely—having little or no money in my purse, and nothing particular to interest me on shore, I thought I would sail about a little and see the watery part of the world.",
-      name: "Herman Melville",
-      title: "Moby-Dick",
+        "Using this platform, our video engagement on TikTok has skyrocketed. The tailored clips are exactly what our audience wants to see.",
+      name: "Emily Chen",
+      title: "Social Media Influencer",
+    },
+    {
+      quote:
+        "This service has streamlined our content creation process. The AI is incredibly accurate, and the insights have helped us refine our approach.",
+      name: "Michael Brown",
+      title: "CEO of DigitalWave",
     },
   ];
+
 
 
   return <section className={className + ' container flex flex-col gap-5   justify-start overflow-hidden relative'}>

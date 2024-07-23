@@ -1,6 +1,5 @@
 import {HeroSection} from "../components/sections/hero-section/hero-section";
 import {WhySection} from "../components/sections/why-section/why-section";
-import {NewEraSection} from "../components/sections/new-era-section/new-era-section";
 import React, {useEffect, useState} from "react";
 import ScrollableLayout from "../layouts/ScrollableLayout";
 import { gsap } from 'gsap';
@@ -11,8 +10,9 @@ import {
 import {useAuth} from "../contexts/Authentication";
 import {TracingBeam} from "../components/ui/tracing-beam";
 import {ReviewSection} from "../components/sections/reviews/ReviewsSection";
-import {BentoGridDemo} from "../components/sections/bento-grid/BentoGridSection";
 import {BentoGridFeatures} from "../components/sections/bento-grid-features/BentoGridFeatures";
+import {AnalyticsCollection} from "../components/sections/analytics-collection/AnalyticsCollection";
+import {DataDrivenVideos, DataDrivenVideosProps} from "../components/sections/data-driven-videos/DataDrivenVideos";
 
 
 
@@ -61,24 +61,25 @@ export default function LandingPage(){
 
     return <ScrollableLayout className={"gap-2 bg-black"}>
         <HeroSection />
-        <TracingBeam className={"relative flex gap-2 z-10 px-5 w-full"}>
-            <div className={"flex flex-col gap-2 w-full"}>
+        <TracingBeam className={"relative flex z-10 px-5 py-32 w-full"}>
+            <div className={"flex flex-col gap-16 w-full"}>
                 <BentoGridFeatures />
                 <WhySection />
+                <AnalyticsCollection />
+                <DataDrivenVideos />
                 {/*<NewEraSection />*/}
                 <ContentDeliveryTools />
                 <ReviewSection />
-                <BentoGridDemo />
             </div>
         </TracingBeam>
 
 
-        <div className="w-full my-8 z-50 p-4 text-center bg-white border border-gray-200 rounded-lg shadow sm:p-8 dark:bg-gray-800 dark:border-gray-700">
+        <div className="w-full my-8 z-50 p-4 text-center border-t border-b  shadow sm:p-8 bg-emerald-950 border-emerald-800">
             <h5 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">Create Clips From Anywhere!</h5>
             <p className="mb-5 text-base text-gray-500 sm:text-lg dark:text-gray-400">Stay up-to-date with the latest research in video clipping!</p>
             <div className="items-center justify-center space-y-4 sm:flex sm:space-y-0 sm:space-x-4 rtl:space-x-reverse">
-
             </div>
         </div>
+
     </ScrollableLayout>
 }

@@ -12,15 +12,15 @@ export interface BentoGridFeaturesProps {
 }
 
 export const BentoGridFeatures: React.FC<BentoGridFeaturesProps> = () => {
-  return <section className="relative my-6 w-[95%] m-auto text-center">
+  return <section className="relative my-6 w-[90%] m-auto text-center">
   <img src={BackgroundGradient} alt="..." className="absolute top-0 left-0 w-full h-full z-0" />
 
-    <div className="z-10 flex flex-col gap-2 justify-center items-center text-left">
-      <div className="flex flex-col gap-1 m-auto justify-center items-center">
+    <div className="z-10 flex flex-col gap-10 justify-center items-center text-left">
+      <div className="flex flex-col m-auto justify-center items-center text-center">
         <div className="border border-primary shadow-accent p-2 rounded-full flex items-center justify-center w-[150px]">
           <p className="text-white">Features</p>
         </div>
-        <p className="text-white text-title">The Future of Short-Form Content is Here</p>
+        <p className="text-white text-title my-0">The Future of Short-Form Content is Here</p>
         <p className="text-white">Viranova puts the power of AI to intelligently create content for your audience.</p>
       </div>
 
