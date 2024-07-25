@@ -7,6 +7,7 @@ export interface Task {
   status: TaskStatus;
   scheduledTime: Timestamp;
   operation: TaskOperation;
+  processingStartTime?: Timestamp;
   taskResultId: string;
   shortId: string;
   tikTokLink: string;

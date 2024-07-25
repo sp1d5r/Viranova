@@ -11,12 +11,13 @@ import {AttentionTab} from "../components/shorts/AttentionTab";
 import {LoadingIcon} from "../components/loading/Loading";
 import {ExportTab} from "../components/shorts/ExportTab";
 import {Timestamp} from "firebase/firestore";
+import {PerformanceTab} from "../components/shorts/PerformanceTab";
 
 export interface ShortsProps {
 
 }
 
-export type Tabs = "Short Settings" | "Transcript Editor" | "Attention Capture" | "Export"
+export type Tabs = "Short Settings" | "Transcript Editor" | "Attention Capture" | "Export" | "Performance";
 
 export const Shorts: React.FC<ShortsProps> = ({}) => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -86,7 +87,6 @@ export const Shorts: React.FC<ShortsProps> = ({}) => {
         const diffInSeconds = now.seconds - short.last_updated.seconds;
         const diffInMinutes = diffInSeconds / 60;
         setIsOlderThanTwoMinutes(diffInMinutes > 5);
-        console.log(diffInMinutes)
       }
     };
 
@@ -142,7 +142,7 @@ export const Shorts: React.FC<ShortsProps> = ({}) => {
         </div>
       </div>)
     }
-    <div className="max-w-screen-xl w-full flex flex-col text-white px-2 ">
+    <div className="max-w-screen-xl w-full flex flex-col text-white px-2 min-h-[80vh]">
       <div className="md:flex gap-2">
         <ul className="flex-wrap flex flex-row space-x-4 justify-center sm:justify-start my-4 overflow-x-auto md:flex-col md:space-y-4 md:space-x-0 text-sm font-medium text-gray-400 md:mb-0 max-h-[90vh]">
         <li>
@@ -176,7 +176,16 @@ export const Shorts: React.FC<ShortsProps> = ({}) => {
               <span className="hidden md:inline">Export</span>
             </button>
           </li>
-          <div className="w-full h-[50%] relative flex md:justify-center items-end text-white">
+          <li>
+            <button disabled={tabSelected === "Performance"} onClick={() => {setTabSelected("Performance")}}  className="inline-flex items-center px-4 py-3 rounded-lg w-full bg-gray-800 hover:bg-gray-700 hover:text-white text-left disabled:text-white disabled:bg-emerald-600">
+              <svg className="w-4 h-4 me-2 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4.5V19a1 1 0 0 0 1 1h15M7 14l4-4 4 4 5-5m0 0h-3.207M20 9v3.207"/>
+              </svg>
+              <span className="hidden md:inline">Performance</span>
+            </button>
+          </li>
+          <div className="w-full flex-1" />
+          <div className="w-full md:h-[300px] relative flex md:justify-center items-start text-white">
             <div className="md:absolute md:-rotate-90">
               <p className="text-4xl font-bold pt-3 sm:pt-5 w-full text-nowrap text-primary">The Kitchen</p>
               <p className="font-bold py-2 text-nowrap">Hold on a second and let him cook 🔥</p>
@@ -198,6 +207,10 @@ export const Shorts: React.FC<ShortsProps> = ({}) => {
 
         {
           tabSelected == "Export" && short && short_id && segment && <ExportTab shortId={short_id} short={short} />
+        }
+
+        {
+          tabSelected == "Performance" && short && short_id && segment && <PerformanceTab shortId={short_id} short={short} />
         }
 
         {
