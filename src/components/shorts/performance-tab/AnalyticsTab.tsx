@@ -103,13 +103,13 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ shortId }) => {
   } satisfies ChartConfig;
 
   const AnalyticsChart: React.FC<{ dataKey: keyof ProcessedDataPoint; title: string }> = ({ dataKey, title }) => (
-    <Card className="w-[45%]">
+    <Card className="w-full md:w-[45%]">
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         <CardDescription>Analytics data over time</CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="min-h-[150px]">
+        <ChartContainer config={chartConfig} className="min-h-[120px]">
           <AreaChart
             accessibilityLayer
             data={processedData}
