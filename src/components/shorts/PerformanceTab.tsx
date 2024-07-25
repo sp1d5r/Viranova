@@ -1,6 +1,7 @@
 import React, {useState} from "react";
 import {Short} from "../../types/collections/Shorts";
 import {TasksTab} from "./performance-tab/TasksTab";
+import {AnalyticsTab} from "./performance-tab/AnalyticsTab";
 
 export interface PerformanceTabProps {
   short: Short;
@@ -69,6 +70,9 @@ export const PerformanceTab :React.FC<PerformanceTabProps> = ({short, shortId}) 
 
     {
       tabSelected === 'Tasks' && <TasksTab shortId={shortId}/>
+    }
+    {
+      tabSelected === 'Analytics' && <AnalyticsTab shortId={shortId}/>
     }
 
   </div>
