@@ -1,15 +1,18 @@
 import React, {useEffect, useRef} from 'react';
 import { HiddenBackgroundTitle } from '../../hidden-background-title/hidden-background-title';
-import CopyWrittenContent from '../../../assets/landing-page-assets/why/CopyWrittenContent.svg'
-import ZeroAudienceEngagement from '../../../assets/landing-page-assets/why/ZeroAudienceEngagement.png'
-import Boring from '../../../assets/landing-page-assets/why/Boring.svg'
+import CardBackground from '../../../assets/landing-page-assets/why/CardBackground.png';
+import AnalyseChannels from '../../../assets/landing-page-assets/why/AnalyseChannels.png';
+import DataCollection from '../../../assets/landing-page-assets/why/DataCollection.png';
+import FinetuneSystem from '../../../assets/landing-page-assets/why/FintuneSystem.png';
+import Database from '../../../assets/landing-page-assets/why/icons/Database.png';
+import Future from '../../../assets/landing-page-assets/why/icons/Future.png';
+import FuseSymbol from '../../../assets/landing-page-assets/why/icons/Fuse Symbol.png';
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 
 export interface WhySectionProps {
     className?: string;
 }
-
 
 export const WhySection: React.FC<WhySectionProps> = ({ className = '' }) => {
     const whySection = useRef<HTMLDivElement>(null);
@@ -39,36 +42,77 @@ export const WhySection: React.FC<WhySectionProps> = ({ className = '' }) => {
     }, []);
 
 
-    return <section ref={whySection} className={className + "container flex flex-col gap-5 min-h-[40vh] justify-start overflow-hidden"}>
-        <HiddenBackgroundTitle />
-        <div className="flex flex-wrap md:flex-nowrap items-end justify-evenly gap-4">
-            <div className="flex flex-col flex-1 h-full gap-2 min-w-[250px] min-h-[300px]">
-                <img src={CopyWrittenContent} alt="Copywritten content" className="h-[150px] ml-auto" />
-                <div className="border-t border-white flex flex-col p-2  text-white h-[150px]">
-                    <p className="text-subsubtitle">Copywritten Content</p>
-                    <p>Just copying and pasting clips get’s you stuck on 200 views. </p>
+    return <section ref={whySection} className={className + "container flex flex-col gap-5 min-h-[20vh] justify-start overflow-hidden"}>
+        <HiddenBackgroundTitle title="Not another automation tool - it's a living organism." />
 
+        <div className="flex w-full items-center justify-center gap-3 mt-8 flex-wrap md:flex-nowrap">
+            <div className="shadow rounded-xl shadow-white relative flex flex-col items-start justify-end w-[300px] h-[300px]">
+                <img className="absolute w-full h-full z-0" src={CardBackground} alt={''} />
+                <img className="absolute top-0 w-full ml-auto mt-4 z-0" src={AnalyseChannels} alt={''} />
+
+                <div className="flex flex-col gap-2 items-start justify-center z-10 text-white p-6">
+                    <div className="flex gap-2 items-center font-bold">
+                        <img className="w-[15px] h-[15px]" src={Database} alt={''} />
+                        <p>Analyse Channels</p>
+                    </div>
+                    <p className="text-sm">Collect data from specific channels to build your clipping empire.</p>
                 </div>
             </div>
+            <div className="shadow rounded-xl shadow-white relative flex flex-col items-start justify-end w-[300px] h-[300px]">
+                <img className="absolute top-0 w-full h-full z-0" src={CardBackground} alt={''} />
+                <img className="absolute top-0 w-full ml-auto mt-4 z-0" src={DataCollection} alt={''} />
 
-            <div className="flex flex-col flex-1 h-full gap-2 min-w-[250px] min-h-[300px]">
-                <img src={ZeroAudienceEngagement} alt="Copywritten content" className="h-[150px] m-auto" />
-                <div className="border-t border-white flex flex-col p-2  text-white h-[150px]">
-                    <p className="text-subsubtitle">Zero Audience Engagement</p>
-                    <p>Without interacting with your audience you won’t be able to build a fanbase</p>
+                <div className="flex flex-col gap-2 items-start justify-center z-10 text-white p-6">
+                    <div className="flex gap-2 items-center font-bold">
+                        <img className="w-[15px] h-[15px]" src={Future} alt={''} />
+                        <p>Data Collection Methods</p>
+                    </div>
+                    <p className="text-sm">Collect data with various levels of granularity most suited to you.</p>
+                </div>
+
+            </div>
+            <div className="shadow rounded-xl shadow-white relative flex flex-col items-start justify-end w-[300px] h-[300px]">
+                <img className="absolute w-full h-full z-0" src={CardBackground} alt={''} />
+                <img className="absolute top-0 w-full ml-auto mt-4 z-0" src={FinetuneSystem} alt={''} />
+
+                <div className="flex flex-col gap-2 items-start justify-center z-10 text-white p-6">
+                    <div className="flex gap-2 items-center font-bold">
+                        <img className="w-[15px] h-[15px]" src={FuseSymbol} alt={''} />
+                        <p>Analyse Channels</p>
+                    </div>
+                    <p className="text-sm">Use data to automatically finetune every part of the system.</p>
                 </div>
             </div>
+        </div>
 
-
-            <div className="flex flex-col flex-1 h-full gap-2 min-w-[250px] min-h-[300px]">
-                <img src={Boring} alt="Copywritten content" className="w-[150px] m-auto" />
-                <div className="border-t border-white flex flex-col p-2  text-white h-[150px]">
-                    <p className="text-subsubtitle">It's Boring...</p>
-                    <p>The videos you're creating are just boring... </p>
+        <div className="flex w-full items-center justify-center gap-3 my-2  flex-wrap md:flex-nowrap">
+            <div className="relative flex flex-col items-start justify-end w-[300px]">
+                <div className="flex flex-col gap-2 items-start justify-center z-10 text-white ">
+                    <div className="flex gap-2 items-center font-bold">
+                        <img className="w-[15px] h-[15px]" src={Database} alt={''} />
+                        <p>Clipping Methodology</p>
+                    </div>
+                    <p className="text-sm">Start with your original video, splitting this up by topic into segments, finally convert the segments into shorts.</p>
                 </div>
             </div>
-
-
+            <div className="relative flex flex-col items-start justify-end w-[300px]">
+                <div className="flex flex-col gap-2 items-start justify-center z-10 text-white">
+                    <div className="flex gap-2 items-center font-bold">
+                        <img className="w-[15px] h-[15px]" src={Database} alt={''} />
+                        <p>Short Generation</p>
+                    </div>
+                    <p className="text-sm">Use Large Language Models to come up with ideas for shorts based from comments and analytics</p>
+                </div>
+            </div>
+            <div className="relative flex flex-col items-start justify-end w-[300px]">
+                <div className="flex flex-col gap-2 items-start justify-center z-10 text-white">
+                    <div className="flex gap-2 items-center font-bold">
+                        <img className="w-[15px] h-[15px]" src={Database} alt={''} />
+                        <p>Intelligent Visual Identification</p>
+                    </div>
+                    <p className="text-sm">Intelligently detect the most interesting parts of your videos visually using our advanced models.</p>
+                </div>
+            </div>
         </div>
     </section>
 };

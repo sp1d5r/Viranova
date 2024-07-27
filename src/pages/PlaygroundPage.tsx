@@ -1,24 +1,14 @@
-import React, {ChangeEventHandler, DragEventHandler, useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {TransparentNavigationBar} from '../components/navigation-bar/transparent-navigation-bar';
 import {ExistingProjects} from '../components/playground/ExistingProjects';
 import {CreateProject} from '../components/playground/CreateProject';
 import LogoIcon from "../assets/logo/Scissors.svg";
 import gsap from "gsap";
-import {SquigglyUnderline} from "../components/ui/squiggly-line";
 import {BackgroundBeams} from "../components/ui/background-beams";
 import {useNotificaiton} from "../contexts/NotificationProvider";
 import FirebaseFirestoreService from "../services/database/strategies/FirebaseFirestoreService";
 import {useAuth} from "../contexts/Authentication";
-import {Simulate} from "react-dom/test-utils";
-import submit = Simulate.submit;
-import FirebaseStorageService from "../services/storage/strategies/FirebaseStorageService";
-import {UserVideo, userVideoToDocument} from "../types/collections/UserVideo";
-import FirebaseDatabaseService from "../services/database/strategies/FirebaseFirestoreService";
 
-function getRandomString(strings: string[]): string {
-    const randomIndex = Math.floor(Math.random() * strings.length);
-    return strings[randomIndex];
-}
 
 export default function PlaygroundPage() {
     const comp = useRef(null);

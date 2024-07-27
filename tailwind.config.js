@@ -14,7 +14,7 @@ module.exports = {
         "background": "#010C0F",
         "primary": "#047857",
         "secondary": "#093909",
-        "accent": "#059669",
+        "accent": "#35DC32",
         "button-primary": "#C8EF9F",
         "button-secondary": "#E0FAE0",
         "danger": "#B64A4A",

@@ -1,6 +1,6 @@
 import React from 'react';
 import BackgroundGradient from "../../../assets/landing-page-assets/BackgroundGradient.svg";
-import AnalyticsTracking from "../../../assets/landing-page-assets/analytics-collection/AnalyticsTracking.svg";
+import AnalyticsTracking from "../../../assets/landing-page-assets/analytics-collection/AnalyticsTracking.png";
 
 export interface AnalyticsCollectionProps {
 

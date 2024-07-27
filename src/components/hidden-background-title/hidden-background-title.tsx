@@ -6,9 +6,12 @@ import gsap from 'gsap';
 export interface HiddenBackgroundTitleProps {
     className?: string;
     title?: string;
+    topTitle?: string;
+    bottomTitle?: string;
+    accentedBottomTitle?: string;
 }
 
-export const HiddenBackgroundTitle: React.FC<HiddenBackgroundTitleProps> = ({ className = '', title = "Your clips won’t slap if they’re boring" }) => {
+export const HiddenBackgroundTitle: React.FC<HiddenBackgroundTitleProps> = ({ className = '', topTitle = 'Generic AI automation', bottomTitle = 'it\'s a', accentedBottomTitle = 'living organism' }) => {
     const ref = useRef<HTMLDivElement>(null);
 
     useLayoutEffect(() => {
@@ -28,7 +31,7 @@ export const HiddenBackgroundTitle: React.FC<HiddenBackgroundTitleProps> = ({ cl
             // Move the title horizontally across the screen
             tl.fromTo(
               '#hidden-title',
-              { opacity: 0 }, // Start from the right, not visible
+              { opacity: 0.5 }, // Start from the right, not visible
               { opacity: 1, duration: 1 } // Move to center and fade in
             );
 
@@ -45,7 +48,11 @@ export const HiddenBackgroundTitle: React.FC<HiddenBackgroundTitleProps> = ({ cl
     return (
       <div ref={ref} className={`${className} w-full relative mt-10 sm:mt-10 flex justify-start items-center text-white`}>
           <img id="hidden-text" className="absolute -top-12 z-1 w-[300vw] max-w-max" src={SpoilerAlert} alt="Spoiler alert" />
-          <p id="hidden-title" className="text-4xl sm:text-6xl font-bold text-center z-10">{title}</p>
+          <span id="hidden-title" className="text-4xl sm:text-6xl font-bold text-center z-10">
+              <span className="line-through">{topTitle}</span>
+              <span> {bottomTitle}</span>
+              <span className="text-accent underline"> {accentedBottomTitle}!</span>
+          </span>
       </div>
     );
 };
