@@ -23,7 +23,7 @@ export interface LandingCardProps {
 }
 const LandingCard : React.FC<LandingCardProps> = ({imageSrc, cardTitle, cardDescription}) => {
     return <div
-        className={"flex-col bg-white/5 flex border-primary border h-72 backdrop-blur rounded-xl hover:scale-110 transition-all p-3 justify-center items-center  gap-3 hover:shadow hover:shadow-primary min-w-[150px] max-w-[250px]"}>
+        className={"flex-col bg-white/5 flex border-emerald-500 border h-72 backdrop-blur rounded-xl hover:scale-110 transition-all p-3 justify-center items-center  gap-3 hover:shadow hover:shadow-primary min-w-[150px] max-w-[250px]"}>
         <img src={imageSrc} alt={"landing card image"} className={"mix-blend-darken h-32 w-32 aspect-square"}/>
         <p className={"font-bold"}>{cardTitle}</p>
         <p>{cardDescription}</p>
@@ -35,7 +35,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ className = '' }) => {
 
     return <Vortex
       baseHue={110}
-        className={className + '!p-0 text-white w-full min-h-[70vh] flex gap-5 justify-center border-t border-primary items-end md:flex-wrap-reverse flex-col-reverse sm:flex-row bg-gradient-to-b from-emerald-950/80 via-emerald-950/60 to-emerald-950/0'}>
+        className={className + '!p-0 text-white w-full min-h-[70vh] flex gap-5 justify-center border-t border-emerald-500 items-end md:flex-wrap-reverse flex-col-reverse sm:flex-row bg-gradient-to-b from-emerald-950/80 via-emerald-950/60 to-emerald-950/0'}>
         <div className={"z-10 flex flex-col gap-10 justify-center items-center px-5 pt-10 w-full h-full"}>
             <div className={"flex justify-center items-center relative "}>
                 <div className={"relative group"}>

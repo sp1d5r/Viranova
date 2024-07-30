@@ -4,7 +4,7 @@ import {Input} from "../ui/input";
 import {Button} from "../ui/button";
 import {GitPullRequestCreateArrow} from "lucide-react";
 import {Alert, AlertDescription, AlertTitle} from "../ui/alert";
-import {ExclamationTriangleIcon} from "@radix-ui/react-icons";
+import {ExclamationTriangleIcon, QuestionMarkCircledIcon} from "@radix-ui/react-icons";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "../ui/tabs";
 import {ChannelCard} from './channels/ChannelCard'
 import {ScrollArea} from "../ui/scroll-area";
@@ -93,7 +93,17 @@ export const DashboardChannels: React.FC<DashboardChannelsProps> = ({}) => {
         </div>
       </ResizablePanel>
       <ResizableHandle withHandle />
-      <ResizablePanel>Two</ResizablePanel>
+      <ResizablePanel>
+        {
+          selectedChannel ?
+            <ChannelCard selected={selectedChannel ? selectedChannel.channelName == selectedChannel.channelName : false} clickCard={()=>{setSelectedChannel(selectedChannel)}} {...selectedChannel} />
+            :
+            <div className="w-full h-full flex flex-col justify-center items-center">
+              <QuestionMarkCircledIcon className="w-10 h-10" />
+              <p>No Channel Selected</p>
+            </div>
+        }
+      </ResizablePanel>
     </ResizablePanelGroup>
   </main>
 }

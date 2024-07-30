@@ -8,8 +8,8 @@ import {
   Package,
   Package2,
   Search,
-  ShoppingCart,
-  Users,
+  ShoppingCart, Smartphone, Tv,
+  Users, Video,
 } from "lucide-react"
 
 import { Badge } from "../components/ui/badge"
@@ -46,9 +46,9 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { id: 'dashboard', title: 'Dashboard', icon: <Home className="h-4 w-4" /> },
-  { id: 'channels', title: 'Channels', icon: <ShoppingCart className="h-4 w-4" />, badge: 6 },
-  { id: 'videos', title: 'Videos', icon: <Package className="h-4 w-4" /> },
-  { id: 'shorts', title: 'Shorts', icon: <Users className="h-4 w-4" /> },
+  { id: 'channels', title: 'Channels', icon: <Tv className="h-4 w-4" />, badge: 6 },
+  { id: 'videos', title: 'Videos', icon: <Video className="h-4 w-4" /> },
+  { id: 'shorts', title: 'Shorts', icon: <Smartphone className="h-4 w-4" /> },
   { id: 'analytics', title: 'Analytics', icon: <LineChart className="h-4 w-4" /> },
 ];
 
