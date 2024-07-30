@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import {NavigationBar} from "./components/navigation-bar/navigation-bar";
-import {ModelReview} from "./pages/ModelReview";
 import LandingPage from "./pages/LandingPage";
 import PlaygroundPage from "./pages/PlaygroundPage";
 import AuthenticationPage from "./pages/AuthenticationPage";
@@ -15,6 +14,7 @@ import {SegmentVideoMatching} from "./components/segment-video-matching/SegmentV
 import {Shorts} from "./pages/Shorts";
 import TermsOfServicePages from "./pages/TermsOfServicePage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import Dashboard from "./pages/Dashboard";
 
 
 function App() {
@@ -26,6 +26,7 @@ function App() {
               <LandingPage />
           } />
 
+          {/* Static Pages */}
           <Route path="/terms-of-service" element={<TermsOfServicePages />} />
           <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
 
@@ -44,6 +45,7 @@ function App() {
 
           {/* Main Pages */}
           <Route path={"/playground"} element={<PlaygroundPage />} />
+          <Route path={"/dashboard"} element={<Dashboard />} />
           <Route path={"/video-handler"} element={<VideoProgress />} />
           <Route path={"/video-temporal-segmentation"} element={<VideoSegments />} />
           <Route path={"/shorts"} element={<Shorts />} />

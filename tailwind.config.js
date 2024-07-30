@@ -12,16 +12,36 @@ module.exports = {
       colors: {
         "text": "#FEFDF6",
         "background": "#010C0F",
-        "primary": "#047857",
+        "primary": "#35DC32",
         "secondary": "#093909",
-        "accent": "#35DC32",
+        "accent": "#047857",
         "button-primary": "#C8EF9F",
         "button-secondary": "#E0FAE0",
         "danger": "#B64A4A",
         "warning": "#b6904a",
         "success": "#58b64a",
         "info": "#4a4fb6",
-        "gradient": "linear-gradient(180deg, #093909 0%, #35DC32 100%)"
+        "gradient": "linear-gradient(180deg, #093909 0%, #35DC32 100%)",
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        foreground: "hsl(var(--foreground))",
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
       },
       keyframes: {
         slideIn: {
