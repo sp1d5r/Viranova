@@ -34,6 +34,7 @@ import { Sheet, SheetContent, SheetTrigger } from "../components/ui/sheet"
 import {Link} from "react-router-dom";
 import {Logo} from "../components/logo/logo";
 import {DashboardAnalytics} from "../components/dashboard/DashboardAnalytics";
+import {DashboardChannels} from "../components/dashboard/DashboardChannels";
 
 interface NavItem {
   id: string;
@@ -45,9 +46,9 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { id: 'dashboard', title: 'Dashboard', icon: <Home className="h-4 w-4" /> },
-  { id: 'orders', title: 'Channels', icon: <ShoppingCart className="h-4 w-4" />, badge: 6 },
-  { id: 'products', title: 'Videos', icon: <Package className="h-4 w-4" /> },
-  { id: 'customers', title: 'Shorts', icon: <Users className="h-4 w-4" /> },
+  { id: 'channels', title: 'Channels', icon: <ShoppingCart className="h-4 w-4" />, badge: 6 },
+  { id: 'videos', title: 'Videos', icon: <Package className="h-4 w-4" /> },
+  { id: 'shorts', title: 'Shorts', icon: <Users className="h-4 w-4" /> },
   { id: 'analytics', title: 'Analytics', icon: <LineChart className="h-4 w-4" /> },
 ];
 
@@ -204,6 +205,9 @@ export default function Dashboard() {
           selectedItem === 'dashboard' && <DashboardAnalytics />
         }
 
+        {
+          selectedItem === 'channels' && <DashboardChannels />
+        }
 
       </div>
     </div>

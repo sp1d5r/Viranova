@@ -228,7 +228,7 @@ export const DashboardAnalytics : React.FC<DashboardAnalyticsProps> = ({}) => {
     <div className="grid gap-4 md:gap-8 lg:grid-cols-2 xl:grid-cols-3">
       <Card
         className="xl:col-span-2"
-        x-chunk="A card showing a table of recent transactions with a link to view all transactions."
+        x-chunk="A card showing a table of recent views on the shorts posted."
       >
         <CardHeader className="flex flex-row items-center">
           <div className="grid gap-2">
