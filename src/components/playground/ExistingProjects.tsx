@@ -27,6 +27,7 @@ export const ExistingProjects: React.FC<ExistingProjectsProps> = ({className=''}
       authState.user && authState.user.uid ? authState.user.uid : '',
       'uid',
       (documents) => {
+        console.log(documents);
         setRecentProjects(documents.map(doc => {
           return documentToUserVideo(doc)
         }).sort((elem1, elem2) => {return elem2.uploadTimestamp - elem1.uploadTimestamp}));

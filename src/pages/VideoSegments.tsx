@@ -12,12 +12,13 @@ import {VideoPlayer} from "../components/video-player/VideoPlayer";
 import {deleteShort} from "../types/collections/Shorts";
 
 export interface VideoSegmentsProps {
-    //
+    videoId?: string;
 }
 
-export const VideoSegments: React.FC<VideoSegmentsProps> = ({}) => {
+export const VideoSegments: React.FC<VideoSegmentsProps> = ({videoId}) => {
     const [searchParams, _] = useSearchParams();
-    const video_id = searchParams.get("video_id");
+    const video_id = searchParams.has("video_id") ? searchParams.get("video_id") : videoId;
+    const videoFromSearch = searchParams.has("video_id")
     const [currentTime, setCurrentTime] = useState<number>(0);
     const [video, setVideo] = useState<UserVideo>();
     const [transcripts, setTranscripts] = useState<Transcript[]>();
@@ -144,6 +145,66 @@ export const VideoSegments: React.FC<VideoSegmentsProps> = ({}) => {
         return <></>
     }
 
+    if (!videoFromSearch) {
+        return <div className={"flex flex-col"}>
+                <div className="w-full flex flex-col gap-2">
+                    <div className="flex-1 flex flex-col gap-2 justify-start items-center">
+
+                        <div className="w-full flex gap-2 justify-center flex-wrap sm:flex-nowrap ">
+                            {video && video.videoPath && <VideoPlayer className={"max-w-screen-lg w-[60%] sm:h-[50vh]"} path={video.videoPath} loadingText={"Loading Video..."} setCurrentTime={(time) => setCurrentTime(time)} seekTo={seekTo}/>}
+                            {
+                              currentSegment != -1 && <CurrentSegmentInformation index={currentSegment} />
+                            }
+                        </div>
+
+                        <div className="w-full flex gap-[2px]">
+                            {
+                              segments && segments.map((elem, index) => {
+                                  return <button
+                                    onClick={() => {setSeekTo(elem.earliestStartTime)}}
+                                    className={`h-5 rounded-md relative border ${elem.flagged ? 'border-red-500' : 'border-emerald-500' } ${elem.latestEndTime <= currentTime ? 'bg-emerald-700' : ''} ${elem.earliestStartTime <= currentTime && currentTime <= elem.latestEndTime ? 'bg-emerald-950' : ''} ${elem.earliestStartTime >= currentTime ? 'bg-gray-700' : ''}`}
+                                    style={{
+                                        width: `${100 * ((elem.latestEndTime - elem.earliestStartTime) / (segments[segments.length - 1].latestEndTime))}%`
+                                    }}
+                                    onMouseEnter={() => {setSegmentHovered(index); console.log(index)}}
+                                    onMouseLeave={() => {setSegmentHovered(-1)}}
+                                  >
+                                      {
+                                        index == segmentHovered && <div className="absolute h-32 w-64 bottom-[20px] left-1/2 -translate-x-1/2">
+                                            <div className="relative w-full h-full z-10">
+                                                <div className="absolute bottom-1 bg-gray-900 border border-gray-200  w-full -translate-y-[2px] shadow-sm rounded-lg p-2">
+                                                    <p className="text-sm font-normal text-gray-400">{elem.segmentTitle}</p>
+                                                </div>
+                                                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 rotate-45 z-20 border-r border-b border-gray-200 w-3 h-3 bg-gray-900 rounded-sm" />
+                                            </div>
+                                        </div>
+                                      }
+                                      <div className="absolute top-0 left-0 rounded-md w-full h-full overflow-hidden">
+                                          <div
+                                            className="absolute bg-emerald-700 h-[98%] left-0 top-0 translate-y-[1%] rounded-md overflow-hidden border-emerald-500"
+                                            style={{
+                                                width: elem.earliestStartTime <= currentTime && currentTime <= elem.latestEndTime ? `${100 - 100 * ((elem.latestEndTime - currentTime) / (elem.latestEndTime - elem.earliestStartTime))}%` : 0
+                                            }}
+                                          ></div>
+                                      </div>
+                                  </button>
+                              })
+                            }
+                        </div>
+                    </div>
+
+                    <div className="flex-1">
+                        {
+                          segments && segments.filter((elem) => {return elem.earliestStartTime <= currentTime && currentTime <= elem.latestEndTime}).reverse().map((elem, index) => {
+                              if (index == 0){
+                                  return <SegmentCard currentSegment={elem} segmentId={elem.id} currentTime={currentTime}/>
+                              }
+                          })
+                        }
+                    </div>
+                </div>
+            </div>;
+    }
     return <ScrollableLayout>
         <div className={"container text-white"}>
             <h1 className={"text-title "}>Video Segments</h1>

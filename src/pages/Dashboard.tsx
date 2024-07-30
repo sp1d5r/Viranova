@@ -35,6 +35,7 @@ import {Link} from "react-router-dom";
 import {Logo} from "../components/logo/logo";
 import {DashboardAnalytics} from "../components/dashboard/DashboardAnalytics";
 import {DashboardChannels} from "../components/dashboard/DashboardChannels";
+import {DashboardVideos} from "../components/dashboard/DashboardVideos";
 
 interface NavItem {
   id: string;
@@ -207,6 +208,10 @@ export default function Dashboard() {
 
         {
           selectedItem === 'channels' && <DashboardChannels />
+        }
+
+        {
+          selectedItem === 'videos' && <DashboardVideos />
         }
 
       </div>
