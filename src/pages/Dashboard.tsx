@@ -36,6 +36,8 @@ import {Logo} from "../components/logo/logo";
 import {DashboardAnalytics} from "../components/dashboard/DashboardAnalytics";
 import {DashboardChannels} from "../components/dashboard/DashboardChannels";
 import {DashboardVideos} from "../components/dashboard/DashboardVideos";
+import {DashboardShorts} from "../components/dashboard/DashboardShorts";
+import {useAuth} from "../contexts/Authentication";
 
 interface NavItem {
   id: string;
@@ -55,6 +57,7 @@ const navItems: NavItem[] = [
 
 export default function Dashboard() {
   const [selectedItem, setSelectedItem] = useState<string>('dashboard');
+  const {authState} = useAuth()
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr] text-white ">
@@ -207,11 +210,15 @@ export default function Dashboard() {
         }
 
         {
-          selectedItem === 'channels' && <DashboardChannels />
+          selectedItem === 'channels' && <DashboardChannels userId={authState.user?.uid}/>
         }
 
         {
           selectedItem === 'videos' && <DashboardVideos />
+        }
+
+        {
+          selectedItem === 'shorts' && <DashboardShorts />
         }
 
       </div>

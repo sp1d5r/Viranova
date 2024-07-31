@@ -14,7 +14,7 @@ import {
     getFirestore,
     onSnapshot,
     Unsubscribe,
-    updateDoc,
+    setDoc,
     WithFieldValue
 } from 'firebase/firestore';
 import app from "../../../config/firebaseConfig";
@@ -52,7 +52,7 @@ const FirebaseDatabaseService: DatabaseService = {
     async updateDocument<T>(collectionPath: string, docId: string, data: Partial<T>, onSuccess?: SuccessCallback<void>, onFailure?: FailureCallback): Promise<void> {
         try {
             const docRef = doc(db, collectionPath, docId);
-            await updateDoc(docRef, data);
+            await setDoc(docRef, data, { merge: true });
             if (onSuccess) onSuccess();
         } catch (error) {
             if (onFailure) onFailure(error as Error);

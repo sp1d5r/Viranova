@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {ResizableHandle, ResizablePanel, ResizablePanelGroup} from "../ui/resizable";
 import {Input} from "../ui/input";
 import {Button} from "../ui/button";
@@ -8,56 +8,84 @@ import {ExclamationTriangleIcon, QuestionMarkCircledIcon} from "@radix-ui/react-
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "../ui/tabs";
 import {ChannelCard} from './channels/ChannelCard'
 import {ScrollArea} from "../ui/scroll-area";
+import {Channel, ChannelsTracking, useAddChannelToTrack} from "../../types/collections/Channels";
+import {useAuth} from "../../contexts/Authentication";
+import FirebaseDatabaseService from "../../services/database/strategies/FirebaseFirestoreService";
+
 
 export interface DashboardChannelsProps {
-
+  userId?: string;
 }
 
-interface Channel {
-  channelName: string;
-  description: string;
-  subscriberCount: string;
-  videoCount: string;
-  viewCount: string;
-  thumbnailUrl:  string;
-}
-
-export const DashboardChannels: React.FC<DashboardChannelsProps> = ({}) => {
-  const channels: Channel[] = [
-    {
-      channelName: "TechTalks",
-      description: "Latest in technology and gadget reviews. We bring you cutting-edge insights and hands-on experiences with the newest tech products.",
-      subscriberCount: "1.2M",
-      videoCount: "500",
-      viewCount: "50M",
-      thumbnailUrl: "https://yt3.ggpht.com/ytc/APkrFKaHas_u9T4C9jtqYIpptEKE7P62n3vqsGfPj12htA=s176-c-k-c0x00ffffff-no-rj"
-    },
-    {
-      channelName: "CookingMasters",
-      description: "Delicious recipes and cooking tips for beginners and experts alike. Join us on a culinary journey around the world!",
-      subscriberCount: "800K",
-      videoCount: "300",
-      viewCount: "30M",
-      thumbnailUrl: "https://yt3.ggpht.com/ytc/APkrFKaLAFUu3Fs0-DjqnhYSyrdCNIWzz81HCFrXI993eQ=s176-c-k-c0x00ffffff-no-rj"
-    },
-    {
-      channelName: "FitnessGuru",
-      description: "Transform your body and mind with our expert fitness advice, workout routines, and health tips.",
-      subscriberCount: "500K",
-      videoCount: "200",
-      viewCount: "15M",
-      thumbnailUrl: "https://yt3.ggpht.com/ytc/APkrFKbWr2xknXmPNzNO7rAuWrtXSCkW9XxURFn-0VIB=s176-c-k-c0x00ffffff-no-rj"
-    },
-    {
-      channelName: "TravelVlogs",
-      description: "Explore the world through our eyes! We bring you breathtaking destinations, travel tips, and cultural experiences.",
-      subscriberCount: "1.5M",
-      videoCount: "400",
-      viewCount: "75M",
-      thumbnailUrl: "https://yt3.ggpht.com/ytc/APkrFKYBi_1MZOVr2JZ3hGxWRcD6o3AO_I9K5_2n6VAy=s176-c-k-c0x00ffffff-no-rj"
-    }
-  ];
+export const DashboardChannels: React.FC<DashboardChannelsProps> = ({userId}) => {
+  const [channels, setChannels] = useState<Channel[]>([]);
   const [selectedChannel, setSelectedChannel] = useState<Channel | undefined>(undefined);
+  const [newChannelId, setNewChannelId] = useState('');
+  const { addChannelToTrack, isLoading, error } = useAddChannelToTrack(userId? userId : "N/A");
+  const [fetchError, setFetchError] = useState<string | null>(null);
+
+  const handleAddChannel = async () => {
+    if (newChannelId) {
+      await addChannelToTrack(newChannelId);
+      setNewChannelId('');
+      // You might want to refresh the channels list here
+    }
+  };
+
+  useEffect(() => {
+    let unsubscribe: (() => void) | undefined;
+
+    const fetchChannels = async () => {
+      try {
+        if (userId){
+          unsubscribe = FirebaseDatabaseService.listenToDocument<ChannelsTracking>(
+            'channelstracking',
+            userId,
+            async (data) => {
+              if (data && data.channelsTracking) {
+                const channelPromises = data.channelsTracking.map(channelId =>
+                  new Promise<Channel>((resolve, reject) => {
+                    FirebaseDatabaseService.getDocument<Channel>(
+                      'channels',
+                      channelId,
+                      (channelData) => {
+                        if (channelData) {
+                          resolve({ ...channelData, channelId });
+                        } else {
+                          reject(new Error(`Channel ${channelId} not found`));
+                        }
+                      },
+                      (error) => reject(error)
+                    );
+                  })
+                );
+
+                const fetchedChannels = await Promise.all(channelPromises);
+                setChannels(fetchedChannels);
+              } else {
+                setChannels([]);
+              }
+            },
+            (error) => {
+              console.error("Error fetching channels:", error);
+              setFetchError("Failed to fetch channels. Please try again.");
+            }
+          );
+        }
+      } catch (error) {
+        console.error("Error setting up channel listener:", error);
+        setFetchError("Failed to set up channel updates. Please refresh the page.");
+      }
+    };
+
+    fetchChannels();
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
+  }, [userId]);
 
   return <main className="flex flex-1 flex-col gap-4 md:gap-8 max-h-[calc(100vh-100px)]">
     <ResizablePanelGroup direction="horizontal">
@@ -72,22 +100,27 @@ export const DashboardChannels: React.FC<DashboardChannelsProps> = ({}) => {
               </TabsList>
             </Tabs>
           </div>
-          <Alert variant="destructive">
-            <ExclamationTriangleIcon className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>
-              The channel url provided does not exist.
-            </AlertDescription>
-          </Alert>
+          {error && (
+            <Alert variant="destructive">
+              <ExclamationTriangleIcon className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
           <div className="w-full flex gap-2">
-            <Input  type="text" placeholder="Add a channel to track" />
-            <Button  size="sm" onClick={() => {}} >
+            <Input
+              type="text"
+              placeholder="Add a channel ID to track"
+              value={newChannelId}
+              onChange={(e) => setNewChannelId(e.target.value)}
+            />
+            <Button  size="sm" onClick={handleAddChannel} disabled={isLoading}>
               <GitPullRequestCreateArrow />
             </Button>
           </div>
           <ScrollArea className="h-[80vh]">
             {channels.map((channel, index) => (
-              <ChannelCard key={index} selected={selectedChannel ? selectedChannel.channelName == channel.channelName : false} clickCard={()=>{setSelectedChannel(channel)}} {...channel} />
+              <ChannelCard key={index} selected={selectedChannel ? selectedChannel.channelId == channel.channelId : false} clickCard={()=>{setSelectedChannel(channel)}} channel={channel} />
             ))}
           </ScrollArea>
         </div>
@@ -96,7 +129,7 @@ export const DashboardChannels: React.FC<DashboardChannelsProps> = ({}) => {
       <ResizablePanel>
         {
           selectedChannel ?
-            <ChannelCard selected={selectedChannel ? selectedChannel.channelName == selectedChannel.channelName : false} clickCard={()=>{setSelectedChannel(selectedChannel)}} {...selectedChannel} />
+            <ChannelCard selected={selectedChannel ? selectedChannel.channelId == selectedChannel.channelId : false} clickCard={()=>{setSelectedChannel(selectedChannel)}} channel={selectedChannel} />
             :
             <div className="w-full h-full flex flex-col justify-center items-center">
               <QuestionMarkCircledIcon className="w-10 h-10" />
