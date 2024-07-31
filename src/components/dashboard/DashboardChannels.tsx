@@ -11,6 +11,7 @@ import {ScrollArea} from "../ui/scroll-area";
 import {Channel, ChannelsTracking, useAddChannelToTrack} from "../../types/collections/Channels";
 import {useAuth} from "../../contexts/Authentication";
 import FirebaseDatabaseService from "../../services/database/strategies/FirebaseFirestoreService";
+import ChannelDetails from "./channels/DetailedChannelView";
 
 
 export interface DashboardChannelsProps {
@@ -59,8 +60,8 @@ export const DashboardChannels: React.FC<DashboardChannelsProps> = ({userId}) =>
                     );
                   })
                 );
-
                 const fetchedChannels = await Promise.all(channelPromises);
+                console.log(fetchedChannels);
                 setChannels(fetchedChannels);
               } else {
                 setChannels([]);
@@ -109,13 +110,14 @@ export const DashboardChannels: React.FC<DashboardChannelsProps> = ({userId}) =>
           )}
           <div className="w-full flex gap-2">
             <Input
+              className="h-9"
               type="text"
               placeholder="Add a channel ID to track"
               value={newChannelId}
               onChange={(e) => setNewChannelId(e.target.value)}
             />
-            <Button  size="sm" onClick={handleAddChannel} disabled={isLoading}>
-              <GitPullRequestCreateArrow />
+            <Button className="h-9" onClick={handleAddChannel} disabled={isLoading}>
+              <GitPullRequestCreateArrow size={16}/>
             </Button>
           </div>
           <ScrollArea className="h-[80vh]">
@@ -129,7 +131,7 @@ export const DashboardChannels: React.FC<DashboardChannelsProps> = ({userId}) =>
       <ResizablePanel>
         {
           selectedChannel ?
-            <ChannelCard selected={selectedChannel ? selectedChannel.channelId == selectedChannel.channelId : false} clickCard={()=>{setSelectedChannel(selectedChannel)}} channel={selectedChannel} />
+            <ChannelDetails channel={selectedChannel} />
             :
             <div className="w-full h-full flex flex-col justify-center items-center">
               <QuestionMarkCircledIcon className="w-10 h-10" />

@@ -6,13 +6,43 @@ type ChannelStatus = "New Channel" | "Added"
 export interface Channel {
   status: ChannelStatus;
   channelId: string;
-  // Temporary - remove when known
-  thumbnailUrl?: string;
-  channelName?: string;
-  subscriberCount?: string;
+  previous_status: string;
+  // Channel information
+  efaultLanguage?: string | null;
+  hiddenSubscriberCount?: boolean;
   description?: string;
-  videoCount?: number;
-  viewCount?: number
+  image?: {
+    bannerExternalUrl?: string;
+  };
+  privacyStatus?: string;
+  subscriberCount?: string;
+  channel?: {
+    title?: string;
+    country?: string;
+    description?: string;
+    keywords?: string;
+    unsubscribedTrailer?: string;
+  };
+  thumbnails?: {
+    default?: string;
+    high?: string;
+    medium?: string;
+  };
+  title?: string;
+  viewCount?: string;
+  longUploadsStatus?: string;
+  isLinked?: boolean;
+  publishedAt?: string;
+  videoCount?: string;
+  topicCategories?: string[];
+  madeForKids?: boolean;
+  selfDeclaredMadeForKids?: boolean | null;
+  relatedPlaylists?: {
+    uploads?: string;
+    likes?: string;
+  };
+  country?: string;
+  customUrl?: string;
 }
 
 export interface ChannelsTracking {
@@ -70,6 +100,7 @@ export const useAddChannelToTrack = (currentUserId: string) => {
     return new Promise((resolve, reject) => {
       const newChannel: Channel = {
         status: 'New Channel',
+        previous_status: 'Created',
         channelId: channelId,
       };
 

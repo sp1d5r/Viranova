@@ -22,12 +22,12 @@ export const ChannelCard: React.FC<ChannelCardProps> = ({
   >
     <CardHeader className="flex flex-row items-center gap-4 pb-2">
       <Avatar className="h-9 w-9">
-        <AvatarImage src={channel.thumbnailUrl ? channel.thumbnailUrl : "N/a"} alt={channel.channelName ? channel.channelName : channel.channelId } />
-        <AvatarFallback>{channel.channelName ? channel.channelName.slice(0, 2).toUpperCase() : channel.channelId.slice(0, 2).toUpperCase()}</AvatarFallback>
+        <AvatarImage src={channel.thumbnails ? channel.thumbnails.medium : "N/a"} alt={channel.title ? channel.title : channel.channelId } />
+        <AvatarFallback>{channel.title ? channel.title.slice(0, 2).toUpperCase() : channel.channelId.slice(0, 2).toUpperCase()}</AvatarFallback>
       </Avatar>
       <div>
         <h3 className={cn("text-lg font-semibold", selected && "text-black")}>
-          {channel.channelName ? channel.channelName : channel.channelId}
+          {channel.title ? channel.title : channel.channelId}
         </h3>
         {channel.subscriberCount && <p className="text-sm text-muted-foreground">{channel.subscriberCount} subscribers</p> }
       </div>
