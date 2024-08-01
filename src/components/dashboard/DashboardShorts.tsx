@@ -32,6 +32,7 @@ import { Short, documentToShort } from "../../types/collections/Shorts";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import FirebaseFirestoreService from "../../services/database/strategies/FirebaseFirestoreService";
 import {toNumber} from "lodash";
+import {Progress} from "../ui/progress";
 
 const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
   const getStatusColor = (status: string) => {
@@ -185,7 +186,9 @@ export const DashboardShorts: React.FC = () => {
                 <TableCell>
                   <StatusBadge status={short.short_status} />
                 </TableCell>
-                <TableCell>{short.update_progress}%</TableCell>
+                <TableCell>
+                  <Progress value={short.update_progress}/>
+                </TableCell>
                 <TableCell>{short.last_updated ? short.last_updated.toDate().toLocaleDateString() : ''}</TableCell>
                 <TableCell>
                   {expandedRows.has(short.id) ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}

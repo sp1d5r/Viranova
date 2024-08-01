@@ -32,6 +32,7 @@ import FirebaseFirestoreService from "../../services/database/strategies/Firebas
 import {documentToUserVideo, UserVideo} from "../../types/collections/UserVideo";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "../ui/select";
 import {VideoSegments} from "../../pages/VideoSegments";
+import {Progress} from "../ui/progress";
 
 const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
   const getStatusColor = (status: string) => {
@@ -94,6 +95,7 @@ export const DashboardVideos: React.FC = () => {
       }
     )
   }, [authState]);
+
 
   const toggleRowExpansion = (id: string) => {
     const newExpandedRows = new Set(expandedRows);
@@ -201,7 +203,7 @@ export const DashboardVideos: React.FC = () => {
                 <TableCell>
                   <StatusBadge status={video.status} />
                 </TableCell>
-                <TableCell>{video.processingProgress}%</TableCell>
+                <TableCell>{video.processingProgress}% <Progress value={video.processingProgress}/></TableCell>
                 <TableCell>{new Date(video.uploadTimestamp).toLocaleDateString()}</TableCell>
                 <TableCell>
                   {expandedRows.has(video.id ? video.id : 'N/A') ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}

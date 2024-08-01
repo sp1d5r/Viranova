@@ -1,11 +1,11 @@
 import React, {useEffect, useState} from 'react';
-import {Task} from "../../../../types/collections/Task";
+import {AnalyticsTask} from "../../../../types/collections/Task";
 import FirebaseFirestoreService from "../../../../services/database/strategies/FirebaseFirestoreService";
 import {Analytics} from "../../../../types/collections/Analytics";
 import {formatDate} from "../TasksTab";
 
 export interface CompletedTaskRowProps {
-  task: Task;
+  task: AnalyticsTask;
 }
 
 export const CompletedTaskRow: React.FC<CompletedTaskRowProps> = ({task}) => {

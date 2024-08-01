@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import FirebaseFirestoreService from "../../../services/database/strategies/FirebaseFirestoreService";
-import {Task} from "../../../types/collections/Task";
+import {AnalyticsTask} from "../../../types/collections/Task";
 import {CompletedTaskRow} from "./analytics-row/CompletedTaskRow";
 
 export interface TasksTabProps {
@@ -26,9 +26,9 @@ export function formatDate(date: Date) {
 
 
 export const TasksTab: React.FC<TasksTabProps> = ({shortId}) => {
-  const [allTasks, setAllTasks] = useState<Task[]>([]);
-  const [completedTasks, setCompletedTasks] = useState<Task[]>([]);
-  const [scheduledTasks, setScheduledTasks] = useState<Task[]>([]);
+  const [allTasks, setAllTasks] = useState<AnalyticsTask[]>([]);
+  const [completedTasks, setCompletedTasks] = useState<AnalyticsTask[]>([]);
+  const [scheduledTasks, setScheduledTasks] = useState<AnalyticsTask[]>([]);
 
   useEffect(() => {
     FirebaseFirestoreService.queryDocuments(
@@ -37,7 +37,7 @@ export const TasksTab: React.FC<TasksTabProps> = ({shortId}) => {
       shortId,
       'scheduledTime',
       (docs) => {
-        setAllTasks(docs.map((elem) => {return elem as Task}));
+        setAllTasks(docs.map((elem) => {return elem as AnalyticsTask}));
         console.log('docs: ',docs)
       },
       (error) => {
@@ -47,8 +47,8 @@ export const TasksTab: React.FC<TasksTabProps> = ({shortId}) => {
   }, []);
 
   useEffect(() => {
-    const completedTasks: Task[] = allTasks.filter((elem) => elem.status != 'Pending').reverse();
-    const scheduledTasks: Task[] = allTasks.filter((elem) => elem.status == 'Pending');
+    const completedTasks: AnalyticsTask[] = allTasks.filter((elem) => elem.status != 'Pending').reverse();
+    const scheduledTasks: AnalyticsTask[] = allTasks.filter((elem) => elem.status == 'Pending');
     setCompletedTasks(completedTasks);
     setScheduledTasks(scheduledTasks);
   }, [allTasks]);

@@ -33,11 +33,12 @@ import { Input } from "../components/ui/input"
 import { Sheet, SheetContent, SheetTrigger } from "../components/ui/sheet"
 import {Link} from "react-router-dom";
 import {Logo} from "../components/logo/logo";
-import {DashboardAnalytics} from "../components/dashboard/DashboardAnalytics";
+import {DashboardLanding} from "../components/dashboard/DashboardLanding";
 import {DashboardChannels} from "../components/dashboard/DashboardChannels";
 import {DashboardVideos} from "../components/dashboard/DashboardVideos";
 import {DashboardShorts} from "../components/dashboard/DashboardShorts";
 import {useAuth} from "../contexts/Authentication";
+import {DashboardAnalytics} from "../components/dashboard/DashboardAnalytics";
 
 interface NavItem {
   id: string;
@@ -206,7 +207,7 @@ export default function Dashboard() {
         </header>
 
         {
-          selectedItem === 'dashboard' && <DashboardAnalytics />
+          selectedItem === 'dashboard' && <DashboardLanding />
         }
 
         {
@@ -219,6 +220,10 @@ export default function Dashboard() {
 
         {
           selectedItem === 'shorts' && <DashboardShorts />
+        }
+
+        {
+          selectedItem === 'analytics' && <DashboardAnalytics userId={authState.user?.uid}/>
         }
 
       </div>

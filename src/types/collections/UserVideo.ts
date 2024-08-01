@@ -10,7 +10,7 @@ export interface UserVideo extends BackendServerMetadata{
     status: UserVideoStatus;
     processingProgress: number;
     progressMessage: string;
-    uid: string;
+    uid?: string;
     link?: string;
     queuePosition: number;
     id?: string;

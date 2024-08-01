@@ -1,337 +1,214 @@
-import React, {useState} from 'react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../ui/card"
-
-import {
-  Activity,
-  ArrowUpRight,
-  MessageCircle,
-  Eye,
-  Heart,
-  Users, ChevronLeft, ChevronRight,
-} from "lucide-react"
-import {
-  Avatar,
-    AvatarFallback,
-    AvatarImage,
-} from "../ui/avatar"
-import { Badge } from "../ui/badge"
-import { Button } from "../ui/button"
-
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../ui/table"
-import {Link} from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import FirebaseFirestoreService from "../../services/database/strategies/FirebaseFirestoreService";
+import { documentToShort, Short } from "../../types/collections/Shorts";
+import { toNumber } from "lodash";
+import { Analytics, VideoAnalytics } from "../../types/collections/Analytics";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { useNotificaiton } from "../../contexts/NotificationProvider";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { Button } from "../ui/button";
 
 export interface DashboardAnalyticsProps {
-
+  userId: string | undefined;
 }
 
-interface TikTokVideo {
-  id: string;
-  description: string;
-  link: string;
-  likes: number;
-  comments: number;
-  views: number;
-  date: string;
-}
-
-const dummyData: TikTokVideo[] = [
-  {
-    id: '1',
-    description: 'Dance challenge #trending',
-    link: 'https://www.tiktok.com/@user/video/1234567890123456789',
-    likes: 1500000,
-    comments: 50000,
-    views: 5000000,
-    date: '2023-07-15',
-  },
-  {
-    id: '2',
-    description: 'Cooking hack you won\'t believe! 😱🍳',
-    link: 'https://www.tiktok.com/@user/video/2345678901234567890',
-    likes: 750000,
-    comments: 30000,
-    views: 2000000,
-    date: '2023-07-16',
-},
-{
-    id: '3',
-    description: 'Cute puppy does tricks 🐶',
-    link: 'https://www.tiktok.com/@user/video/3456789012345678901',
-    likes: 2000000,
-    comments: 100000,
-    views: 8000000,
-    date: '2023-07-17',
-},
-{
-    id: '4',
-    description: 'DIY room decor ideas 🎨',
-    link: 'https://www.tiktok.com/@user/video/4567890123456789012',
-    likes: 500000,
-    comments: 25000,
-    views: 1500000,
-    date: '2023-07-18',
-},
-{
-    id: '5',
-    description: 'Life hack: How to fold a shirt in 2 seconds',
-    link: 'https://www.tiktok.com/@user/video/5678901234567890123',
-    likes: 1000000,
-    comments: 40000,
-    views: 3000000,
-    date: '2023-07-19',
-},
-];
-
-const ITEMS_PER_PAGE = 5;
-
-interface UserComment {
-  id: string;
-  user: {
-    name: string;
-    avatar: string;
-    username: string;
+type ChartConfig = {
+  [key: string]: {
+    label: string;
+    color: string;
   };
-  comment: string;
-  timestamp: string;
 };
 
-const dummyComments: UserComment[] = [
-  {
-    id: '1',
-    user: {
-      name: 'Olivia Martin',
-      avatar: '/avatars/01.png',
-      username: '@olivia_m',
-    },
-    comment: 'This video is fire! 🔥 Keep up the great content!',
-    timestamp: '2 hours ago',
+const chartConfig: ChartConfig = {
+  commentCount: {
+    label: 'Comments',
+    color: 'hsl(var(--chart-1))',
   },
-  {
-    id: '2',
-    user: {
-      name: 'Jackson Lee',
-      avatar: '/avatars/02.png',
-      username: '@jackson_l',
-    },
-    comment: 'How did you do that transition? It\'s so smooth!',
-    timestamp: '3 hours ago',
+  diggCount: {
+    label: 'Likes',
+    color: 'hsl(var(--chart-2))',
   },
-  {
-    id: '3',
-    user: {
-      name: 'Isabella Nguyen',
-      avatar: '/avatars/03.png',
-      username: '@bella_n',
-    },
-    comment: 'Your editing skills are on point! 👌',
-    timestamp: '5 hours ago',
+  shareCount: {
+    label: 'Shares',
+    color: 'hsl(var(--chart-3))',
   },
-  {
-    id: '4',
-    user: {
-      name: 'William Kim',
-      avatar: '/avatars/04.png',
-      username: '@will_k',
-    },
-    comment: 'This trend is everywhere! You nailed it though!',
-    timestamp: '1 day ago',
+  playCount: {
+    label: 'Plays',
+    color: 'hsl(var(--chart-4))',
   },
-  {
-    id: '5',
-    user: {
-      name: 'Sofia Davis',
-      avatar: '/avatars/05.png',
-      username: '@sofia_d',
-    },
-    comment: 'Can you do a tutorial on how you made this? It\'s awesome!',
-    timestamp: '1 day ago',
+  fans: {
+    label: 'Fans',
+    color: 'hsl(var(--chart-1))',
   },
-];
+  heart: {
+    label: 'Hearts',
+    color: 'hsl(var(--chart-2))',
+  },
+  video: {
+    label: 'Videos',
+    color: 'hsl(var(--chart-3))',
+  },
+};
 
+export const DashboardAnalytics: React.FC<DashboardAnalyticsProps> = ({ userId }) => {
+  const [shorts, setShorts] = useState<Short[]>([]);
+  const [analytics, setAnalytics] = useState<Analytics[]>([]);
+  const [selectedShort, setSelectedShort] = useState<string | null>(null);
+  const { showNotification } = useNotificaiton();
 
-export const DashboardAnalytics : React.FC<DashboardAnalyticsProps> = ({}) => {
-  const [currentPage, setCurrentPage] = useState(1);
+  useEffect(() => {
+    if (userId) {
+      FirebaseFirestoreService.queryDocuments(
+        '/shorts',
+        'uid',
+        userId,
+        'last_updated',
+        (documents) => {
+          setShorts(documents.map(doc => documentToShort(doc))
+            .sort((elem1, elem2) => toNumber(elem2.last_updated) - toNumber(elem1.last_updated)));
+          showNotification("Success", "Short data collected!", "success");
+        },
+        (error) => {
+          showNotification("Error", error.message, "error");
+        }
+      );
+    }
+  }, [userId]);
 
-  const totalPages = Math.ceil(dummyData.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + ITEMS_PER_PAGE;
-  const currentData = dummyData.slice(startIndex, endIndex);
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      const allAnalytics: Analytics[] = [];
+      for (const short of shorts) {
+        await new Promise<void>((resolve) => {
+          FirebaseFirestoreService.queryDocuments<Analytics>(
+            'analytics',
+            'shortId',
+            short.id,
+            'taskTime',
+            (docs) => {
+              if (docs.length > 0) {
+                allAnalytics.push(...docs);
+              }
+              resolve();
+            },
+            (error) => {
+              showNotification("Error", error.message, "error");
+              console.log(error)
+            }
+          );
+        });
+      }
+      setAnalytics(allAnalytics);
+    };
 
-  return <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-    <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
-      <Card x-chunk="A card showing the total revenue in USD and the percentage difference from last month.">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">
-            Total Views
-          </CardTitle>
-          <Eye className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">45,231</div>
-          <p className="text-xs text-muted-foreground">
-            +20.1% from last month
-          </p>
-        </CardContent>
-      </Card>
-      <Card x-chunk="A card showing the total subscriptions and the percentage difference from last month.">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">
-            Followers
-          </CardTitle>
-          <Users className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">+2350</div>
-          <p className="text-xs text-muted-foreground">
-            +180.1% from last month
-          </p>
-        </CardContent>
-      </Card>
-      <Card x-chunk="A card showing the total sales and the percentage difference from last month.">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Likes</CardTitle>
-          <Heart className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">+12,234</div>
-          <p className="text-xs text-muted-foreground">
-            +19% from last month
-          </p>
-        </CardContent>
-      </Card>
-      <Card x-chunk="A card showing the total active users and the percentage difference from last hour.">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Comments</CardTitle>
-          <MessageCircle className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">+573</div>
-          <p className="text-xs text-muted-foreground">
-            +201 since last hour
-          </p>
-        </CardContent>
-      </Card>
-    </div>
-    <div className="grid gap-4 md:gap-8 lg:grid-cols-2 xl:grid-cols-3">
-      <Card
-        className="xl:col-span-2"
-        x-chunk="A card showing a table of recent views on the shorts posted."
-      >
-        <CardHeader className="flex flex-row items-center">
-          <div className="grid gap-2">
-            <CardTitle>Short Views</CardTitle>
-            <CardDescription>
-              Overview of the views received on your shorts.
-            </CardDescription>
-          </div>
-          <Button asChild size="sm" className="ml-auto gap-1">
-            <Link to="#">
-              View All
-              <ArrowUpRight className="h-4 w-4" />
-            </Link>
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <div className="rounded-md border">
-            <div className="max-h-[400px] overflow-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="sticky top-0 bg-background">Description</TableHead>
-                    <TableHead className="sticky top-0 bg-background">Likes</TableHead>
-                    <TableHead className="sticky top-0 bg-background">Comments</TableHead>
-                    <TableHead className="sticky top-0 bg-background">Views</TableHead>
-                    <TableHead className="sticky top-0 bg-background hidden md:table-cell">Date</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {currentData.map((video) => (
-                    <TableRow key={video.id}>
-                      <TableCell>
-                        <div className="font-medium">{video.description}</div>
-                        <a href={video.link} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                          {video.link.substring(0, 30)}...
-                        </a>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">{video.likes.toLocaleString()}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{video.comments.toLocaleString()}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="default">{video.views.toLocaleString()}</Badge>
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell">{video.date}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
-          <div className="flex items-center justify-end space-x-2 py-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-            >
-              <ChevronLeft className="h-4 w-4" />
-              Previous
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-            >
-              Next
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Comments</CardTitle>
-          <CardDescription>Latest feedback from your TikTok audience</CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-6">
-          <div className="h-[400px] overflow-y-auto pr-4">
-            <div className="grid gap-6">
-              {dummyComments.map((comment) => (
-                <div key={comment.id} className="flex items-start gap-4">
-                  <Avatar className="h-9 w-9">
-                    <AvatarImage src={comment.user.avatar} alt={comment.user.name} />
-                    <AvatarFallback>{comment.user.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                  </Avatar>
-                  <div className="grid gap-1">
-                    <div className="flex items-center">
-                      <p className="text-sm font-medium leading-none">{comment.user.name}</p>
-                      <p className="ml-2 text-sm text-muted-foreground">{comment.user.username}</p>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{comment.comment}</p>
-                    <p className="text-xs text-muted-foreground">{comment.timestamp}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  </main>
-}
+    if (shorts.length > 0) {
+      fetchAnalytics();
+    }
+  }, [shorts]);
+
+  const prepareChartData = (metric: keyof VideoAnalytics | keyof VideoAnalytics['authorMeta']) => {
+    if (selectedShort) {
+      return analytics
+        .filter(a => a.shortId === selectedShort)
+        .map(a => ({
+          name: a.taskTime.toDate().toLocaleDateString(),
+          value: metric in a.videoAnalytics[0]
+            ? a.videoAnalytics[0][metric as keyof VideoAnalytics]
+            : a.videoAnalytics[0].authorMeta[metric as keyof VideoAnalytics['authorMeta']]
+        }));
+    } else {
+      const shortMap = new Map<string, VideoAnalytics>();
+      analytics.forEach(a => {
+        if (!shortMap.has(a.shortId) || a.taskTime.toDate() > new Date(shortMap.get(a.shortId)!.createTimeISO)) {
+          shortMap.set(a.shortId, a.videoAnalytics[0]);
+        }
+      });
+      return Array.from(shortMap.entries()).map(([shortId, videoAnalytics]) => ({
+        name: shortId,
+        value: metric in videoAnalytics
+          ? videoAnalytics[metric as keyof VideoAnalytics]
+          : videoAnalytics.authorMeta[metric as keyof VideoAnalytics['authorMeta']]
+      }));
+    }
+  };
+
+  const prepareFansData = () => {
+    const shortMap = new Map<string, VideoAnalytics>();
+    analytics.forEach(a => {
+      if (!shortMap.has(a.shortId) || a.taskTime.toDate() > new Date(shortMap.get(a.shortId)!.createTimeISO)) {
+        shortMap.set(a.shortId, a.videoAnalytics[0]);
+      }
+    });
+    return Array.from(shortMap.entries()).map(([shortId, videoAnalytics]) => ({
+      name: shortId,
+      fans: videoAnalytics.authorMeta.fans,
+      following: videoAnalytics.authorMeta.following
+    }));
+  };
+
+  const renderChart = (metric: keyof typeof chartConfig) => (
+    <Card key={metric}>
+      <CardHeader>
+        <CardTitle>{chartConfig[metric].label}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <ResponsiveContainer width="100%" height={300}>
+          <AreaChart data={prepareChartData(metric as keyof VideoAnalytics | keyof VideoAnalytics['authorMeta'])}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Area type="monotone" dataKey="value" stroke={chartConfig[metric].color} fill={chartConfig[metric].color} fillOpacity={0.3} />
+          </AreaChart>
+        </ResponsiveContainer>
+      </CardContent>
+    </Card>
+  );
+
+  return (
+    <main className="p-4 space-y-4">
+      <div className="flex justify-between items-center">
+        <Select onValueChange={(value) => setSelectedShort(value === "null" ? null : value)}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select a short" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="null">All Shorts</SelectItem>
+            {shorts.map(short => (
+              <SelectItem key={short.id} value={short.id}>{short.id}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Button onClick={() => setSelectedShort(null)}>View All Shorts</Button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {Object.keys(chartConfig).map(metric =>
+          metric !== 'fans' && renderChart(metric as keyof typeof chartConfig)
+        )}
+        <Card>
+          <CardHeader>
+            <CardTitle>Fans and Following</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={prepareFansData()}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="fans" fill={chartConfig.fans.color} />
+                <Bar dataKey="following" fill={chartConfig.heart.color} />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+    </main>
+  );
+};
+
+export default DashboardAnalytics;

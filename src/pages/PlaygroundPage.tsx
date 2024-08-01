@@ -84,7 +84,6 @@ export default function PlaygroundPage() {
         } else {
             showNotification("No Link", "You need to add a youtube link", "error");
         }
-
     }
 
     const submitButton = () => {

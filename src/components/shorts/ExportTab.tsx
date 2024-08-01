@@ -10,7 +10,7 @@ import {StockAudio} from "../../types/collections/StockAudio";
 import {AudioPlayer} from "../audio/AudioPlayer";
 import {PingVisualiser} from "./export-tab/PingVisualiser";
 import {Timestamp} from "firebase/firestore";
-import {Task} from "../../types/collections/Task";
+import {AnalyticsTask} from "../../types/collections/Task";
 
 export interface ExportTabProps {
   short: Short;
@@ -87,7 +87,7 @@ export const ExportTab :React.FC<ExportTabProps> = ({short, shortId}) => {
 
   const scheduleAnalyticsTasks = async () => {
     const taskSchedule = createTaskSchedule(selectedDataCollection.collectionType);
-    const tasks: Task[] = taskSchedule.map((scheduledTime) => ({
+    const tasks: AnalyticsTask[] = taskSchedule.map((scheduledTime) => ({
       status: 'Pending',
       scheduledTime: Timestamp.fromMillis(scheduledTime),
       operation: 'Analytics',
