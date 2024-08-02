@@ -58,7 +58,7 @@ const navItems: NavItem[] = [
 
 export default function Dashboard() {
   const [selectedItem, setSelectedItem] = useState<string>('dashboard');
-  const {authState} = useAuth()
+  const {authState} = useAuth();
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr] text-white ">
@@ -196,12 +196,13 @@ export default function Dashboard() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              {authState.user?.uid ? <DropdownMenuLabel>My Account</DropdownMenuLabel> : <DropdownMenuLabel>Create an Account</DropdownMenuLabel>}
+              {authState.user?.uid ? <></> : <DropdownMenuItem>Make a profile and join us on our journey!</DropdownMenuItem>}
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuItem>Support</DropdownMenuItem>
+              {authState.user?.uid ? <DropdownMenuItem>Settings</DropdownMenuItem> : <DropdownMenuItem><a href="/authenticate">Login</a></DropdownMenuItem>}
+              {authState.user?.uid ? <DropdownMenuItem>Support</DropdownMenuItem> : <DropdownMenuItem><a href="/authenticate">Register</a></DropdownMenuItem>}
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Logout</DropdownMenuItem>
+              {authState.user?.uid && <DropdownMenuItem>Logout</DropdownMenuItem>}
             </DropdownMenuContent>
           </DropdownMenu>
         </header>

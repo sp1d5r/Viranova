@@ -78,7 +78,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ className = '' }) => {
                 {/*             cardDescription={"Inference and training powered by blockchain."}/>*/}
             </div>
 
-            <BorderButton duration={2000} onClick={() => {window.location.href="/playground"}}>
+            <BorderButton duration={2000} onClick={() => {window.location.href="/dashboard"}}>
                 <p className="text-white font-bold tracking-widest px-5">Begin Clipping!</p>
             </BorderButton>
             <p className={"text-secondary font-bold tracking-widest underline "}>Continue Scrolling</p>

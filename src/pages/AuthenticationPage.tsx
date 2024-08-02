@@ -1,8 +1,11 @@
-import React, {ChangeEvent, FormEvent, useContext, useEffect, useRef, useState} from "react";
-import ScrollableLayout from "../layouts/ScrollableLayout";
-import {useAuth} from "../contexts/Authentication";
-import {NotificationContext} from "../contexts/NotificationProvider";
-
+import React, { ChangeEvent, FormEvent, useContext, useEffect, useRef, useState } from "react";
+import { useAuth } from "../contexts/Authentication";
+import { NotificationContext } from "../contexts/NotificationProvider";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { Link } from "react-router-dom";
+import {BackgroundBeams} from "../components/ui/background-beams";
 
 interface LoginRequestData {
     email: string;
@@ -27,10 +30,9 @@ export default function AuthenticationPage() {
         return () => window.removeEventListener('keydown', handleKeyPress);
     }, []);
 
-
     useEffect(() => {
         if (authState.isAuthenticated) {
-            window.location.href="/playground";
+            window.location.href="/dashboard";
         }
     }, [authState.isAuthenticated]);
 
@@ -52,42 +54,70 @@ export default function AuthenticationPage() {
         console.log('Logging in with', formData);
         login(formData.email, formData.password, () => {
             window.location.href="/playground"
-        }, ()=>{showNotification("Authentication Issue", "Failed to authenticate..", "error", 5000)})
+        }, ()=>{showNotification("Authentication Issue", "Failed to authenticate.", "error", 5000)})
     };
 
-    return <ScrollableLayout>
-        <div className={"container m-auto flex flex-col min-h-[70vh] justify-center items-center gap-2 text-accent"}>
-            <h1 className={"text-title"}>
-                Login
-            </h1>
-            <p className={"text-accent"}>Enter the realm of the infinite.</p>
-
-            <form onSubmit={handleSubmit} className={"flex flex-col gap-5 max-w-[500px] w-full"}>
-                <div className={"flex flex-col w-full"}>
-                    <label htmlFor="username">Username:</label>
-                    <input
-                        type="text"
-                        id="email"
-                        name="email"
-                        ref={inputRef}
-                        value={formData.email}
-                        onChange={handleChange}
-                        className={"bg-black border-secondary border w-full min-h-[40px] rounded p-2 focus:outline-none focus:ring-indigo-500 focus:border-primary"}
-                    />
-                </div>
-                <div className={"flex flex-col w-full"}>
-                    <label htmlFor="password">Password:</label>
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        className={"bg-black border-secondary border w-full min-h-[40px] rounded p-2 focus:outline-none focus:ring-indigo-500 focus:border-primary"}
-                    />
-                </div>
-                <button type="submit" className={"py-2 px-5 border-primary bg-secondary rounded hover:bg-primary hover:text-black focus:bg-primary focus:text-black"}>Login</button>
-            </form>
-        </div>
-    </ScrollableLayout>
-};
+    return (
+      <div className="w-full lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px]  h-screen text-white">
+          <div className="flex items-center justify-center py-12 h-full">
+              <div className="mx-auto grid w-[350px] gap-6">
+                  <div className="grid gap-2 text-center">
+                      <h1 className="text-3xl font-bold">Login</h1>
+                      <p className="text-balance text-muted-foreground">
+                          Enter the realm of the infinite.
+                      </p>
+                  </div>
+                  <form onSubmit={handleSubmit} className="grid gap-4">
+                      <div className="grid gap-2">
+                          <Label htmlFor="email">Email</Label>
+                          <Input
+                            id="email"
+                            name="email"
+                            type="email"
+                            ref={inputRef}
+                            value={formData.email}
+                            onChange={handleChange}
+                            placeholder="m@example.com"
+                            required
+                          />
+                      </div>
+                      <div className="grid gap-2">
+                          <div className="flex items-center">
+                              <Label htmlFor="password">Password</Label>
+                              <Link
+                                to="/forgot-password"
+                                className="ml-auto inline-block text-sm underline"
+                              >
+                                  Forgot your password?
+                              </Link>
+                          </div>
+                          <Input
+                            id="password"
+                            name="password"
+                            type="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            required
+                          />
+                      </div>
+                      <Button type="submit" className="w-full">
+                          Login
+                      </Button>
+                      <Button variant="outline" className="w-full">
+                          Login with Google
+                      </Button>
+                  </form>
+                  <div className="mt-4 text-center text-sm">
+                      Don&apos;t have an account?{" "}
+                      <Link to="/" className="underline">
+                          Sign up
+                      </Link>
+                  </div>
+              </div>
+          </div>
+          <div className="relative hidden lg:block bg-emerald-200/20">
+              <BackgroundBeams />
+          </div>
+      </div>
+    );
+}
