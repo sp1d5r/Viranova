@@ -5,7 +5,7 @@ import {
 } from "../../types/segmentation-masks/SegmentationGroup";
 import {PageState} from "../../pages/SegmentationHandlingPage";
 import SpacialSegmentationCanvas from "./SpacialSegmentationCanvas";
-import {useNotificaiton} from "../../contexts/NotificationProvider";
+import {useNotification} from "../../contexts/NotificationProvider";
 import FirebaseDatabaseService from "../../services/database/strategies/FirebaseFirestoreService";
 
 export interface SpacialSegmentationProps {
@@ -16,7 +16,7 @@ export interface SpacialSegmentationProps {
 
 export const SpacialSegmentation : React.FC<SpacialSegmentationProps> = ({segmentationGroup, setSegmentationGroup, setPageState}) => {
     const [currentFrame, setCurrentFrame] = useState<number>(-1)
-    const {showNotification} = useNotificaiton();
+    const {showNotification} = useNotification();
 
     const updateSpacialGroups = (group: number[]) => {
         const spacialGroups: number[][] = segmentationGroup.spacialGroups.map((oldGroup, index) => index === currentFrame ? group : oldGroup)

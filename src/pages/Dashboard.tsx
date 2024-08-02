@@ -39,6 +39,9 @@ import {DashboardVideos} from "../components/dashboard/DashboardVideos";
 import {DashboardShorts} from "../components/dashboard/DashboardShorts";
 import {useAuth} from "../contexts/Authentication";
 import {DashboardAnalytics} from "../components/dashboard/DashboardAnalytics";
+import {useNotification} from "../contexts/NotificationProvider";
+import {Popover, PopoverTrigger, PopoverContent} from "../components/ui/popover";
+import {ScrollArea} from "../components/ui/scroll-area";
 
 interface NavItem {
   id: string;
@@ -58,7 +61,8 @@ const navItems: NavItem[] = [
 
 export default function Dashboard() {
   const [selectedItem, setSelectedItem] = useState<string>('dashboard');
-  const {authState} = useAuth();
+  const {authState, logout} = useAuth();
+  const {showNotification, allNotifications} = useNotification();
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr] text-white ">
@@ -68,10 +72,32 @@ export default function Dashboard() {
             <Link to="/" className="flex items-center gap-2 font-semibold">
               <Logo />
             </Link>
-            <Button variant="outline" size="icon" className="ml-auto h-8 w-8">
-              <Bell className="h-4 w-4" />
-              <span className="sr-only">Toggle notifications</span>
-            </Button>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="icon" className="ml-auto h-8 w-8">
+                  <Bell className="h-4 w-4" />
+                  <span className="sr-only">Toggle notifications</span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80">
+                <CardTitle className="mb-2">Notifications</CardTitle>
+                <ScrollArea className="h-[300px]">
+                  {allNotifications.length > 0 ? (
+                    allNotifications.map((notification, index) => (
+                      <div key={index} className="mb-2 p-2 bg-muted rounded-md">
+                        <p className="font-semibold">{notification.title}</p>
+                        <p className="text-sm text-muted-foreground">{notification.message}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {new Date(notification.timestamp).toLocaleString()}
+                        </p>
+                      </div>
+                    ))
+                  ) : (
+                    <p>No notifications</p>
+                  )}
+                </ScrollArea>
+              </PopoverContent>
+            </Popover>
           </div>
           <div className="flex-1">
             <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
@@ -202,7 +228,28 @@ export default function Dashboard() {
               {authState.user?.uid ? <DropdownMenuItem>Settings</DropdownMenuItem> : <DropdownMenuItem><a href="/authenticate">Login</a></DropdownMenuItem>}
               {authState.user?.uid ? <DropdownMenuItem>Support</DropdownMenuItem> : <DropdownMenuItem><a href="/authenticate">Register</a></DropdownMenuItem>}
               <DropdownMenuSeparator />
-              {authState.user?.uid && <DropdownMenuItem>Logout</DropdownMenuItem>}
+              {authState.user?.uid && <DropdownMenuItem>
+                <Button
+                  variant="destructive"
+                  className="h-8"
+                  onClick={() => {
+                    logout(() => {
+                        showNotification(
+                          "Signed Out",
+                          "You've successfully signed out, it might take a second to propagate",
+                          "success"
+                        )},
+                      () => {
+                        showNotification(
+                          "Failed to Sign Out",
+                          "I don't think this is possible... try refreshing.",
+                          "warning"
+                        )
+                      }
+                    )}}
+                >Logout
+                </Button>
+              </DropdownMenuItem>}
             </DropdownMenuContent>
           </DropdownMenu>
         </header>

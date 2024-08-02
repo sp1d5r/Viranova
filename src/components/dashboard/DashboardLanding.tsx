@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {
   Card,
   CardContent,
@@ -32,6 +32,12 @@ import {
   TableRow,
 } from "../ui/table"
 import {Link} from "react-router-dom";
+import {documentToShort, Short} from "../../types/collections/Shorts";
+import {Analytics} from "../../types/collections/Analytics";
+import {useNotification} from "../../contexts/NotificationProvider";
+import FirebaseFirestoreService from "../../services/database/strategies/FirebaseFirestoreService";
+import {toNumber} from "lodash";
+import {useAuth} from "../../contexts/Authentication";
 
 export interface DashboardLandingProps {
 
@@ -161,66 +167,218 @@ const dummyComments: UserComment[] = [
   },
 ];
 
+interface AnalyticsSummary {
+  totalViews: number;
+  totalLikes: number;
+  totalComments: number;
+  viewsChange: number;
+  likesChange: number;
+  commentsChange: number;
+  followerCount: number;
+  followerCountUpdated: string;
+}
+
 
 export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [shorts, setShorts] = useState<Short[]>([]);
+  const [analytics, setAnalytics] = useState<Analytics[]>([]);
+  const [selectedShort, setSelectedShort] = useState<string | null>(null);
+  const { showNotification } = useNotification();
+  const {authState} = useAuth();
 
-  const totalPages = Math.ceil(dummyData.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + ITEMS_PER_PAGE;
-  const currentData = dummyData.slice(startIndex, endIndex);
+  useEffect(() => {
+    if (authState.user?.uid) {
+      FirebaseFirestoreService.queryDocuments(
+        '/shorts',
+        'uid',
+        authState.user.uid,
+        'last_updated',
+        (documents) => {
+          setShorts(documents.map(doc => documentToShort(doc))
+            .sort((elem1, elem2) => toNumber(elem2.last_updated) - toNumber(elem1.last_updated)));
+        },
+        (error) => {
+          showNotification("Error", error.message, "error");
+        }
+      );
+    }
+  }, [authState]);
+
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      const allAnalytics: Analytics[] = [];
+      for (const short of shorts) {
+        await new Promise<void>((resolve) => {
+          FirebaseFirestoreService.queryDocuments<Analytics>(
+            'analytics',
+            'shortId',
+            short.id,
+            'taskTime',
+            (docs) => {
+              if (docs.length > 0) {
+                allAnalytics.push(docs[docs.length - 1]);
+              }
+              console.log(allAnalytics);
+              showNotification("Success", "Analytics Collected, analysis needed.", "success");
+              resolve();
+            },
+            (error) => {
+              showNotification("Error", error.message, "error");
+              console.log(error)
+            }
+          );
+        });
+      }
+      setAnalytics(allAnalytics);
+    };
+
+    if (shorts.length > 0) {
+      fetchAnalytics();
+      console.log('allanlytics', analytics);
+    }
+  }, [shorts]);
+
+  const [tiktokVideoData, setTikTokVideoData] = useState<TikTokVideo[]>([]);
+  const [analyticsSummary, setAnalyticsSummary] = useState<AnalyticsSummary>({
+    totalViews: 0,
+    totalLikes: 0,
+    totalComments: 0,
+    viewsChange: 0,
+    likesChange: 0,
+    commentsChange: 0,
+    followerCount: 0,
+    followerCountUpdated: '',
+  });
+
+  useEffect(() => {
+    if (analytics && analytics.length > 0) {
+      const processedData = analytics.map(item => {
+        const videoAnalytics = item.videoAnalytics[0]; // Most recent video analytics
+        return {
+          id: videoAnalytics.id,
+          description: videoAnalytics.text,
+          link: videoAnalytics.webVideoUrl,
+          likes: videoAnalytics.diggCount,
+          comments: videoAnalytics.commentCount,
+          views: videoAnalytics.playCount,
+          date: new Date(videoAnalytics.createTime * 1000).toISOString(),
+        };
+      });
+      setTikTokVideoData(processedData);
+
+      // Calculate totals and changes
+      const currentDate = new Date();
+      const lastMonthDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, currentDate.getDate());
+
+      let totalViews = 0, totalLikes = 0, totalComments = 0;
+      let lastMonthViews = 0, lastMonthLikes = 0, lastMonthComments = 0;
+
+      processedData.forEach(video => {
+        const videoDate = new Date(video.date);
+        if (videoDate >= lastMonthDate) {
+          totalViews += video.views;
+          totalLikes += video.likes;
+          totalComments += video.comments;
+        } else {
+          lastMonthViews += video.views;
+          lastMonthLikes += video.likes;
+          lastMonthComments += video.comments;
+        }
+      });
+
+      const viewsChange = ((totalViews - lastMonthViews) / lastMonthViews) * 100;
+      const likesChange = ((totalLikes - lastMonthLikes) / lastMonthLikes) * 100;
+      const commentsChange = ((totalComments - lastMonthComments) / lastMonthComments) * 100;
+
+      // Get the most recent follower count and update time
+      const mostRecentAnalytics = analytics.reduce((latest, current) => {
+        return new Date(latest.taskTime.seconds * 1000) > new Date(current.taskTime.seconds * 1000) ? latest : current;
+      });
+
+      const followerCount = mostRecentAnalytics.videoAnalytics[0].authorMeta.fans;
+      const followerCountUpdated = new Date(mostRecentAnalytics.taskTime.seconds * 1000).toLocaleString();
+
+      setAnalyticsSummary({
+        totalViews,
+        totalLikes,
+        totalComments,
+        viewsChange,
+        likesChange,
+        commentsChange,
+        followerCount,
+        followerCountUpdated,
+      });
+    }
+  }, [analytics]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 5;
+  const {
+    totalPages,
+    currentPageData
+  } = useMemo(() => {
+    const totalPages = Math.ceil(tiktokVideoData.length / ITEMS_PER_PAGE);
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const currentPageData = tiktokVideoData.slice(startIndex, endIndex);
+
+    return {
+      totalPages,
+      currentPageData
+    };
+  }, [tiktokVideoData, currentPage, ITEMS_PER_PAGE]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [tiktokVideoData]);
 
   return <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
     <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
-      <Card x-chunk="A card showing the total revenue in USD and the percentage difference from last month.">
+      <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">
-            Total Views
-          </CardTitle>
+          <CardTitle className="text-sm font-medium">Total Views</CardTitle>
           <Eye className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">45,231</div>
+          <div className="text-2xl font-bold">{analyticsSummary.totalViews.toLocaleString()}</div>
           <p className="text-xs text-muted-foreground">
-            +20.1% from last month
+            {analyticsSummary.viewsChange > 0 ? '+' : ''}{analyticsSummary.viewsChange.toFixed(1)}% from last month
           </p>
         </CardContent>
       </Card>
-      <Card x-chunk="A card showing the total subscriptions and the percentage difference from last month.">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">
-            Followers
-          </CardTitle>
-          <Users className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">+2350</div>
-          <p className="text-xs text-muted-foreground">
-            +180.1% from last month
-          </p>
-        </CardContent>
-      </Card>
-      <Card x-chunk="A card showing the total sales and the percentage difference from last month.">
+      <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Likes</CardTitle>
           <Heart className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">+12,234</div>
+          <div className="text-2xl font-bold">{analyticsSummary.totalLikes.toLocaleString()}</div>
           <p className="text-xs text-muted-foreground">
-            +19% from last month
+            {analyticsSummary.likesChange > 0 ? '+' : ''}{analyticsSummary.likesChange.toFixed(1)}% from last month
           </p>
         </CardContent>
       </Card>
-      <Card x-chunk="A card showing the total active users and the percentage difference from last hour.">
+      <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Comments</CardTitle>
           <MessageCircle className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">+573</div>
+          <div className="text-2xl font-bold">{analyticsSummary.totalComments.toLocaleString()}</div>
           <p className="text-xs text-muted-foreground">
-            +201 since last hour
+            {analyticsSummary.commentsChange > 0 ? '+' : ''}{analyticsSummary.commentsChange.toFixed(1)}% from last month
+          </p>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Followers</CardTitle>
+          <Users className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{analyticsSummary.followerCount.toLocaleString()}</div>
+          <p className="text-xs text-muted-foreground">
+            Last updated: {analyticsSummary.followerCountUpdated}
           </p>
         </CardContent>
       </Card>
@@ -258,7 +416,7 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {currentData.map((video) => (
+                  {tiktokVideoData.map((video) => (
                     <TableRow key={video.id}>
                       <TableCell>
                         <div className="font-medium">{video.description}</div>

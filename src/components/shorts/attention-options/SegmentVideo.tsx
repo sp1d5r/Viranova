@@ -2,7 +2,7 @@ import React from "react";
 import {Segment} from "../../../types/collections/Segment";
 import {VideoPlayer} from "../../video-player/VideoPlayer";
 import FirebaseFirestoreService from "../../../services/database/strategies/FirebaseFirestoreService";
-import {useNotificaiton} from "../../../contexts/NotificationProvider";
+import {useNotification} from "../../../contexts/NotificationProvider";
 
 export interface SegmentVideoProps {
   segment: Segment;
@@ -12,7 +12,7 @@ export interface SegmentVideoProps {
 
 export const SegmentVideo: React.FC<SegmentVideoProps> = ({segment, segmentId, continueButton}) => {
 
-  const {showNotification} = useNotificaiton();
+  const {showNotification} = useNotification();
 
   return <div className="w-full flex flex-col gap-2 items-center justify-start">
     <VideoPlayer path={segment.videoSegmentLocation} />

@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import ScrollableLayout from "../layouts/ScrollableLayout";
 import {URLSearchParamsInit, useSearchParams} from "react-router-dom";
 import FirebaseFirestoreService from "../services/database/strategies/FirebaseFirestoreService";
-import {useNotificaiton} from "../contexts/NotificationProvider";
+import {useNotification} from "../contexts/NotificationProvider";
 import {documentToShort, Short} from "../types/collections/Shorts";
 import {ShortSettingsTab} from "../components/shorts/ShortSettingsTab";
 import {documentToSegment, Segment} from "../types/collections/Segment";
@@ -25,7 +25,7 @@ export const Shorts: React.FC<ShortsProps> = ({}) => {
   const [short, setShort] = useState<Short | undefined>();
   const [loading, setLoading] = useState(true);
   const [segment, setSegment] = useState<Segment | undefined>();
-  const {showNotification} = useNotificaiton();
+  const {showNotification} = useNotification();
   const initialTab = searchParams.get("tab") as Tabs || "Short Settings";
   const [tabSelected, setTabSelected] = useState<Tabs>(initialTab);
 

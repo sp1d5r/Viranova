@@ -3,7 +3,7 @@ import {ModalLayout} from "../layouts/ModalLayout";
 import {useSearchParams} from "react-router-dom";
 import {documentToUserVideo, UserVideo} from "../types/collections/UserVideo";
 import FirebaseDatabaseService from "../services/database/strategies/FirebaseFirestoreService";
-import {useNotificaiton} from "../contexts/NotificationProvider";
+import {useNotification} from "../contexts/NotificationProvider";
 import Proposals from "../assets/icons/Email Open.svg";
 import Transcript from "../assets/icons/Transcript.svg"
 import Segments from "../assets/icons/Image.svg";
@@ -21,7 +21,7 @@ export const VideoProgress: React.FC<VideoProgressProps> = ({}) => {
     const video_id = searchParams.get("video_id");
 
     const [video, setVideo] = useState<UserVideo>();
-    const {showNotification} = useNotificaiton();
+    const {showNotification} = useNotification();
 
     useEffect(() => {
         if (video_id){

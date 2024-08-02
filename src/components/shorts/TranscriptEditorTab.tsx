@@ -2,7 +2,7 @@ import React, {useEffect, useRef, useState} from "react";
 import {Logs, Short} from "../../types/collections/Shorts";
 import {Segment} from "../../types/collections/Segment";
 import FirebaseFirestoreService from "../../services/database/strategies/FirebaseFirestoreService";
-import {useNotificaiton} from "../../contexts/NotificationProvider";
+import {useNotification} from "../../contexts/NotificationProvider";
 import FirebaseDatabaseService from "../../services/database/strategies/FirebaseFirestoreService";
 import {Timestamp} from "firebase/firestore";
 import {AudioPlayer} from "../audio/AudioPlayer";
@@ -108,7 +108,7 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({short, 
   const scrollRef = useRef<HTMLOListElement>(null);
   const [editing, setEditing] = useState(false);
   const [deleteRange, setDeleteRange] = useState<DeleteRange>({startIndex: undefined, endIndex: undefined});
-  const {showNotification} = useNotificaiton();
+  const {showNotification} = useNotification();
 
   useEffect(() => {
     // Scroll to the top of the container

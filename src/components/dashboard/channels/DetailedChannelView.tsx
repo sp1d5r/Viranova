@@ -9,7 +9,7 @@ import { formatDistanceToNow } from 'date-fns';
 import {Button} from "../../ui/button";
 import FirebaseFirestoreService from "../../../services/database/strategies/FirebaseFirestoreService";
 import {useAuth} from "../../../contexts/Authentication";
-import {useNotificaiton} from "../../../contexts/NotificationProvider";
+import {useNotification} from "../../../contexts/NotificationProvider";
 
 interface ChannelDetailsProps {
   channel: Channel;
@@ -18,7 +18,7 @@ interface ChannelDetailsProps {
 const ChannelDetails: React.FC<ChannelDetailsProps> = ({ channel }) => {
   const [videos, setVideos] = useState<Video[]>([]);
   const {authState} = useAuth();
-  const { showNotification } = useNotificaiton();
+  const { showNotification } = useNotification();
 
   useEffect(() => {
     getRecentChannelVideos(channel.channelId).then((vids) => {

@@ -5,7 +5,7 @@ import { toNumber } from "lodash";
 import { Analytics, VideoAnalytics } from "../../types/collections/Analytics";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { useNotificaiton } from "../../contexts/NotificationProvider";
+import { useNotification } from "../../contexts/NotificationProvider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Button } from "../ui/button";
 
@@ -55,7 +55,7 @@ export const DashboardAnalytics: React.FC<DashboardAnalyticsProps> = ({ userId }
   const [shorts, setShorts] = useState<Short[]>([]);
   const [analytics, setAnalytics] = useState<Analytics[]>([]);
   const [selectedShort, setSelectedShort] = useState<string | null>(null);
-  const { showNotification } = useNotificaiton();
+  const { showNotification } = useNotification();
 
   useEffect(() => {
     if (userId) {

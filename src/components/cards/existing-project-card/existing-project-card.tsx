@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import {UserVideo} from "../../../types/collections/UserVideo";
 import FirebaseDatabaseService from "../../../services/database/strategies/FirebaseFirestoreService";
-import {useNotificaiton} from "../../../contexts/NotificationProvider";
+import {useNotification} from "../../../contexts/NotificationProvider";
 import {FirebaseStorageService} from "../../../services/storage/strategies";
 import {LoadingIcon} from "../../loading/Loading";
 import {VideoPlayer} from "../../video-player/VideoPlayer";
@@ -13,7 +13,7 @@ export interface ExistingProjectCardProps {
 }
 
 export const ExistingProjectCard: React.FC<ExistingProjectCardProps> = ({userVideo, setRefresh, id}) => {
-    const {showNotification} = useNotificaiton();
+    const {showNotification} = useNotification();
     const [previewVideo, setPreviewVideo] = useState(false);
 
     const deleteVideo = () => {

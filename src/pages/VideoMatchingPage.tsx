@@ -3,7 +3,7 @@ import ScrollableLayout from "../layouts/ScrollableLayout";
 import Background from "../assets/landing-page-assets/background.png";
 import {getVideoInfo} from "../services/youtube";
 import {Video} from "../types/Video";
-import {useNotificaiton} from "../contexts/NotificationProvider";
+import {useNotification} from "../contexts/NotificationProvider";
 import FirebaseDatabaseService from "../services/database/strategies/FirebaseFirestoreService";
 import {documentToProposedMatch, ProposedMatch} from "../types/collections/ProposedMatches";
 import {MatchResults, matchResultsToDocument} from "../types/collections/self-supervised/MatchResults";
@@ -32,7 +32,7 @@ export const VideoMatchingPage : React.FC<VideoMatchingPageProps> = () => {
     const [longVideo, setLongVideo] = useState<Video>();
     const [times, setTimes] = useState({startTime:'', endTime:''})
 
-    const {showNotification} = useNotificaiton();
+    const {showNotification} = useNotification();
     const {authState}= useAuth();
 
     useEffect(() => {

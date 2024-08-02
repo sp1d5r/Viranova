@@ -1,7 +1,7 @@
 import React, {useState, useEffect, useRef} from 'react';
 import {BoundingBoxes, Boxes, Short} from "../../../../types/collections/Shorts";
 import FirebaseFirestoreService from "../../../../services/database/strategies/FirebaseFirestoreService";
-import {useNotificaiton} from "../../../../contexts/NotificationProvider";
+import {useNotification} from "../../../../contexts/NotificationProvider";
 
 export interface ManualOverrideControlProps {
   currentFrame: number;
@@ -23,7 +23,7 @@ interface BoxMovementPos {
 
 const ManualOverrideControls: React.FC<ManualOverrideControlProps> = ({ currentFrame, totalFrames, cuts, setCuts, internalBoundingBoxes, setInternalBoundingBoxes, shortId, short }) => {
   const [currentIntervalIndex, setCurrentIntervalIndex] = useState<number | undefined>();
-  const {showNotification} = useNotificaiton();
+  const {showNotification} = useNotification();
   const [editedBoundingBoxes, setEditedBoundingBoxes] = useState(internalBoundingBoxes);
   const [moveOption, setMoveOption] = useState<ManualOverrideOptions>("None");
   const boxRef = useRef<HTMLDivElement>(null)

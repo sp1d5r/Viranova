@@ -3,7 +3,7 @@ import { BoundingBoxes, Short } from '../../../types/collections/Shorts';
 import { FirebaseStorageService } from '../../../services/storage/strategies';
 import { LoadingIcon } from '../../loading/Loading';
 import FirebaseFirestoreService from "../../../services/database/strategies/FirebaseFirestoreService";
-import {useNotificaiton} from "../../../contexts/NotificationProvider";
+import {useNotification} from "../../../contexts/NotificationProvider";
 
 export interface VideoEditorProps {
   short: Short;
@@ -25,7 +25,7 @@ export const VideoEditor: React.FC<VideoEditorProps> = ({ short, shortId,current
   const [internalBoundingBoxes, setInternalBoundingBoxes] = useState<BoundingBoxes | undefined>(short.bounding_boxes);
   const clippedVideoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
-  const {showNotification} = useNotificaiton();
+  const {showNotification} = useNotification();
 
   useEffect(() => {
     const video = clippedVideoRef.current;

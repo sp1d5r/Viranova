@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import LangSmithFeedback from "../../services/langchain";
-import {useNotificaiton} from "../../contexts/NotificationProvider";
+import {useNotification} from "../../contexts/NotificationProvider";
 
 
 export interface ReviewLangchainLogProps {
@@ -9,7 +9,7 @@ export interface ReviewLangchainLogProps {
 }
 
 export const ReviewLangchainLogs : React.FC<ReviewLangchainLogProps> = ({runId}) => {
-  const {showNotification} = useNotificaiton();
+  const {showNotification} = useNotification();
 
   const [commentSection, setCommentSection] = useState({
     visible: false,

@@ -8,7 +8,7 @@ import Confirm from "../../assets/segmentation-assets/confirm.svg";
 import GoodLuck from "../../assets/segmentation-assets/good_luck.svg";
 import {Video} from "../../types/Video";
 import {getVideoInfo} from "../../services/youtube";
-import {useNotificaiton} from "../../contexts/NotificationProvider";
+import {useNotification} from "../../contexts/NotificationProvider";
 
 export interface SegmentationIntroProps {
     setPageState: (pageState: PageState) => void;
@@ -25,7 +25,7 @@ export const SegmentationIntro : React.FC<SegmentationIntroProps> = ({setPageSta
     const [segmentationState, setSegmentationState] = useState<SegmentationIntroStates>("STARTING");
     const [video, setVideo] = useState<Video | undefined>(undefined);
     const [loadingSegmentation, setLoadingSegment] = useState(false);
-    const {showNotification} = useNotificaiton();
+    const {showNotification} = useNotification();
 
     useEffect(() => {
         setLoadingSegment(segmentationGroup.spacialGroups.length !== 0 );

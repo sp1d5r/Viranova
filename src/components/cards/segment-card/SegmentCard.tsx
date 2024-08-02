@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import FirebaseDatabaseService from "../../../services/database/strategies/FirebaseFirestoreService";
 import FirebaseFirestoreService from "../../../services/database/strategies/FirebaseFirestoreService";
 import {deleteSegment, documentToSegment, Segment} from "../../../types/collections/Segment";
-import {useNotificaiton} from "../../../contexts/NotificationProvider";
+import {useNotification} from "../../../contexts/NotificationProvider";
 import {documentToUserVideo} from "../../../types/collections/UserVideo";
 import {deleteShort, Short} from "../../../types/collections/Shorts";
 import LangSmithFeedback from "../../../services/langchain";
@@ -16,7 +16,7 @@ export interface SegmentCardProps{
 }
 
 export const SegmentCard: React.FC<SegmentCardProps> = ({currentSegment, segmentId, currentTime}) => {
-  const {showNotification} = useNotificaiton();
+  const {showNotification} = useNotification();
   const [segment, setSegment] = useState<Segment>(currentSegment);
   const [shorts, setShorts] = useState<Short[]>([])
   const [fullTranscriptShown, setFullTranscript] = useState(false);

@@ -2,7 +2,7 @@ import React from "react";
 import {VideoPlayer} from "../../video-player/VideoPlayer";
 import {Short} from "../../../types/collections/Shorts";
 import FirebaseFirestoreService from "../../../services/database/strategies/FirebaseFirestoreService";
-import {useNotificaiton} from "../../../contexts/NotificationProvider";
+import {useNotification} from "../../../contexts/NotificationProvider";
 
 export interface PreviewShortVideoProps {
   short: Short;
@@ -12,7 +12,7 @@ export interface PreviewShortVideoProps {
 
 export const PreviewShortVideo : React.FC<PreviewShortVideoProps> = ({short, shortId, continueButton}) => {
 
-  const {showNotification} = useNotificaiton();
+  const {showNotification} = useNotification();
 
   return <div className="w-full flex flex-col gap-2 items-center">
     <VideoPlayer path={short.short_clipped_video} />

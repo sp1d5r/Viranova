@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import {deleteShort, Short} from "../../types/collections/Shorts";
 import FirebaseFirestoreService from "../../services/database/strategies/FirebaseFirestoreService";
-import {useNotificaiton} from "../../contexts/NotificationProvider";
+import {useNotification} from "../../contexts/NotificationProvider";
 
 export interface ShortSettingsTabProps {
   short: Short;
@@ -11,7 +11,7 @@ export interface ShortSettingsTabProps {
 export const ShortSettingsTab :React.FC<ShortSettingsTabProps> = ({short, shortId}) => {
   const [shortIdea, setShortIdea] = useState<string>(short.short_idea);
   const [shortIdeaExplanation, setShortIdeaExplanation] = useState(short.short_idea_explanation)
-  const {showNotification} = useNotificaiton();
+  const {showNotification} = useNotification();
 
   const reset = () => {
     setShortIdea(short.short_idea);

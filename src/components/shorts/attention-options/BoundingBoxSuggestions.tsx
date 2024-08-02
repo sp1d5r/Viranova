@@ -3,7 +3,7 @@ import {BoundingBoxes, Short} from "../../../types/collections/Shorts";
 import {FirebaseStorageService} from "../../../services/storage/strategies";
 import {LoadingIcon} from "../../loading/Loading";
 import FirebaseFirestoreService from "../../../services/database/strategies/FirebaseFirestoreService";
-import {useNotificaiton} from "../../../contexts/NotificationProvider";
+import {useNotification} from "../../../contexts/NotificationProvider";
 import "./bounding-box.css";
 import ManualOverrideControls from "./bounding-boxes/ManualOverrideSegment";
 
@@ -21,7 +21,7 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({s
   const [loading, setLoading] = useState(true);
   const fps = short.fps;
   const [pause, setPause] = useState(false);
-  const {showNotification} = useNotificaiton();
+  const {showNotification} = useNotification();
   const [videoUrls, setVideoUrls] = useState<VideoInfo>({clippedVideo: undefined, saliencyVideo: undefined});
   const [opacity, setOpacity] = useState(0);
   const [currentFrame, setCurrentFrame] = useState(0);

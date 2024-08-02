@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import {PageState} from "../../pages/SegmentationHandlingPage";
 import {SegmentationGroup, spacialSegmentationGroupToDocument} from "../../types/segmentation-masks/SegmentationGroup";
 import FirebaseDatabaseService from "../../services/database/strategies/FirebaseFirestoreService";
-import {useNotificaiton} from "../../contexts/NotificationProvider";
+import {useNotification} from "../../contexts/NotificationProvider";
 import TemporalSegmentationCanvas from "./TemporalSegmentationCanvas";
 
 export interface TemporalSegmentationProps {
@@ -12,7 +12,7 @@ export interface TemporalSegmentationProps {
 
 export const TemporalSegmentation: React.FC<TemporalSegmentationProps> = ({setPageState, segmentationGroup}) => {
   const [currentFrame, setCurrentFrame] = useState<number>(-1);
-  const {showNotification} = useNotificaiton();
+  const {showNotification} = useNotification();
 
   const updateTemporalSegmentationGroups = (group: number[]) => {
 

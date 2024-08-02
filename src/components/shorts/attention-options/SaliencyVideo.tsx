@@ -1,7 +1,7 @@
 import React from "react";
 import {VideoPlayer} from "../../video-player/VideoPlayer";
 import {Short} from "../../../types/collections/Shorts";
-import {useNotificaiton} from "../../../contexts/NotificationProvider";
+import {useNotification} from "../../../contexts/NotificationProvider";
 import FirebaseFirestoreService from "../../../services/database/strategies/FirebaseFirestoreService";
 
 export interface SaliencyVideoProps {
@@ -10,7 +10,7 @@ export interface SaliencyVideoProps {
 }
 
 export const SaliencyVideo: React.FC<SaliencyVideoProps> = ({short, shortId}) => {
-  const { showNotification } = useNotificaiton();
+  const { showNotification } = useNotification();
 
   return <div className="w-full flex flex-col gap-2 items-center">
     <VideoPlayer path={short.short_video_saliency} loadingText={"Loading Saliency"}/>

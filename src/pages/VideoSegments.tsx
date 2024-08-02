@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import ScrollableLayout from "../layouts/ScrollableLayout";
 import {useSearchParams} from "react-router-dom";
 import {documentToUserVideo, UserVideo} from "../types/collections/UserVideo";
-import {useNotificaiton} from "../contexts/NotificationProvider";
+import {useNotification} from "../contexts/NotificationProvider";
 import FirebaseDatabaseService from "../services/database/strategies/FirebaseFirestoreService";
 import firebaseFirestoreService from "../services/database/strategies/FirebaseFirestoreService";
 import {documentToTranscript, Transcript} from "../types/collections/Transcript";
@@ -27,7 +27,7 @@ export const VideoSegments: React.FC<VideoSegmentsProps> = ({videoId}) => {
     const [segmentHovered, setSegmentHovered] = useState(-1);
     const [seekTo, setSeekTo] = useState(0);
 
-    const {showNotification} = useNotificaiton();
+    const {showNotification} = useNotification();
 
     useEffect(() => {
         if (video_id){

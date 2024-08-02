@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {Short} from "../../types/collections/Shorts";
 import FirebaseFirestoreService from "../../services/database/strategies/FirebaseFirestoreService";
-import {useNotificaiton} from "../../contexts/NotificationProvider";
+import {useNotification} from "../../contexts/NotificationProvider";
 import {VideoPlayer} from "../video-player/VideoPlayer";
 import {LoadingIcon} from "../loading/Loading";
 import FirebaseDatabaseService from "../../services/database/strategies/FirebaseFirestoreService";
@@ -83,7 +83,7 @@ export const ExportTab :React.FC<ExportTabProps> = ({short, shortId}) => {
   });
   const [tikTokLink, setTikTokLink] = useState(short.tiktok_link);
   const [selectedDataCollection, setSelectedDataCollection] = useState<DataCollectionType>(dataCollectionMethodologies[0]);
-  const {showNotification} = useNotificaiton();
+  const {showNotification} = useNotification();
 
   const scheduleAnalyticsTasks = async () => {
     const taskSchedule = createTaskSchedule(selectedDataCollection.collectionType);

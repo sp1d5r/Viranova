@@ -5,7 +5,7 @@ import Notifications from "../../assets/icons/Notifications.svg";
 import Cards from "../../assets/icons/Cards.svg";
 import ChevronDown from "../../assets/icons/ChevronDown.svg";
 import {useAuth} from "../../contexts/Authentication";
-import {useNotificaiton} from "../../contexts/NotificationProvider";
+import {useNotification} from "../../contexts/NotificationProvider";
 
 interface ExpandedOption {
     title: string;
@@ -56,7 +56,7 @@ const HoverableLink: React.FC<HoverableLinkProps> = ({ name, expandedOptions, le
 export const TransparentNavigationBar: React.FC<TransparentNavigationBarProps> = ({ className = '' }) => {
     const [menuExpanded, setMenuExpanded] = useState(false);
     const {authState, logout} = useAuth();
-    const { showNotification } = useNotificaiton();
+    const { showNotification } = useNotification();
 
     return <div className="w-full flex fixed top-0 min-h-12 shadow justify-start items-center gap-[90px] px-10 py-5 navigation-bar z-50">
         {

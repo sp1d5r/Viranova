@@ -8,6 +8,7 @@ import reportWebVitals from './reportWebVitals';
 import {NotificationProvider} from "./contexts/NotificationProvider";
 import {AuthProvider} from "./contexts/Authentication";
 import { PostHogProvider} from 'posthog-js/react'
+import {Toaster} from "./components/ui/toaster";
 
 const options = {
   api_host: process.env.REACT_APP_PUBLIC_POSTHOG_HOST,
@@ -25,6 +26,7 @@ root.render(
       <AuthProvider>
           <NotificationProvider>
               <App />
+              <Toaster />
           </NotificationProvider>
       </AuthProvider>
     </PostHogProvider>

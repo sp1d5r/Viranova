@@ -5,7 +5,7 @@ import {CreateProject} from '../components/playground/CreateProject';
 import LogoIcon from "../assets/logo/Scissors.svg";
 import gsap from "gsap";
 import {BackgroundBeams} from "../components/ui/background-beams";
-import {useNotificaiton} from "../contexts/NotificationProvider";
+import {useNotification} from "../contexts/NotificationProvider";
 import FirebaseFirestoreService from "../services/database/strategies/FirebaseFirestoreService";
 import {useAuth} from "../contexts/Authentication";
 
@@ -13,7 +13,7 @@ import {useAuth} from "../contexts/Authentication";
 export default function PlaygroundPage() {
     const comp = useRef(null);
     const [youtubeLink, setYouTubeLink] = useState<string>();
-    const { showNotification } = useNotificaiton();
+    const { showNotification } = useNotification();
     const { authState } = useAuth();
     const [uploadProgress, setUploadProgress] = useState<number>(0);
 

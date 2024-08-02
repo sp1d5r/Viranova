@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {Short} from "../../types/collections/Shorts";
-import {useNotificaiton} from "../../contexts/NotificationProvider";
+import {useNotification} from "../../contexts/NotificationProvider";
 import {Segment} from "../../types/collections/Segment";
 import {SegmentVideo} from "./attention-options/SegmentVideo";
 import {PreviewShortVideo} from "./attention-options/PreviewShortVideo";
@@ -24,7 +24,7 @@ const options : AttentionOptions[] = ["View Segment Video", "Preview Clipped Vid
 export const AttentionTab: React.FC<AttentionTabProps> = ({short, shortId, segment, setTab}) => {
   const [selectedOption, setSelectedOption] = useState<AttentionOptions>("View Segment Video");
   const [currentTab, setCurrentTab] = useState(0);
-  const {showNotification} = useNotificaiton();
+  const {showNotification} = useNotification();
 
   useEffect(() => {
     setCurrentTab(0);

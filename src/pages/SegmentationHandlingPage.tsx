@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import ScrollableLayout from "../layouts/ScrollableLayout";
 import {useAuth} from "../contexts/Authentication";
 import {SegmentationIntro} from "../components/segmentation/SegmentationIntro";
-import {useNotificaiton} from "../contexts/NotificationProvider";
+import {useNotification} from "../contexts/NotificationProvider";
 import {SpacialSegmentation} from "../components/segmentation/SpacialSegmentation";
 import {SegmentationGroup} from "../types/segmentation-masks/SegmentationGroup";
 import axios from 'axios';
@@ -21,7 +21,7 @@ export type PageState = "Introduction" |
 
 export const SegmentationHandlingPage: React.FC<SegmentationHandlingPageProps> = ({}) => {
     const {authState} = useAuth();
-    const {showNotification} = useNotificaiton();
+    const {showNotification} = useNotification();
     const [pageState, setPageState] = useState<PageState>("Introduction");
     const [videoFile, setVideoFile] = useState("");
     const [segmentationGroup, setSegmentationGroup] = useState<SegmentationGroup>({
