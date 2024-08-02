@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Bell,
   CircleUser,
@@ -31,7 +31,7 @@ import {
 } from "../components/ui/dropdown-menu"
 import { Input } from "../components/ui/input"
 import { Sheet, SheetContent, SheetTrigger } from "../components/ui/sheet"
-import {Link} from "react-router-dom";
+import {Link, useNavigate, useSearchParams} from "react-router-dom";
 import {Logo} from "../components/logo/logo";
 import {DashboardLanding} from "../components/dashboard/DashboardLanding";
 import {DashboardChannels} from "../components/dashboard/DashboardChannels";
@@ -60,9 +60,23 @@ const navItems: NavItem[] = [
 ];
 
 export default function Dashboard() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [selectedItem, setSelectedItem] = useState<string>('dashboard');
   const {authState, logout} = useAuth();
   const {showNotification, allNotifications} = useNotification();
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab && navItems.some(item => item.id === tab)) {
+      setSelectedItem(tab);
+    }
+  }, [searchParams]);
+
+  const handleTabChange = (tabId: string) => {
+    setSelectedItem(tabId);
+    setSearchParams({ tab: tabId });
+  };
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr] text-white ">
@@ -110,7 +124,10 @@ export default function Dashboard() {
                       ? 'bg-muted text-primary'
                       : 'text-muted-foreground'
                   }`}
-                  onClick={() => setSelectedItem(item.id)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleTabChange(item.id);
+                  }}
                 >
                   {item.icon}
                   {item.title}

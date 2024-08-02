@@ -1,192 +1,190 @@
-import './navigation-bar.css';
 import React, { useState } from 'react';
-import { Logo } from '../logo/logo';
-import Notifications from "../../assets/icons/Notifications.svg";
-import Cards from "../../assets/icons/Cards.svg";
-import ChevronDown from "../../assets/icons/ChevronDown.svg";
+import {Link} from 'react-router-dom';
+import { Bell, Menu, Settings, ChevronDown, LogOut } from 'lucide-react';
+import { Button } from '../ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '../ui/dropdown-menu';
+import {
+    Sheet,
+    SheetContent,
+    SheetTrigger,
+    SheetClose,
+} from '../ui/sheet';
 import { useAuth } from "../../contexts/Authentication";
 import { useNotification } from "../../contexts/NotificationProvider";
+import {Logo} from "../logo/logo";
+import {Popover, PopoverContent, PopoverTrigger} from "../ui/popover";
+import {CardTitle} from "../ui/card";
+import {ScrollArea} from "../ui/scroll-area";
 
-interface ExpandedOption {
+interface NavLinkProps {
+    href: string;
+    children: React.ReactNode;
+}
+
+const NavLink: React.FC<NavLinkProps> = ({ href, children }) => (
+  <Link to={href} className="text-sm font-medium transition-colors hover:text-primary">
+      {children}
+  </Link>
+);
+
+interface OptionProps {
     title: string;
     description: string;
     link: string;
 }
 
-interface HoverableLinkProps {
+interface NavMenuProps {
     name: string;
-    expandedOptions: ExpandedOption[];
-    left: number;
+    options: OptionProps[];
 }
-
-export interface NavigationBarProps {
-    className?: string;
-}
-
-const HoverableLink: React.FC<HoverableLinkProps> = ({ name, expandedOptions, left = 0 }) => {
-    const [isHovered, setIsHovered] = useState(false);
-
-    return (
-      <div
-        className="relative inline-block"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-          <div className="flex gap-2 items-center">
-              <p className="text-center text-stone-50 text-sm font-bold">{name}</p>
-              <img src={ChevronDown} alt="" />
-          </div>
-          {isHovered && (
-            <div
-              style={{ left: left }}
-              className="absolute top-6 w-[50vw] min-h-[30vh] bg-black/30 p-2 shadow-lg z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 rounded backdrop-blur border border-white p-5"
-            >
-                {expandedOptions.map((option, index) => (
-                  <a key={index} href={option.link} className="no-underline text-white w-[200px]">
-                      <h3 className="font-bold text-primary mb-1 underline">{option.title}</h3>
-                      <p className="text-sm">{option.description}</p>
-                  </a>
-                ))}
-            </div>
-          )}
-      </div>
-    );
-};
-
-export const NavigationBar: React.FC<NavigationBarProps> = ({ className = '' }) => {
-    const [menuExpanded, setMenuExpanded] = useState(false);
-    const { authState, logout } = useAuth();
-    const { showNotification } = useNotification();
-
-    return (
-      <div className={`w-full flex sticky top-0 bg-background min-h-20 shadow justify-start items-center gap-6 px-10 py-5 ${className} z-50`}>
-          {menuExpanded && (
-            <div className="absolute z-20 h-screen w-screen top-0 left-0 bg-background flex flex-col px-10 py-5 justify-between">
-                <div className="flex justify-start min-h-[50px]">
-                    <Logo />
-                </div>
-
-                <div className="gap-5 flex flex-col justify-start py-5">
-                    <HoverableLink expandedOptions={[{
-                        title: "Research Paper",
-                        description: "A link to the research paper",
-                        link: "/help"
-                    }]} name="Research" left={-20} />
-                    <HoverableLink expandedOptions={[]} name="About" left={-100} />
-                    <p className="text-left text-stone-50 text-sm font-bold">Demo</p>
-                </div>
-
-                <div className="flex flex-1 gap-5 justify-end items-center flex-col">
-                    <div className="flex gap-2 w-full">
-                        <img src={Notifications} alt="Notifications" />
-                        <p className="text-white">Notifications</p>
+const NavMenu: React.FC<NavMenuProps> = ({ name, options })  => (
+  <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="flex items-center gap-1">
+              {name} <ChevronDown className="h-4 w-4" />
+          </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56">
+          {options.map((option, index) => (
+            <DropdownMenuItem key={index}>
+                <Link to={option.link} className="w-full">
+                    <div>
+                        <div className="font-medium">{option.title}</div>
+                        <p className="text-sm text-muted-foreground">{option.description}</p>
                     </div>
-                    <a className="flex gap-2 w-full" href="/settings">
-                        <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" strokeLinecap="square" strokeLinejoin="round" strokeWidth="2" d="M10 19H5a1 1 0 0 1-1-1v-1a3 3 0 0 1 3-3h2m10 1a3 3 0 0 1-3 3m3-3a3 3 0 0 0-3-3m3 3h1m-4 3a3 3 0 0 1-3-3m3 3v1m-3-4a3 3 0 0 1 3-3m-3 3h-1m4-3v-1m-2.121 1.879-.707-.707m5.656 5.656-.707-.707m-4.242 0-.707.707m5.656-5.656-.707.707M12 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
-                        </svg>
-                        <p className="text-white">User Settings</p>
-                    </a>
+                </Link>
+            </DropdownMenuItem>
+          ))}
+      </DropdownMenuContent>
+  </DropdownMenu>
+);
 
-                    {authState.isAuthenticated ? (
-                      <p
-                        onClick={() => {
-                            logout(
-                              () => {
-                                  showNotification(
-                                    "Signed Out",
-                                    "You've successfully signed out, it might take a second to propagate",
-                                    "success"
-                                  );
-                              },
-                              () => {
-                                  showNotification(
-                                    "Failed to Sign Out",
-                                    "I don't think this is possible... try refreshing.",
-                                    "warning"
-                                  );
-                              }
-                            );
-                        }}
-                        className="font-bold text-danger cursor-pointer"
-                      >
-                          Sign Out
-                      </p>
-                    ) : (
-                      <a href="/authenticate">
-                          <p className="m-0 text-center text-stone-50 text-base font-normal">Sign Up</p>
-                      </a>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => setMenuExpanded(false)}
-                      className="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
-                    >
-                        Close Menu
-                    </button>
-                </div>
-            </div>
-          )}
+export const NavigationBar = () => {
+    const { authState, logout } = useAuth();
+    const {showNotification, allNotifications} = useNotification();
 
-          <div className="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl w-full gap-5">
-              <div className="flex-1 flex justify-start md:flex-initial">
+    const handleLogout = () => {
+        logout(
+          () => {
+              showNotification(
+                "Signed Out",
+                "You've successfully signed out, it might take a second to propagate",
+                "success"
+              );
+          },
+          () => {
+              showNotification(
+                "Failed to Sign Out",
+                "I don't think this is possible... try refreshing.",
+                "warning"
+              );
+          }
+        );
+    };
+
+    interface NavItemProps {
+        name: string;
+        options?: OptionProps[];
+        link?: string;
+    }
+    const navItems:NavItemProps[] = [
+        { name: 'Research', options: [{ title: 'Research Paper', description: 'A link to the research paper', link: '/help' }] },
+        { name: 'About', options: [] },
+        { name: 'Demo', link: '/playground' },
+    ];
+
+    return (
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 text-white">
+          <div className="container flex h-14 items-center">
+              <div className="mr-4 flex">
                   <Logo />
               </div>
-              <div className="flex-1 gap-10 hidden md:flex mx-10">
-                  <HoverableLink expandedOptions={[{
-                      title: "Research Paper",
-                      description: "A link to the research paper",
-                      link: "/help"
-                  }]} name="Research" left={-30} />
-                  <HoverableLink expandedOptions={[]} name="About" left={-100} />
-                  <a href="/playground" className="text-center text-stone-50 text-base font-normal">Demo</a>
+              <div className="hidden flex-1 items-center justify-center space-x-2">
+                  <nav className="flex items-center space-x-6 text-sm font-medium">
+                      {navItems.map((item, index) =>
+                        <>
+                            {item.options && <NavMenu key={index} name={item.name} options={item.options}/>}
+                            {item.link && <NavLink key={index} href={item.link}>{item.name}</NavLink> }
+                        </>)
+                      }
+                  </nav>
               </div>
-
-              <div className="hidden md:flex gap-5 justify-center items-center">
-                  <img src={Notifications} alt="Notifications" />
-                  {authState.isAuthenticated && (
-                    <a href="/settings">
-                        <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" strokeLinecap="square" strokeLinejoin="round" strokeWidth="1" d="M10 19H5a1 1 0 0 1-1-1v-1a3 3 0 0 1 3-3h2m10 1a3 3 0 0 1-3 3m3-3a3 3 0 0 0-3-3m3 3h1m-4 3a3 3 0 0 1-3-3m3 3v1m-3-4a3 3 0 0 1 3-3m-3 3h-1m4-3v-1m-2.121 1.879-.707-.707m5.656 5.656-.707-.707m-4.242 0-.707.707m5.656-5.656-.707.707M12 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
-                        </svg>
-                    </a>
-                  )}
-                  {authState.isAuthenticated ? (
-                    <p
-                      onClick={() => {
-                          logout(
-                            () => {
-                                showNotification(
-                                  "Signed Out",
-                                  "You've successfully signed out, it might take a second to propagate",
-                                  "success"
-                                );
-                            },
-                            () => {
-                                showNotification(
-                                  "Failed to Sign Out",
-                                  "I don't think this is possible... try refreshing.",
-                                  "warning"
-                                );
-                            }
-                          );
-                      }}
-                      className="font-bold text-white px-5 py-3 text-center bg-rose-700 rounded-xl border-black border min-w-[120px] cursor-pointer"
-                    >
-                        Sign Out
-                    </p>
-                  ) : (
-                    <a href="/authenticate">
-                        <p className="m-0 text-center text-stone-50 text-base font-normal min-w-[100px]">Sign Up</p>
-                    </a>
-                  )}
-              </div>
-
-              <div className="flex md:hidden gap-5 justify-center items-center" onClick={() => setMenuExpanded(true)}>
-                  <div className="border-l border-white h-12 w-[10px]" />
-                  <img src={Cards} alt="menu" className="h-full" />
+              <div className="flex-1" />
+              <div className="flex items-center justify-end space-x-4">
+                  <nav className="hidden md:flex items-center space-x-1">
+                      <Popover>
+                          <PopoverTrigger asChild>
+                              <Button variant="outline" size="icon" className="ml-auto h-8 w-8">
+                                  <Bell className="h-4 w-4" />
+                                  <span className="sr-only">Toggle notifications</span>
+                              </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-80">
+                              <CardTitle className="mb-2">Notifications</CardTitle>
+                              <ScrollArea className="h-[300px]">
+                                  {allNotifications.length > 0 ? (
+                                    allNotifications.map((notification, index) => (
+                                      <div key={index} className="mb-2 p-2 bg-muted rounded-md">
+                                          <p className="font-semibold">{notification.title}</p>
+                                          <p className="text-sm text-muted-foreground">{notification.message}</p>
+                                          <p className="text-xs text-muted-foreground mt-1">
+                                              {new Date(notification.timestamp).toLocaleString()}
+                                          </p>
+                                      </div>
+                                    ))
+                                  ) : (
+                                    <p>No notifications</p>
+                                  )}
+                              </ScrollArea>
+                          </PopoverContent>
+                      </Popover>
+                      {authState.isAuthenticated && (
+                        <Button variant="outline" size="icon" className="ml-auto h-8 w-8" asChild>
+                            <Link to="/settings">
+                                <Settings className="h-4 w-4" />
+                            </Link>
+                        </Button>
+                      )}
+                      {authState.isAuthenticated ? (
+                        <Button variant="ghost" onClick={handleLogout}>
+                            <LogOut className="mr-2 h-4 w-4" />
+                            Sign Out
+                        </Button>
+                      ) : (
+                        <Button variant="ghost" asChild>
+                            <Link to="/authenticate">Sign Up</Link>
+                        </Button>
+                      )}
+                  </nav>
+                  <Sheet>
+                      <SheetTrigger asChild>
+                          <Button variant="outline" size="icon" className="md:hidden h-8 w-8">
+                              <Menu className="h-4 w-4" />
+                          </Button>
+                      </SheetTrigger>
+                      <SheetContent side="left">
+                          <div className="grid gap-4 py-4">
+                              <Logo />
+                              {navItems.map((item, index) => (
+                                <SheetClose key={index} asChild>
+                                    <div>
+                                        {item.options &&  <NavMenu name={item.name} options={item.options} /> }
+                                        {item.link && <NavLink href={item.link}>{item.name}</NavLink> }
+                                    </div>
+                                </SheetClose>
+                              ))}
+                          </div>
+                      </SheetContent>
+                  </Sheet>
               </div>
           </div>
-      </div>
+      </header>
     );
 };
+
+export default NavigationBar;
