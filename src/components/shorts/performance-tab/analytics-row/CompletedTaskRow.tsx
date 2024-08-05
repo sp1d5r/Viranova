@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {AnalyticsTask} from "../../../../types/collections/Task";
 import FirebaseFirestoreService from "../../../../services/database/strategies/FirebaseFirestoreService";
 import {Analytics} from "../../../../types/collections/Analytics";
-import {formatDate} from "../TasksTab";
+import {formatTimestamp} from "../TasksTab";
 
 export interface CompletedTaskRowProps {
   task: AnalyticsTask;
@@ -38,7 +38,7 @@ export const CompletedTaskRow: React.FC<CompletedTaskRowProps> = ({task}) => {
 
     </th>
     <td className="px-6 py-4">
-      {task.processingStartTime ? formatDate(task.processingStartTime?.toDate()) : 'N/A'}
+      {task.processingStartTime ? formatTimestamp(task.processingStartTime) : 'N/A'}
     </td>
     <td className="px-6 py-4">
       {analytics && analytics.videoAnalytics.length > 0 ? analytics.videoAnalytics[0].playCount : 'N/A'}
