@@ -29,6 +29,7 @@ export interface Segment extends BackendServerMetadata {
     shortIdea: string;
     shortIdeaExplanation: string;
     shortRunId: string;
+    progress?: number;
     videoSegmentLocation: string;
 }
 
@@ -60,6 +61,7 @@ export function documentToSegment(docData: DocumentData): Segment {
         shortIdeaExplanation: docData.short_idea_explanation,
         shortRunId: docData.short_idea_run_id,
         videoSegmentLocation: docData.video_segment_location,
+        progress: docData.progress,
     };
 }
 
@@ -88,7 +90,8 @@ export function segmentToDocument(segment: Segment): DocumentData {
         short_idea: segment.shortIdea,
         short_idea_explanation: segment.shortIdeaExplanation,
         short_run_id: segment.shortRunId,
-        video_segment_location: segment.videoSegmentLocation
+        video_segment_location: segment.videoSegmentLocation,
+        progress: segment.progress,
     };
 }
 
