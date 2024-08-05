@@ -12,6 +12,7 @@ import {LoadingIcon} from "../components/loading/Loading";
 import {ExportTab} from "../components/shorts/ExportTab";
 import {Timestamp} from "firebase/firestore";
 import {PerformanceTab} from "../components/shorts/PerformanceTab";
+import {VideoTab} from "../components/shorts/VideoTab";
 
 export interface ShortsProps {
 
@@ -99,7 +100,7 @@ export const Shorts: React.FC<ShortsProps> = ({}) => {
 
   return <ScrollableLayout className={"flex flex-col gap-2 items-center relative"}>
     {short && short.pending_operation && (
-      <div className="fixed bottom-0 min-h-20 my-5 mx-auto w-[90%] sm:w-[50%] rounded-xl shadow-xl border-2 bg-background/90 border-white z-50 flex flex-col p-4" style={{zIndex: 100}}>
+      <div className="fixed bottom-0 min-h-20 my-10 mx-auto w-[90%] sm:w-[50%] rounded-xl shadow-xl border-2 bg-background/90 border-white z-50 flex flex-col p-4" style={{zIndex: 100}}>
         <div className="w-full flex justify-between flex-wrap text-white pb-2">
           <div className="flex gap-2 items-center flex-wrap">
             <p className="font-bold text-md">Progress Message:</p>
@@ -142,7 +143,7 @@ export const Shorts: React.FC<ShortsProps> = ({}) => {
         </div>
       </div>)
     }
-    <div className="max-w-screen-xl w-full flex flex-col text-white px-2 min-h-[80vh]">
+    <div className="max-w-screen-xl w-full my-2 flex flex-col text-white px-2 min-h-[80vh]">
       <div className="md:flex gap-2">
         <ul className="flex-wrap flex flex-row space-x-4 justify-center sm:justify-start my-4 overflow-x-auto md:flex-col md:space-y-4 md:space-x-0 text-sm font-medium text-gray-400 md:mb-0 max-h-[90vh]">
         <li>
@@ -202,7 +203,7 @@ export const Shorts: React.FC<ShortsProps> = ({}) => {
         }
 
         {
-          tabSelected == "Attention Capture" && short && short_id && segment && <AttentionTab shortId={short_id} short={short} segment={segment} setTab={setTabSelected}/>
+          tabSelected == "Attention Capture" && short && short_id && segment && <VideoTab shortId={short_id} short={short} segment={segment} setTab={setTabSelected}/>
         }
 
         {

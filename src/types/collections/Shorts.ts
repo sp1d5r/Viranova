@@ -35,6 +35,11 @@ export type BoundingBoxes = {
   boxes: Boxes[];
 }
 
+export type TwoBoundingBoxes = {
+  boxes: [Boxes, Boxes][];
+}
+
+
 export type VisualDifference = {
   frame_differences: number[]
 }
@@ -62,7 +67,11 @@ export interface Short extends BackendServerMetadata{
   temp_audio_file: string,
   short_clipped_video: string,
   short_video_saliency: string,
+  standard_tiktok?: BoundingBoxes;
+  two_boxes?: TwoBoundingBoxes;
+  reaction_box?: BoundingBoxes;
   bounding_boxes?: BoundingBoxes,
+  box_type?: string[];
   cuts: number[],
   total_frame_count: number,
   visual_difference?: VisualDifference,
@@ -83,6 +92,23 @@ export interface Short extends BackendServerMetadata{
 
 
 export function documentToShort(docData: DocumentData): Short {
+  let parsedBoundingBoxes: {
+    standard_tiktok?: BoundingBoxes;
+    two_boxes?: TwoBoundingBoxes;
+    reaction_box?: BoundingBoxes;
+  } | undefined;
+  if (docData.bounding_boxes) {
+    try {
+      const boundingBoxesData = JSON.parse(docData.bounding_boxes);
+      parsedBoundingBoxes = {
+        standard_tiktok: boundingBoxesData.standard_tiktok ? { boxes: boundingBoxesData.standard_tiktok } : undefined,
+        two_boxes: boundingBoxesData.two_boxes ? { boxes: boundingBoxesData.two_boxes } : undefined,
+        reaction_box: boundingBoxesData.reaction_box ? { boxes: boundingBoxesData.reaction_box } : undefined
+      };
+    } catch (error) {
+      console.error("Error parsing bounding boxes:", error);
+    }
+  }
   return {
     id: docData.id,
     start_index: docData.start_index,
@@ -103,9 +129,11 @@ export function documentToShort(docData: DocumentData): Short {
     short_clipped_video: docData.short_clipped_video,
     short_video_saliency: docData.short_video_saliency,
     bounding_boxes: docData.bounding_boxes ? JSON.parse(docData.bounding_boxes) : undefined,
+    ...parsedBoundingBoxes,
     cuts: docData.cuts,
     total_frame_count: docData.total_frame_count,
     visual_difference: docData.visual_difference ? JSON.parse(docData.visual_difference) : undefined,
+    box_type: docData.box_type,
     saliency_values: docData.saliency_values ? JSON.parse(docData.saliency_values) : undefined,
     finished_short_location: docData.finished_short_location,
     short_title_top: docData.short_title_top,
