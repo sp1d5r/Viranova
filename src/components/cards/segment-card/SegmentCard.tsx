@@ -191,7 +191,19 @@ export const SegmentCard: React.FC<SegmentCardProps> = ({currentSegment, segment
                   "uid": authState.user?.uid,
                 },
                 (shortId)=>{
-                  window.location.href = `/shorts?short_id=${shortId}`
+                  FirebaseFirestoreService.updateDocument(
+                    "topical_segments",
+                    segmentId,
+                    {
+                      segment_status: 'Crop Segment'
+                    },
+                    (doc) => {
+                      window.location.href = `/shorts?short_id=${shortId}`
+                    },
+                    (error) => {
+                      showNotification("Cropping Segment", `${error}`, "error")
+                    }
+                  )
                 },
                 (error) => {
                   showNotification("Document Creation", `${error}`, "error")
