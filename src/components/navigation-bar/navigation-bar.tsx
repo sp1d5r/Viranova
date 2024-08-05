@@ -128,7 +128,7 @@ export const NavigationBar = () => {
                               <CardTitle className="mb-2">Notifications</CardTitle>
                               <ScrollArea className="h-[300px]">
                                   {allNotifications.length > 0 ? (
-                                    allNotifications.map((notification, index) => (
+                                    allNotifications.reverse().map((notification, index) => (
                                       <div key={index} className="mb-2 p-2 bg-muted rounded-md">
                                           <p className="font-semibold">{notification.title}</p>
                                           <p className="text-sm text-muted-foreground">{notification.message}</p>

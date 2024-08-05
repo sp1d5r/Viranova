@@ -154,6 +154,7 @@ export const deleteShort = (shortId: string) => {
           shortId,
           () => {
             console.log("Successfully Deleted short!");
+            window.location.href = "/dashboard?tab=shorts";
           },
           (error) => {
             console.error("Failed to delete Short:", error.message)
