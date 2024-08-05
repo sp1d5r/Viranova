@@ -2,27 +2,25 @@ import React, {useEffect, useState} from "react";
 import FirebaseFirestoreService from "../../../services/database/strategies/FirebaseFirestoreService";
 import {AnalyticsTask} from "../../../types/collections/Task";
 import {CompletedTaskRow} from "./analytics-row/CompletedTaskRow";
+import {Timestamp} from "firebase/firestore";
 
 export interface TasksTabProps {
   shortId: string;
 }
 
-export function formatDate(date: Date) {
-  // Ensure the input is a Date object
-  if (!(date instanceof Date)) {
-    throw new Error("Invalid date");
-  }
-
-  // Get the components of the date
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  const seconds = String(date.getSeconds()).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
-  const year = String(date.getFullYear()).slice(-2); // Get last two digits of year
-
-  // Format the date as m:s dd/mm/yy
-  return `${minutes}:${seconds} ${day}/${month}/${year}`;
-}
+export const formatTimestamp = (timestamp: Timestamp | undefined): string => {
+  if (!timestamp) return 'N/A';
+  const date = timestamp.toDate();
+  return date.toLocaleString('en-US', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  });
+};
 
 
 export const TasksTab: React.FC<TasksTabProps> = ({shortId}) => {
@@ -130,7 +128,7 @@ export const TasksTab: React.FC<TasksTabProps> = ({shortId}) => {
                 {elem.status}
               </td>
               <td className="px-6 py-4">
-                {formatDate(elem.scheduledTime.toDate())}
+                {formatTimestamp(elem.scheduledTime)}
               </td>
               <td className="px-6 py-4">
                 <a href="#" className="font-medium text-emerald-500 hover:underline">Reschedule</a>

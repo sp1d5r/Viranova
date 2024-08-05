@@ -76,11 +76,25 @@ export const DashboardShorts: React.FC = () => {
       authState.user && authState.user.uid ? authState.user.uid : '',
       'uid',
       (documents) => {
-        setShorts(documents.map(doc => {
-          return documentToShort(doc)
-        }).sort((elem1, elem2) => {return toNumber(elem2.last_updated) - toNumber(elem1.last_updated)}));
+        const mappedShorts = documents.map(doc => documentToShort(doc));
+
+        // Sort the shorts array
+        const sortedShorts = mappedShorts.sort((a, b) => {
+          // If both have last_updated, compare them
+          if (a.last_updated && b.last_updated) {
+            return b.last_updated.toMillis() - a.last_updated.toMillis();
+          }
+          // If only a has last_updated, it should come first
+          if (a.last_updated) return -1;
+          // If only b has last_updated, it should come first
+          if (b.last_updated) return 1;
+          // If neither has last_updated, maintain their original order
+          return 0;
+        });
+
+        setShorts(sortedShorts);
       }
-    )
+    );
   }, [authState]);
 
   const toggleRowExpansion = (id: string) => {
