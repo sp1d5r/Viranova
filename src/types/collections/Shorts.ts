@@ -3,6 +3,41 @@ import FirebaseDatabaseService from "../../services/database/strategies/Firebase
 import FirebaseStorageService from "../../services/storage/strategies/FirebaseStorageService";
 import {BackendServerMetadata} from "./BackendServerMetadata";
 
+
+export interface Track {
+  id: string;
+  name: string;
+  items: TrackItem[];
+}
+
+export interface TrackItem {
+  id: string;
+  start: number;
+  end: number;
+  objectMetadata: ImageMetadata | VideoMetadata;
+}
+
+export interface BaseMetadata {
+  type: 'image' | 'video';
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export interface ImageMetadata extends BaseMetadata {
+  type: 'image';
+  src: string;
+  uploadType: 'link' | 'upload';
+}
+
+export interface VideoMetadata extends BaseMetadata {
+  type: 'video';
+  src: string;
+  offset: number; // Start time of the video in seconds
+  uploadType: 'link' | 'upload';
+}
+
 export type Logs = {
   type: "message",
   message: string,
@@ -81,6 +116,7 @@ export interface Short extends BackendServerMetadata{
   short_title_top?:string,
   short_title_bottom?: string,
   uid?: string,
+  b_roll_tracks?: Track[];
   update_progress: number,
   progress_message: string,
   last_updated: Timestamp,
@@ -146,6 +182,7 @@ export function documentToShort(docData: DocumentData): Short {
     pending_operation: docData.pending_operation,
     background_audio: docData.background_audio,
     background_percentage: docData.background_percentage,
+    b_roll_tracks: docData.b_roll_tracks ? JSON.parse(docData.b_roll_tracks) : undefined,
     short_a_roll: docData.short_a_roll,
     tiktok_link: docData.tiktok_link,
   };

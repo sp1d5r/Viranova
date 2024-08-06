@@ -1,6 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { Track } from './types';
-import { Short } from "../../../../types/collections/Shorts";
+import { Short, Track } from "../../../../types/collections/Shorts";
 import BRollItem from './BRollItem';
 
 interface VideoPlayerProps {
@@ -8,16 +7,16 @@ interface VideoPlayerProps {
   currentTime: number;
   setCurrentTime: (time: number) => void;
   tracks: Track[];
-  short: Short;
+  fps: number;
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl, currentTime, setCurrentTime, tracks, short }) => {
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl, currentTime, setCurrentTime, tracks, fps }) => {
   const aRollRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const handleTimeUpdate = () => {
       if (aRollRef.current) {
-        setCurrentTime(aRollRef.current.currentTime * (short.fps || 30));
+        setCurrentTime(aRollRef.current.currentTime * (fps || 30));
       }
     };
 
@@ -27,11 +26,11 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl, currentTime, setCur
     return () => {
       videoElement?.removeEventListener('timeupdate', handleTimeUpdate);
     };
-  }, [setCurrentTime, short.fps]);
+  }, [setCurrentTime, fps, aRollRef.current]);
 
   return (
     <div className="flex-1 flex justify-center items-center">
-      <div className="relative w-[270px] h-[480px] bg-red-300 my-2 flex justify-center items-center overflow-hidden">
+      <div className="relative w-[270px] h-[480px] my-2 flex justify-center items-center overflow-hidden">
         {videoUrl ? (
           <video ref={aRollRef} className="z-10 h-full w-full" controls>
             <source src={videoUrl} type="video/mp4" />
