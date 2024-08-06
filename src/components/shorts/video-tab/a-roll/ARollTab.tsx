@@ -1,13 +1,13 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
-import { Button } from "../../ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../../../ui/card";
+import { Button } from "../../../ui/button";
 import { CheckCircle2, Circle, Loader2 } from "lucide-react";
-import FirebaseFirestoreService from "../../../services/database/strategies/FirebaseFirestoreService";
-import { useNotification } from "../../../contexts/NotificationProvider";
-import { Short } from "../../../types/collections/Shorts";
-import { Segment } from "../../../types/collections/Segment";
+import FirebaseFirestoreService from "../../../../services/database/strategies/FirebaseFirestoreService";
+import { useNotification } from "../../../../contexts/NotificationProvider";
+import { Short } from "../../../../types/collections/Shorts";
+import { Segment } from "../../../../types/collections/Segment";
 import {BoundingBoxSuggestions} from "./BoundingBoxSuggestion";
-import {LoadingIcon} from "../../loading/Loading";
+import {LoadingIcon} from "../../../loading/Loading";
 
 type ProcessingStage = {
   id: string;

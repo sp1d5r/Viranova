@@ -1,0 +1,35 @@
+.tracks-container {
+    margin-top: 20px;
+}
+
+.track-item input {
+    width: 50px;
+    margin: 0 5px;
+}
+
+.tracks-container {
+    overflow-x: auto;
+    width: 100%;
+}
+
+.track {
+    margin-bottom: 20px;
+}
+
+.track-items {
+    position: relative;
+    height: 50px;
+    background-color: #f0f0f0;
+}
+
+.track-item {
+    position: absolute;
+    height: 100%;
+    background-color: #007bff;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 5px;
+    cursor: move;
+}
