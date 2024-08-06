@@ -1,7 +1,8 @@
 import React, { useState, useCallback } from 'react';
-import { PlusCircle } from "lucide-react";
-import { Track, TrackItem } from './types';
+import { PlusCircle, ImagePlus, Video } from "lucide-react";
+import { Track, TrackItem } from '../../../../types/collections/Shorts';
 import {Button} from "../../../ui/button";
+import {Popover, PopoverContent, PopoverTrigger} from "../../../ui/popover";
 
 interface TrackListProps {
   tracks: Track[];
@@ -66,25 +67,48 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, totalFrames, currentTime,
   }, [draggedItem, handleMouseMove, handleMouseUp]);
 
   const TrackerTag: React.FC<{currentFrame: number}> = ({currentFrame}) => {
-    return <div className="absolute h-full top-0 w-1 bg-white" style={{left: `${currentFrame}px`}}/>;
+    return <div className="absolute h-full -top-[2px] w-[1px] bg-white" style={{left: `${currentFrame}px`}}/>;
   };
 
   return (
-    <div className="tracks-container overflow-x-auto w-full">
+    <div className="tracks-container overflow-x-auto w-full my-2">
       {tracks.map(track => (
         <div
           key={track.id}
-          className="track p-1 bg-zinc-950 rounded-lg flex mb-2"
+          className="track bg-zinc-950 rounded-lg flex items-center"
           style={{ width: `${totalFrames + 100}px` }}
         >
-          <Button
-            size="icon"
-            variant="outline"
-            onClick={() => onAddItem(track.id, 'image')}
-            className="bg-gray-700 hover:bg-gray-500 text-white font-bold p-[2px] rounded h-10 w-10 flex justify-center items-center mr-2"
-          >
-            <PlusCircle size={20} />
-          </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                size="icon"
+                variant="outline"
+                className="bg-gray-700 hover:bg-gray-600 text-white font-bold p-[2px] rounded h-8 w-8 flex justify-center items-center mr-2"
+              >
+                <PlusCircle size={20} />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-40">
+              <div className="grid gap-2">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => onAddItem(track.id, 'image')}
+                >
+                  <ImagePlus className="mr-2 h-4 w-4" />
+                  Add Image
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => onAddItem(track.id, 'video')}
+                >
+                  <Video className="mr-2 h-4 w-4" />
+                  Add Video
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
           <div className="track-items relative h-10 bg-zinc-900 flex-grow border border-slate-200 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-950 no-scrollbar " style={{ width: `${totalFrames}px` }}>
             {track.items.map(item => (
               <div

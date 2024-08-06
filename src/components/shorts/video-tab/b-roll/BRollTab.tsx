@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Short } from "../../../../types/collections/Shorts";
+import { Short, Track, TrackItem } from "../../../../types/collections/Shorts";
 import { Segment } from "../../../../types/collections/Segment";
 import { FirebaseStorageService } from "../../../../services/storage/strategies";
 import { uniqueId } from "lodash";
 import VideoPlayer from './VideoPlayer';
 import ItemEditor from './ItemEditor';
 import TrackList from './TrackList';
-import { Track, TrackItem } from './types';
 import {Button} from "../../../ui/button";
+import FirebaseFirestoreService from "../../../../services/database/strategies/FirebaseFirestoreService";
 
 interface BRollTabContentProps {
   short: Short;
@@ -23,6 +23,19 @@ const BRollTab: React.FC<BRollTabContentProps> = ({ short, shortId, segment }) =
     { id: '1', name: 'B-Roll Track 1', items: [] },
   ]);
   const [selectedItem, setSelectedItem] = useState<TrackItem | null>(null);
+  const [fps, setFps] = useState(30);
+
+  useEffect(() => {
+    if (fps != short.fps) {
+      setFps(short.fps);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (short.b_roll_tracks) {
+      setTracks(short.b_roll_tracks);
+    }
+  }, []);
 
   const loadVideo = async (url: string) => {
     try {
@@ -58,7 +71,8 @@ const BRollTab: React.FC<BRollTabContentProps> = ({ short, shortId, segment }) =
               x: 0,
               y: 0,
               width: 100,
-              height: 100
+              height: 100,
+              uploadType: 'link',
             }
             : {
               type: 'video',
@@ -67,7 +81,8 @@ const BRollTab: React.FC<BRollTabContentProps> = ({ short, shortId, segment }) =
               y: 0,
               width: 100,
               height: 100,
-              offset: 0
+              offset: 0,
+              uploadType: 'link',
             }
         };
         track.items.push(newItem);
@@ -110,24 +125,46 @@ const BRollTab: React.FC<BRollTabContentProps> = ({ short, shortId, segment }) =
     setSelectedItem(updatedItem);
   };
 
+  const updateShort = () => {
+    FirebaseFirestoreService.updateDocument(
+      "shorts",
+      shortId,
+      {
+        b_roll_tracks: JSON.stringify(tracks),
+      },
+      () => {
+        console.log('success');
+      },
+      () => {
+        console.log('failed');
+      }
+    )
+  }
+
+  useEffect(() => {
+    updateShort()
+  }, [tracks]);
+
+
   if (!short.short_a_roll) {
     return <p className="text-red-500">You need to generate the A-Roll first little man!</p>;
   }
 
   return (
     <div className="b-roll-container text-black">
-      <div className="w-full flex justify-center items-center gap-2 my-5">
+      <div className="flex-wrap md:flex-nowrap w-full flex justify-center items-center gap-2 my-5">
         <VideoPlayer
           videoUrl={videoUrl}
           currentTime={currentTime}
           setCurrentTime={setCurrentTime}
           tracks={tracks}
-          short={short}
+          fps={fps}
         />
         <ItemEditor
           selectedItem={selectedItem}
           onItemUpdate={handleItemUpdate}
           onItemDelete={handleItemDelete}
+          shortId={shortId}
         />
       </div>
       <TrackList
