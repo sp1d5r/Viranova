@@ -314,6 +314,27 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({ 
               {type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
             </Button>
           ))}
+          <div className="flex-1"/>
+          <Button
+            onClick={() => {
+              FirebaseFirestoreService.updateDocument(
+                "shorts",
+                shortId,
+                {
+                  previous_short_status: "Generating A-Roll",
+                  short_status: "Generate A-Roll",
+                },
+                () => {
+                  showNotification("Success", "Generated A Roll", "success");
+                },
+                (error) => {
+                  showNotification("Success", error.message, "error");
+                }
+              )
+            }}
+          >
+            Generate A-Roll
+          </Button>
         </div>
       </div>
     </div>

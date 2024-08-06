@@ -73,6 +73,7 @@ export interface Short extends BackendServerMetadata{
   bounding_boxes?: BoundingBoxes,
   box_type?: string[];
   cuts: number[],
+  short_a_roll?: string;
   total_frame_count: number,
   visual_difference?: VisualDifference,
   saliency_values?: SaliencyCaptured,
@@ -130,10 +131,10 @@ export function documentToShort(docData: DocumentData): Short {
     short_video_saliency: docData.short_video_saliency,
     bounding_boxes: docData.bounding_boxes ? JSON.parse(docData.bounding_boxes) : undefined,
     ...parsedBoundingBoxes,
+    box_type: docData.box_type,
     cuts: docData.cuts,
     total_frame_count: docData.total_frame_count,
     visual_difference: docData.visual_difference ? JSON.parse(docData.visual_difference) : undefined,
-    box_type: docData.box_type,
     saliency_values: docData.saliency_values ? JSON.parse(docData.saliency_values) : undefined,
     finished_short_location: docData.finished_short_location,
     short_title_top: docData.short_title_top,
@@ -145,6 +146,7 @@ export function documentToShort(docData: DocumentData): Short {
     pending_operation: docData.pending_operation,
     background_audio: docData.background_audio,
     background_percentage: docData.background_percentage,
+    short_a_roll: docData.short_a_roll,
     tiktok_link: docData.tiktok_link,
   };
 }
