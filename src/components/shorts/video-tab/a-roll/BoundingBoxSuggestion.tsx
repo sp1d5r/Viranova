@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { Short, BoundingBoxes, TwoBoundingBoxes, Boxes } from "../../../types/collections/Shorts";
-import { FirebaseStorageService } from "../../../services/storage/strategies";
-import { LoadingIcon } from "../../loading/Loading";
-import FirebaseFirestoreService from "../../../services/database/strategies/FirebaseFirestoreService";
-import { useNotification } from "../../../contexts/NotificationProvider";
+import { Short, BoundingBoxes, TwoBoundingBoxes, Boxes } from "../../../../types/collections/Shorts";
+import { FirebaseStorageService } from "../../../../services/storage/strategies";
+import { LoadingIcon } from "../../../loading/Loading";
+import FirebaseFirestoreService from "../../../../services/database/strategies/FirebaseFirestoreService";
+import { useNotification } from "../../../../contexts/NotificationProvider";
 import "./bounding-box.css";
 import ClipPathOverlay from "./ClipPathOverlay";
-import {Button} from "../../ui/button";
-import {Slider} from "../../ui/slider";
+import {Button} from "../../../ui/button";
+import {Slider} from "../../../ui/slider";
 
 export interface BoundingBoxSuggestionsProps {
   short: Short;

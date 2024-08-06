@@ -8,8 +8,9 @@ import { CheckCircle2, Circle, Loader2 } from "lucide-react";
 import {Button} from "../ui/button";
 import FirebaseFirestoreService from "../../services/database/strategies/FirebaseFirestoreService";
 import {useNotification} from "../../contexts/NotificationProvider";
-import {ARollTabContent} from "./video-tab/ARollTab";
+import {ARollTabContent} from "./video-tab/a-roll/ARollTab";
 import {VideoPlayer} from "../video-player/VideoPlayer";
+import BRollTab from "./video-tab/b-roll/BRollTab";
 
 export interface VideoTabProps {
   short: Short;
@@ -75,13 +76,7 @@ export const VideoTab: React.FC<VideoTabProps> = ({ short, shortId, segment, set
             <ARollTabContent short={short} shortId={shortId} segment={segment} stages={stages} />
           </TabsContent>
           <TabsContent value="b-roll">
-            {
-              short.short_a_roll ? <div>
-                <VideoPlayer path={short.short_a_roll} />
-              </div> : <p>
-                You need to generate the A-Roll first little man!
-              </p>
-            }
+            <BRollTab short={short} shortId={shortId} segment={segment} />
           </TabsContent>
           <TabsContent value="transcript">Transcript content here</TabsContent>
         </ShadcnTabs>

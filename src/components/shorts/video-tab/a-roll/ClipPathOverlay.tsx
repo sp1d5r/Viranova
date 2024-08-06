@@ -1,5 +1,5 @@
 import React from 'react';
-import { Boxes } from "../../../types/collections/Shorts";
+import { Boxes } from "../../../../types/collections/Shorts";
 
 interface ClipPathOverlayProps {
   boxes: Boxes | Boxes[];
