@@ -6,8 +6,11 @@ import { uniqueId } from "lodash";
 import VideoPlayer from './VideoPlayer';
 import ItemEditor from './ItemEditor';
 import TrackList from './TrackList';
+import { Alert, AlertDescription, AlertTitle } from '../../../ui/alert';
 import {Button} from "../../../ui/button";
 import FirebaseFirestoreService from "../../../../services/database/strategies/FirebaseFirestoreService";
+import {Terminal} from "lucide-react";
+import {useNotification} from "../../../../contexts/NotificationProvider";
 
 interface BRollTabContentProps {
   short: Short;
@@ -24,6 +27,7 @@ const BRollTab: React.FC<BRollTabContentProps> = ({ short, shortId, segment }) =
   ]);
   const [selectedItem, setSelectedItem] = useState<TrackItem | null>(null);
   const [fps, setFps] = useState(30);
+  const {showNotification} = useNotification();
 
   useEffect(() => {
     if (fps != short.fps) {
@@ -48,7 +52,7 @@ const BRollTab: React.FC<BRollTabContentProps> = ({ short, shortId, segment }) =
   };
 
   useEffect(() => {
-    if (short.short_a_roll) {
+    if (short.short_a_roll && !videoUrl) {
       loadVideo(short.short_a_roll).then(url =>
         setVideoUrl(url)
       );
@@ -151,7 +155,15 @@ const BRollTab: React.FC<BRollTabContentProps> = ({ short, shortId, segment }) =
   }
 
   return (
-    <div className="b-roll-container text-black">
+    <div className="text-white dark:text-black">
+      <Alert>
+        <Terminal className="h-4 w-4" />
+        <AlertTitle>Feature in Beta</AlertTitle>
+        <AlertDescription>
+          Adding B-Roll is currently in development... that's why it looks like this. Feel free to test and provide feedback at {' '}
+          <a className="text-primary underline" href="mailto:elijahahmad03@gmail.com">elijahahmad03@gmail.com</a>.
+        </AlertDescription>
+      </Alert>
       <div className="flex-wrap md:flex-nowrap w-full flex justify-center items-center gap-2 my-5">
         <VideoPlayer
           videoUrl={videoUrl}
@@ -175,15 +187,53 @@ const BRollTab: React.FC<BRollTabContentProps> = ({ short, shortId, segment }) =
         onItemSelect={handleItemSelect}
         onTracksUpdate={setTracks}
       />
-      <div className="flex w-full justify-between items-center">
+      <div className="flex w-full justify-between items-center gap-2">
         <Button
           onClick={handleAddTrack}
           variant="secondary"
         >
           Add Track
         </Button>
+        <div className="flex-1" />
         <Button
-          onClick={handleAddTrack}
+          className="text-white"
+          onClick={() => {
+            FirebaseFirestoreService.updateDocument(
+              'shorts',
+              shortId,
+              {
+                'short_b_roll': short['short_a_roll']
+              },
+              () => {
+                showNotification("Using A-Roll", "Using A-Roll for footage", "success");
+              },
+              (error) => {
+                showNotification("Failed to use A-Roll", error.message, "error");
+              }
+            )
+          }}
+          variant="outline"
+        >
+          Use A-Roll
+        </Button>
+        <Button
+          cooldown={100}
+          onClick={() => {
+            FirebaseFirestoreService.updateDocument(
+              "shorts",
+              shortId,
+              {
+                short_status: "Generate B-Roll",
+                previous_short_status: "Generating B-Roll"
+              },
+              () => {
+                showNotification("Requested B-Roll", "Generating B-Roll", "success");
+              },
+              (error) => {
+                showNotification("Failed to generate B-Roll", error.message, "error");
+              }
+            )
+          }}
         >
           Generate B-Roll
         </Button>

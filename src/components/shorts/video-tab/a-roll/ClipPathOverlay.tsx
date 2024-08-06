@@ -64,7 +64,7 @@ const ClipPathOverlay: React.FC<ClipPathOverlayProps> = ({ boxes, currentBoxType
 
   return (
     <svg
-      className="absolute top-0 left-0 w-full h-full z-50"
+      className="absolute top-0 left-0 w-full h-full z-20"
       viewBox={`0 0 ${width} ${height}`}
       preserveAspectRatio="none"
     >

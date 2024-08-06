@@ -20,8 +20,9 @@ const BRollItem: React.FC<BRollItemProps> = ({ item, currentTime }) => {
 
   const loadVideo = async (url: string) => {
     try {
-      const res = await FirebaseStorageService.downloadFile(url);
-      return URL.createObjectURL(res);
+      console.log(url)
+      const downloadUrl = await FirebaseStorageService.getDownloadURL(url);
+      return downloadUrl
     } catch (err) {
       console.error(`Failed to load video: ${url}`, err);
       return undefined;
@@ -57,7 +58,7 @@ const BRollItem: React.FC<BRollItemProps> = ({ item, currentTime }) => {
     return (
       <video
         ref={videoRef}
-        src={objectMetadata.src}
+        src={src}
         style={style}
         className="z-50 border-red-500 border border-primary bg-primary/20"
         muted
