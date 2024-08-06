@@ -79,7 +79,7 @@ const ItemEditor: React.FC<ItemEditorProps> = ({ selectedItem, onItemUpdate, onI
         ...selectedItem,
         objectMetadata: {
           ...selectedItem.objectMetadata,
-          src: downloadURL,
+          src: filePath,
           uploadType: 'upload'
         }
       });
@@ -100,7 +100,7 @@ const ItemEditor: React.FC<ItemEditorProps> = ({ selectedItem, onItemUpdate, onI
   };
 
   return (
-    <div className="flex-1 h-full max-w-[400px] min-h-[300px] bg-background p-4 rounded-lg text-gray-200">
+    <div className="flex-1 h-full  min-h-[300px] bg-background p-4 rounded-lg text-gray-200">
       <form className="grid w-full items-start gap-3" onSubmit={(e) => e.preventDefault()}>
         <fieldset className="grid gap-3 rounded-lg border p-4 border-gray-500">
           <legend className="px-1 text-sm font-medium text-white">Item Settings</legend>
@@ -182,7 +182,7 @@ const ItemEditor: React.FC<ItemEditorProps> = ({ selectedItem, onItemUpdate, onI
             )}
             {selectedItem.objectMetadata.uploadType === 'upload' && (
               <div className="flex gap-2 justify-center items-center">
-                <p className="flex-1 truncate">{selectedItem.objectMetadata.src}</p>
+                <p className="flex-1 truncate">{selectedItem.objectMetadata.src.substring(0,20)}...</p>
                 <Button type="button" size="icon" variant="destructive" onClick={(e) => {
                   e.preventDefault();
                   handleRemoveUpload();

@@ -332,6 +332,7 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({ 
                 }
               )
             }}
+            cooldown={100}
           >
             Generate A-Roll
           </Button>
