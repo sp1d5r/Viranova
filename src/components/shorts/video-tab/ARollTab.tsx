@@ -7,6 +7,7 @@ import { useNotification } from "../../../contexts/NotificationProvider";
 import { Short } from "../../../types/collections/Shorts";
 import { Segment } from "../../../types/collections/Segment";
 import {BoundingBoxSuggestions} from "./BoundingBoxSuggestion";
+import {LoadingIcon} from "../../loading/Loading";
 
 type ProcessingStage = {
   id: string;
@@ -80,7 +81,7 @@ export const ARollTabContent: React.FC<ARollTabContentProps> = ({ short, shortId
   }
 
   if (short.pending_operation) {
-    return <p>Loading...</p>
+    return <LoadingIcon id={"something"} text={"Performing Operation"} className="my-10"/>
   }
   return <BoundingBoxSuggestions short={short} shortId={shortId}/>
 };

@@ -9,6 +9,7 @@ import {Button} from "../ui/button";
 import FirebaseFirestoreService from "../../services/database/strategies/FirebaseFirestoreService";
 import {useNotification} from "../../contexts/NotificationProvider";
 import {ARollTabContent} from "./video-tab/ARollTab";
+import {VideoPlayer} from "../video-player/VideoPlayer";
 
 export interface VideoTabProps {
   short: Short;
@@ -73,7 +74,15 @@ export const VideoTab: React.FC<VideoTabProps> = ({ short, shortId, segment, set
           <TabsContent value="a-roll">
             <ARollTabContent short={short} shortId={shortId} segment={segment} stages={stages} />
           </TabsContent>
-          <TabsContent value="b-roll">B-Roll content here</TabsContent>
+          <TabsContent value="b-roll">
+            {
+              short.short_a_roll ? <div>
+                <VideoPlayer path={short.short_a_roll} />
+              </div> : <p>
+                You need to generate the A-Roll first little man!
+              </p>
+            }
+          </TabsContent>
           <TabsContent value="transcript">Transcript content here</TabsContent>
         </ShadcnTabs>
       </CardContent>
