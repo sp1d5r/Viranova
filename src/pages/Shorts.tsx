@@ -7,7 +7,6 @@ import {documentToShort, Short} from "../types/collections/Shorts";
 import {ShortSettingsTab} from "../components/shorts/ShortSettingsTab";
 import {documentToSegment, Segment} from "../types/collections/Segment";
 import {TranscriptEditorTab} from "../components/shorts/TranscriptEditorTab";
-import {AttentionTab} from "../components/shorts/AttentionTab";
 import {LoadingIcon} from "../components/loading/Loading";
 import {ExportTab} from "../components/shorts/ExportTab";
 import {Timestamp} from "firebase/firestore";
@@ -203,7 +202,7 @@ export const Shorts: React.FC<ShortsProps> = ({}) => {
         }
 
         {
-          tabSelected == "Attention Capture" && short && short_id && segment && <VideoTab shortId={short_id} short={short} segment={segment} setTab={setTabSelected}/>
+          tabSelected == "Attention Capture" && short && short_id && segment && <VideoTab shortId={short_id} short={short} segment={segment} />
         }
 
         {

@@ -83,6 +83,7 @@ export type SaliencyCaptured = {
   saliency_vals: number[]
 }
 
+
 export interface Short extends BackendServerMetadata{
   id: string,
   start_index: number,
@@ -109,6 +110,7 @@ export interface Short extends BackendServerMetadata{
   box_type?: string[];
   cuts: number[],
   short_a_roll?: string;
+  short_b_roll?: string;
   total_frame_count: number,
   visual_difference?: VisualDifference,
   saliency_values?: SaliencyCaptured,
@@ -146,6 +148,7 @@ export function documentToShort(docData: DocumentData): Short {
       console.error("Error parsing bounding boxes:", error);
     }
   }
+
   return {
     id: docData.id,
     start_index: docData.start_index,
@@ -184,6 +187,7 @@ export function documentToShort(docData: DocumentData): Short {
     background_percentage: docData.background_percentage,
     b_roll_tracks: docData.b_roll_tracks ? JSON.parse(docData.b_roll_tracks) : undefined,
     short_a_roll: docData.short_a_roll,
+    short_b_roll: docData.short_b_roll,
     tiktok_link: docData.tiktok_link,
   };
 }

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { FirebaseStorageService } from "../../services/storage/strategies";
+import {Button} from "../ui/button";
 
 export interface AudioProps {
   className?: string;
@@ -29,7 +30,7 @@ export const AudioPlayer: React.FC<AudioProps> = ({ className = "", path }) => {
   };
 
   return <div className={`${className} w-full flex gap-2 items-center justify-start`}>
-    <button
+    <Button
       disabled={loading}
       type="button"
       onClick={() => {
@@ -55,7 +56,7 @@ export const AudioPlayer: React.FC<AudioProps> = ({ className = "", path }) => {
           Load Audio
         </>
       }
-    </button>
+    </Button>
     {source && <audio src={source} controls autoPlay onError={() => {
       setError('Error playing the audio.');
     }} onEnded={() => URL.revokeObjectURL(source)}/>}

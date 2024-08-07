@@ -1,22 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Short } from "../../types/collections/Shorts";
 import { Segment } from "../../types/collections/Segment";
-import { Tabs } from "../../pages/Shorts";
 import { Tabs as ShadcnTabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { CheckCircle2, Circle, Loader2 } from "lucide-react";
-import {Button} from "../ui/button";
-import FirebaseFirestoreService from "../../services/database/strategies/FirebaseFirestoreService";
-import {useNotification} from "../../contexts/NotificationProvider";
 import {ARollTabContent} from "./video-tab/a-roll/ARollTab";
-import {VideoPlayer} from "../video-player/VideoPlayer";
 import BRollTab from "./video-tab/b-roll/BRollTab";
+import {TranscriptTab} from "./video-tab/transcript/Transcript";
 
 export interface VideoTabProps {
   short: Short;
   shortId: string;
   segment: Segment;
-  setTab: React.Dispatch<React.SetStateAction<Tabs>>;
 }
 
 type ProcessingStage = {
@@ -25,7 +19,7 @@ type ProcessingStage = {
   status: 'pending' | 'processing' | 'completed';
 };
 
-export const VideoTab: React.FC<VideoTabProps> = ({ short, shortId, segment, setTab }) => {
+export const VideoTab: React.FC<VideoTabProps> = ({ short, shortId, segment }) => {
   const [activeTab, setActiveTab] = useState('a-roll');
   const [stages, setStages] = useState<ProcessingStage[]>([
     { id: 'segment', label: 'Clipping Segment', status: 'pending' },
@@ -34,7 +28,6 @@ export const VideoTab: React.FC<VideoTabProps> = ({ short, shortId, segment, set
     { id: 'camera', label: 'Finding Camera Cuts', status: 'pending' },
     { id: 'bboxes', label: 'Generating Bounding Box Calculations', status: 'pending' },
   ]);
-  const {showNotification} = useNotification();
 
   useEffect(() => {
     setStages(prevStages => {
@@ -76,9 +69,11 @@ export const VideoTab: React.FC<VideoTabProps> = ({ short, shortId, segment, set
             <ARollTabContent short={short} shortId={shortId} segment={segment} stages={stages} />
           </TabsContent>
           <TabsContent value="b-roll">
-            <BRollTab short={short} shortId={shortId} segment={segment} />
+            <BRollTab short={short} shortId={shortId} />
           </TabsContent>
-          <TabsContent value="transcript">Transcript content here</TabsContent>
+          <TabsContent value="transcript">
+            <TranscriptTab short={short} shortId={shortId} segment={segment} />
+          </TabsContent>
         </ShadcnTabs>
       </CardContent>
     </Card>

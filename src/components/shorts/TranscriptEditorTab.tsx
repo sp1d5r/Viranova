@@ -6,6 +6,7 @@ import {useNotification} from "../../contexts/NotificationProvider";
 import FirebaseDatabaseService from "../../services/database/strategies/FirebaseFirestoreService";
 import {Timestamp} from "firebase/firestore";
 import {AudioPlayer} from "../audio/AudioPlayer";
+import {Button} from "../ui/button";
 
 export interface TranscriptEditorTabProps {
   short: Short;
@@ -196,11 +197,15 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({short, 
   return <div className="p-6 text-medium text-gray-400 bg-gray-900 rounded-lg w-full flex flex-col gap-2">
     <span className="text-xl font-bold text-white mb-2 flex justify-between items-center flex-wrap">
       Transcript Editor
-      { !editing && <div className="inline-flex rounded-md shadow-sm" role="group">
-        <button onClick={() => {setEditing(prevState => !prevState)}} type="button" className={` px-4 py-2 text-sm font-medium border rounded-s-lg focus:z-10 focus:ring-2  ${editing ? "bg-red-500 hover:bg-red-700" : "bg-gray-800 hover:bg-gray-700"}  border-gray-700 text-white hover:text-white  focus:ring-blue-500 focus:text-white`}>
+      { !editing && <div className="flex gap-2 rounded-md shadow-sm" role="group">
+        <Button
+          variant="ghost"
+          onClick={() => {setEditing(prevState => !prevState)}} type="button" className={` px-4 py-2 text-sm font-medium border rounded-s-lg focus:z-10 focus:ring-2  ${editing ? "bg-red-500 hover:bg-red-700" : "bg-gray-800 hover:bg-gray-700"}  border-gray-700 text-white hover:text-white  focus:ring-blue-500 focus:text-white`}>
           Edit Transcript
-        </button>
-        <button
+        </Button>
+        <Button
+          cooldown={30}
+          variant={"secondary"}
           onClick={() => {
             FirebaseDatabaseService.updateDocument(
               "shorts",
@@ -223,21 +228,10 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({short, 
           className="px-4 py-2 text-sm font-medium border focus:z-10 focus:ring-2 bg-gray-800 border-gray-700 text-white hover:text-white hover:bg-gray-700 focus:ring-blue-500 focus:text-white"
         >
           Preview Sound
-        </button>
+        </Button>
 
-        <button
-          onClick={() => {
+        <Button cooldown={30} variant={"default"} onClick={() => {
 
-          }}
-          disabled={!editing}
-          type="button"
-          className="px-4 py-2 text-sm font-medium border focus:z-10 focus:ring-2 bg-gray-800 border-gray-700 text-white hover:text-white hover:bg-gray-700 focus:ring-blue-500 focus:text-white"
-        >
-          Evaluate Transcript
-        </button>
-
-
-        <button onClick={() => {
           console.log(shortId);
           FirebaseFirestoreService.updateDocument(
             "shorts",
@@ -257,7 +251,7 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({short, 
           )
         }} type="button" className="px-4 py-2 text-sm font-medium border rounded-e-lg focus:z-10 focus:ring-2 bg-green-800 border-gray-700 text-white hover:text-white hover:bg-green-700 focus:ring-blue-500 focus:text-white">
           AI Generation
-        </button>
+        </Button>
       </div> }
       { editing && <div className="inline-flex rounded-md shadow-sm" role="group">
         <button onClick={() => {setEditing(prevState => !prevState)}} type="button" className={` px-4 py-2 text-sm font-medium border rounded-s-lg focus:z-10 focus:ring-2  ${editing ? "bg-red-500 hover:bg-red-700" : "bg-gray-800 hover:bg-gray-700"}  border-gray-700 text-white hover:text-white  focus:ring-blue-500 focus:text-white`}>

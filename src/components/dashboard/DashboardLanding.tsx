@@ -404,7 +404,7 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
         </CardHeader>
         <CardContent>
           <div className="rounded-md border">
-            <div className="max-h-[400px] overflow-auto">
+            <div className="max-h-[400px] overflow-x-scroll max-w-[85vw]">
               <Table>
                 <TableHeader>
                   <TableRow>
