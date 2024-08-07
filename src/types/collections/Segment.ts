@@ -4,6 +4,14 @@ import {deleteShort, documentToShort, Short} from "./Shorts";
 import {FirebaseStorageService} from "../../services/storage/strategies";
 import {BackendServerMetadata} from "./BackendServerMetadata";
 
+export interface Word {
+    start_time: number;
+    end_time: number;
+    index: number;
+    confidence: number;
+    word: string;
+}
+
 export interface Segment extends BackendServerMetadata {
     id: string;
     earliestStartTime: number;
@@ -31,6 +39,7 @@ export interface Segment extends BackendServerMetadata {
     shortRunId: string;
     progress?: number;
     videoSegmentLocation: string;
+    words: Word[];
 }
 
 
@@ -62,6 +71,7 @@ export function documentToSegment(docData: DocumentData): Segment {
         shortRunId: docData.short_idea_run_id,
         videoSegmentLocation: docData.video_segment_location,
         progress: docData.progress,
+        words: docData.words ? (0, eval)('(' + docData.words + ')') : []
     };
 }
 

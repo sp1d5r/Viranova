@@ -1,13 +1,14 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "../../../ui/card";
 import { Button } from "../../../ui/button";
-import { CheckCircle2, Circle, Loader2 } from "lucide-react";
+import {CheckCircle2, Circle, Loader2, Terminal} from "lucide-react";
 import FirebaseFirestoreService from "../../../../services/database/strategies/FirebaseFirestoreService";
 import { useNotification } from "../../../../contexts/NotificationProvider";
 import { Short } from "../../../../types/collections/Shorts";
 import { Segment } from "../../../../types/collections/Segment";
 import {BoundingBoxSuggestions} from "./BoundingBoxSuggestion";
 import {LoadingIcon} from "../../../loading/Loading";
+import {Alert, AlertDescription, AlertTitle} from "../../../ui/alert";
 
 type ProcessingStage = {
   id: string;
@@ -83,5 +84,24 @@ export const ARollTabContent: React.FC<ARollTabContentProps> = ({ short, shortId
   if (short.pending_operation) {
     return <LoadingIcon id={"something"} text={"Performing Operation"} className="my-10"/>
   }
-  return <BoundingBoxSuggestions short={short} shortId={shortId}/>
+  return <div>
+    <Alert>
+      <Terminal className="h-4 w-4" />
+      <AlertTitle>Something Broken?</AlertTitle>
+      <AlertDescription>
+        <div className="flex items-center justify-between">
+          <div>
+            This feature is still in beta, email me if you need help - {' '}
+            <a className="text-primary underline" href="mailto:elijahahmad03@gmail.com">elijahahmad03@gmail.com</a>.
+          </div>
+          <Button variant={"outline"} cooldown={200} onClick={() => {
+            handleBeginProcessing()
+          }}>
+            Regenerate...
+          </Button>
+        </div>
+      </AlertDescription>
+    </Alert>
+    <BoundingBoxSuggestions short={short} shortId={shortId}/>
+  </div>
 };

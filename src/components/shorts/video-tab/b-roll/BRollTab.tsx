@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Short, Track, TrackItem } from "../../../../types/collections/Shorts";
-import { Segment } from "../../../../types/collections/Segment";
 import { FirebaseStorageService } from "../../../../services/storage/strategies";
 import { uniqueId } from "lodash";
 import VideoPlayer from './VideoPlayer';
@@ -15,10 +14,9 @@ import {useNotification} from "../../../../contexts/NotificationProvider";
 interface BRollTabContentProps {
   short: Short;
   shortId: string;
-  segment: Segment;
 }
 
-const BRollTab: React.FC<BRollTabContentProps> = ({ short, shortId, segment }) => {
+const BRollTab: React.FC<BRollTabContentProps> = ({ short, shortId }) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [videoUrl, setVideoUrl] = useState<string | undefined>(undefined);
   const totalFrames = short.total_frame_count;

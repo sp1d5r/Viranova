@@ -11,6 +11,7 @@ import {AudioPlayer} from "../audio/AudioPlayer";
 import {PingVisualiser} from "./export-tab/PingVisualiser";
 import {Timestamp} from "firebase/firestore";
 import {AnalyticsTask} from "../../types/collections/Task";
+import {Button} from "../ui/button";
 
 export interface ExportTabProps {
   short: Short;
@@ -327,12 +328,13 @@ export const ExportTab :React.FC<ExportTabProps> = ({short, shortId}) => {
         </div>
       }
       <div className="w-full flex gap-2">
-        <button type="button" className="inline-flex items-center px-4 py-2 my-2 text-sm font-medium border rounded-lg focus:z-10 focus:ring-4 focus:outline-none focus:text-emerald-700 bg-gray-800 text-gray-200 border-emerald-600 hover:text-white hover:bg-emerald-700 focus:ring-emerald-700 gap-3">
+        <Button disabled variant="secondary" type="button" className="inline-flex items-center px-4 py-2 my-2 text-sm font-medium border rounded-lg focus:z-10 focus:ring-4 focus:outline-none focus:text-emerald-700 bg-gray-800 text-gray-200 border-emerald-600 hover:text-white hover:bg-emerald-700 focus:ring-emerald-700 gap-3">
           <svg xmlns="http://www.w3.org/2000/svg"  height="30px" width="30px" viewBox="0 0 192 192" fill="none"><path stroke="#ffffff" strokeLinecap="round" strokeLinejoin="round" strokeWidth="15" d="M170 42 22 124v14c0 6.627 5.373 12 12 12h78c6.627 0 12-5.373 12-12v-9.5"/><path stroke="#ffffff" strokeLinecap="round" strokeLinejoin="round" strokeWidth="15" d="M170 150 22 68V54c0-6.627 5.373-12 12-12h78c6.627 0 12 5.373 12 12v9.5"/></svg>
           Export to CapCut
-        </button>
+        </Button>
 
-        <button
+        <Button
+          cooldown={200}
           type="button"
           className="inline-flex items-center px-4 py-2 my-2 text-sm font-medium border rounded-lg focus:z-10 focus:ring-4 focus:outline-none focus:text-emerald-700 bg-gray-800 text-gray-200 border-emerald-600 hover:text-white hover:bg-emerald-700 focus:ring-emerald-700 gap-3"
           disabled={!short.bounding_boxes}
@@ -350,10 +352,11 @@ export const ExportTab :React.FC<ExportTabProps> = ({short, shortId}) => {
           }}
         >
           Preview
-        </button>
+        </Button>
 
-        <button
+        <Button
           type="button"
+          variant="secondary"
           className="inline-flex items-center px-4 py-2 my-2 text-sm font-medium border rounded-lg focus:z-10 focus:ring-4 focus:outline-none focus:text-emerald-700 bg-gray-800 text-gray-200 border-emerald-600 hover:text-white hover:bg-emerald-700 focus:ring-emerald-700 gap-3"
           disabled={!short.finished_short_location}
           onClick={() => {
@@ -385,7 +388,7 @@ export const ExportTab :React.FC<ExportTabProps> = ({short, shortId}) => {
           <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 13V4M7 14H5a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1h-2m-1-5-4 5-4-5m9 8h.01"/>
           </svg>
-        </button>
+        </Button>
       </div>
     </div>
   </div>
