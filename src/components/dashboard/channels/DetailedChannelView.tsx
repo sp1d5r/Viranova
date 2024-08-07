@@ -155,7 +155,7 @@ const ChannelDetails: React.FC<ChannelDetailsProps> = ({ channel }) => {
                   <span>{formatDistanceToNow(new Date(video.publishedAt))} ago</span>
                   <span>{video.viewCount.toLocaleString()} views</span>
                 </div>
-                <Button size="sm" onClick={()=>{submitButton(video.videoId)}} className="mt-2">
+                <Button cooldown={100} size="sm" onClick={()=>{submitButton(video.videoId)}} className="mt-2">
                   Download
                 </Button>
               </CardContent>
