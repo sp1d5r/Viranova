@@ -47,7 +47,7 @@ const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
   );
 };
 
-export const VideoRow: React.FC<{ videoId: string; isExpanded: boolean; onToggle: () => void }> = ({ videoId, isExpanded, onToggle }) => {
+export const VideoRow: React.FC<{ videoId: string; isExpanded: boolean; onToggle: () => void, source: 'Channel' | 'Manual' }> = ({ videoId, isExpanded, onToggle, source }) => {
   const [video, setVideo] = useState<UserVideo | null>(null);
   const {showNotification} = useNotification();
 
@@ -91,6 +91,7 @@ export const VideoRow: React.FC<{ videoId: string; isExpanded: boolean; onToggle
             <div className="p-4">
               <VideoSegments videoId={videoId}/>
               <h3 className="font-semibold mb-2">Additional Details:</h3>
+              <p>Source: {source} </p>
               <p>Link: {video.link || 'N/A'}</p>
               <p>Backend Status: {video.backend_status}</p>
               <p>Progress Message: {video.progressMessage}</p>

@@ -14,6 +14,7 @@ export interface UserVideo extends BackendServerMetadata{
     link?: string;
     queuePosition: number;
     id?: string;
+    channelId?: string;
 }
 
 export function documentToUserVideo(docData: DocumentData): UserVideo {
@@ -28,7 +29,8 @@ export function documentToUserVideo(docData: DocumentData): UserVideo {
         link: docData.link,
         queuePosition: docData.queuePosition,
         id: docData.id,
-        backend_status: docData.backend_status
+        backend_status: docData.backend_status,
+        channelId: docData.channelId
     };
 }
 

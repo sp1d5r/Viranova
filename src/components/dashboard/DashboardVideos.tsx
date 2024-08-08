@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   Table,
   TableBody,
@@ -27,51 +27,12 @@ import {
   Loader2,
   X
 } from "lucide-react";
-import {useAuth} from "../../contexts/Authentication";
+import { useAuth } from "../../contexts/Authentication";
 import FirebaseFirestoreService from "../../services/database/strategies/FirebaseFirestoreService";
-import {documentToUserVideo, UserVideo} from "../../types/collections/UserVideo";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "../ui/select";
-import {VideoSegments} from "../../pages/VideoSegments";
-import {Progress} from "../ui/progress";
-import {VideoRow} from "./videos/VideoRow";
-
-const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Uploaded":
-        return "!bg-blue-500 text-white";
-      case "Link Provided":
-        return "!bg-purple-500 text-white";
-      case "Transcribing":
-      case "Diarizing":
-      case "Segmenting":
-      case "Summarizing Segments":
-        return "!bg-yellow-500 text-black";
-      case "Clip Transcripts":
-        return "!bg-green-500 text-white";
-      case "Preprocessing Complete":
-        return "!bg-indigo-500 text-white";
-      case "Create TikTok Ideas":
-        return "!bg-pink-500 text-white";
-      default:
-        return "!bg-gray-500 text-white";
-    }
-  };
-
-  const isProcessing = [
-    "Transcribing",
-    "Diarizing",
-    "Segmenting",
-    "Summarizing Segments"
-  ].includes(status);
-
-  return (
-    <Badge className={`flex items-center gap-1 ${getStatusColor(status)} `}>
-      {isProcessing && <Loader2 className="h-3 w-3 animate-spin" />}
-      {status}
-    </Badge>
-  );
-};
+import { documentToUserVideo, UserVideo } from "../../types/collections/UserVideo";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { VideoRow } from "./videos/VideoRow";
+import { Channel, ChannelsTracking } from '../../types/collections/Channels';
 
 export const DashboardVideos: React.FC = () => {
   const [videos, setVideos] = useState<UserVideo[]>([]);
@@ -80,32 +41,105 @@ export const DashboardVideos: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const {authState} = useAuth();
+  const [viewMode, setViewMode] = useState<'all' | 'manual' | 'channel'>('all');
+  const [isLoading, setIsLoading] = useState(true);
+  const { authState } = useAuth();
+
+  const fetchVideos = useCallback(async () => {
+    if (!authState.user?.uid) return;
+
+    setIsLoading(true);
+    try {
+      let fetchedVideos: UserVideo[] = [];
+
+      if (viewMode === 'all' || viewMode === 'manual') {
+        const manualVideos = await fetchManualVideos();
+        fetchedVideos = [...fetchedVideos, ...manualVideos];
+      }
+
+      if (viewMode === 'all' || viewMode === 'channel') {
+        const channelVideos = await fetchChannelVideos();
+        fetchedVideos = [...fetchedVideos, ...channelVideos];
+      }
+
+      fetchedVideos.sort((a, b) => b.uploadTimestamp - a.uploadTimestamp);
+      setVideos(fetchedVideos);
+    } catch (error) {
+      console.error("Error fetching videos:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [authState.user, viewMode]);
 
   useEffect(() => {
-    FirebaseFirestoreService.queryDocuments(
-      '/videos',
-      'uid',
-      authState.user && authState.user.uid ? authState.user.uid : '',
-      'uid',
-      (documents) => {
-        console.log(documents);
-        setVideos(documents.map(doc => {
-          return documentToUserVideo(doc)
-        }).sort((elem1, elem2) => {return elem2.uploadTimestamp - elem1.uploadTimestamp}));
-      }
-    )
-  }, [authState]);
+    fetchVideos();
+  }, [fetchVideos]);
 
+  const fetchManualVideos = (): Promise<UserVideo[]> => {
+    return new Promise((resolve) => {
+      FirebaseFirestoreService.queryDocuments(
+        '/videos',
+        'uid',
+        authState.user!.uid,
+        'uid',
+        (documents) => {
+          resolve(documents.map(doc => documentToUserVideo(doc)));
+        }
+      );
+    });
+  };
+
+  const fetchChannelVideos = async (): Promise<UserVideo[]> => {
+    const channelIds = await getTrackedChannels();
+    const channelVideos: UserVideo[] = [];
+
+    for (const channelId of channelIds) {
+      const videos = await fetchVideosForChannel(channelId);
+      channelVideos.push(...videos);
+    }
+
+    return channelVideos;
+  };
+
+  const getTrackedChannels = (): Promise<string[]> => {
+    return new Promise((resolve) => {
+      FirebaseFirestoreService.getDocument<ChannelsTracking>(
+        'channelstracking',
+        authState.user!.uid,
+        (data) => {
+          resolve(data?.channelsTracking || []);
+        }
+      );
+    });
+  };
+
+  const fetchVideosForChannel = (channelId: string): Promise<UserVideo[]> => {
+    return new Promise((resolve) => {
+      FirebaseFirestoreService.queryDocuments<UserVideo>(
+        '/videos',
+        'channelId',
+        channelId,
+        'uploadTimestamp',
+        (documents) => {
+          resolve(documents.map(doc => documentToUserVideo(doc)));
+        },
+        (error) => {
+          console.log(error.message);
+        }
+      );
+    });
+  };
 
   const toggleRowExpansion = (id: string) => {
-    const newExpandedRows = new Set(expandedRows);
-    if (newExpandedRows.has(id)) {
-      newExpandedRows.delete(id);
-    } else {
-      newExpandedRows.add(id);
-    }
-    setExpandedRows(newExpandedRows);
+    setExpandedRows(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
   };
 
   const filteredVideos = videos.filter(video => {
@@ -138,18 +172,39 @@ export const DashboardVideos: React.FC = () => {
     setCurrentPage(1);
   };
 
+  const handleViewModeChange = (value: 'all' | 'manual' | 'channel') => {
+    setViewMode(value);
+    setCurrentPage(1);
+  };
+
+  if (isLoading) {
+    return <div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+  }
+
   return (
     <main className="flex flex-1 flex-col p-4 md:p-8">
-      <h1 className="text-2xl font-bold mb-4">Original Videos</h1>
-      <p className="text-muted-foreground mb-4">Here's a list of your longer-length videos posted on YouTube.</p>
+      <h1 className="text-2xl font-bold mb-4">Videos Dashboard</h1>
+      <p className="text-muted-foreground mb-4">View your manually added videos and videos from tracked channels.</p>
 
       <div className="flex justify-between items-center mb-4">
-        <Input
-          placeholder="Filter videos..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-sm"
-        />
+        <div className="flex items-center gap-2">
+          <Input
+            placeholder="Filter videos..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="max-w-sm"
+          />
+          <Select value={viewMode} onValueChange={handleViewModeChange}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="View Mode" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Videos</SelectItem>
+              <SelectItem value="manual">Manually Added</SelectItem>
+              <SelectItem value="channel">From Channels</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -190,18 +245,22 @@ export const DashboardVideos: React.FC = () => {
             <TableHead>Status</TableHead>
             <TableHead>Progress</TableHead>
             <TableHead>Upload Date</TableHead>
+            <TableHead>Source</TableHead>
             <TableHead></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {currentVideos && currentVideos.map((video) => (
+          {currentVideos.map((video) => (
             <React.Fragment key={video.id}>
-              {video.id && <VideoRow
-                key={video.id}
-                videoId={video.id}
-                isExpanded={expandedRows.has(video.id)}
-                onToggle={() => toggleRowExpansion(video.id!)}
-              />}
+              {video.id && (
+                <VideoRow
+                  key={video.id}
+                  videoId={video.id}
+                  isExpanded={expandedRows.has(video.id)}
+                  onToggle={() => toggleRowExpansion(video.id!)}
+                  source={video.channelId ? 'Channel' : 'Manual'}
+                />
+              )}
             </React.Fragment>
           ))}
         </TableBody>
