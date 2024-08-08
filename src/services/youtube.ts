@@ -3,9 +3,10 @@ import {Video} from "../types/Video";
 import {Video as YoutubeVideo} from "../types/youtube/YoutubeVideo";
 import { parse, toSeconds } from 'iso8601-duration';
 
+const MIN_DURATION_SECONDS = 100
 const MAX_DURATION_SECONDS = 5400;
 
-const getRecentChannelVideos = async (channelId: string, maxResults: number = 10): Promise<YoutubeVideo[]> => {
+const getRecentChannelVideos = async (channelId: string, maxResults: number = 30): Promise<YoutubeVideo[]> => {
     const apiKey = process.env.REACT_APP_GOOGLE_API_KEY;
     const searchUrl = `https://www.googleapis.com/youtube/v3/search?key=${apiKey}&channelId=${channelId}&part=snippet&order=date&maxResults=${maxResults}&type=video`;
 
@@ -21,7 +22,7 @@ const getRecentChannelVideos = async (channelId: string, maxResults: number = 10
         const videos: YoutubeVideo[] = videoResponse.data.items
           .filter((videoData: any) => {
               const durationInSeconds = toSeconds(parse(videoData.contentDetails.duration));
-              return durationInSeconds <= MAX_DURATION_SECONDS;
+              return MIN_DURATION_SECONDS < durationInSeconds && durationInSeconds <= MAX_DURATION_SECONDS;
           })
           .map((videoData: any) => ({
               videoId: videoData.id,
