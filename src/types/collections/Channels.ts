@@ -55,6 +55,10 @@ export interface UsersTrackingChannels {
   channelId: string;
 }
 
+export interface Identifiable {
+  id: string;
+}
+
 export const useAddChannelToTrack = (currentUserId: string) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -169,7 +173,90 @@ export const useAddChannelToTrack = (currentUserId: string) => {
     });
   };
 
-  return { addChannelToTrack, isLoading, error };
+  const removeChannelFromTrack = async (channelId: string, channeldeleteChannelDocument: boolean = false) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Remove channel from ChannelsTracking for the current user
+      await removeFromChannelsTracking(currentUserId, channelId);
+
+      // Remove entry from UsersTrackingChannels
+      await removeUserTrackingChannel(currentUserId, channelId);
+
+      // Optionally delete the channel document
+      if (channeldeleteChannelDocument) {
+        await deleteChannelDocument(channelId);
+      }
+
+      setIsLoading(false);
+    } catch (err) {
+      setError('Failed to remove channel. Please try again.');
+      setIsLoading(false);
+    }
+  };
+
+  const removeFromChannelsTracking = async (userId: string, channelId: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      FirebaseDatabaseService.getDocument<ChannelsTracking>(
+        'channelstracking',
+        userId,
+        (existingTracking) => {
+          if (existingTracking) {
+            const updatedChannels = existingTracking.channelsTracking.filter(id => id !== channelId);
+            FirebaseDatabaseService.updateDocument<ChannelsTracking>(
+              'channelstracking',
+              userId,
+              { channelsTracking: updatedChannels },
+              () => resolve(),
+              (error) => reject(error)
+            );
+          } else {
+            resolve(); // No tracking document exists, nothing to remove
+          }
+        },
+        (error) => reject(error)
+      );
+    });
+  };
+
+  const removeUserTrackingChannel = async (userId: string, channelId: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      FirebaseDatabaseService.queryDocuments<UsersTrackingChannels & Identifiable>(
+        'userstrackingchannels',
+        'uid',
+        userId,
+        'uid', // orderByField, using 'uid' as it's likely to be indexed
+        (documents) => {
+          const documentToDelete = documents.find(doc => doc.channelId === channelId);
+          if (documentToDelete) {
+            FirebaseDatabaseService.deleteDocument(
+              'userstrackingchannels',
+              documentToDelete.id,
+              () => resolve(),
+              (error) => reject(error)
+            );
+          } else {
+            resolve(); // No matching document found, nothing to delete
+          }
+        },
+        (error) => reject(error)
+      );
+    });
+  };
+
+  const deleteChannelDocument = async (channelId: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      FirebaseDatabaseService.deleteDocument(
+        'channels',
+        channelId,
+        () => resolve(),
+        (error) => reject(error)
+      );
+    });
+  };
+
+  return { addChannelToTrack, removeChannelFromTrack, isLoading, error };
 };
 
 

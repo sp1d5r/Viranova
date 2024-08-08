@@ -36,6 +36,7 @@
     "firebase": "^10.8.0",
     "framer-motion": "^11.2.4",
     "gsap": "^3.12.5",
+    "iso8601-duration": "^2.1.2",
     "langchain": "^0.2.4",
     "langsmith": "^0.1.30",
     "lodash": "^4.17.21",

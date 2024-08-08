@@ -131,7 +131,7 @@ export const DashboardChannels: React.FC<DashboardChannelsProps> = ({userId}) =>
       <ResizablePanel>
         {
           selectedChannel ?
-            <ChannelDetails channel={selectedChannel} />
+            <ChannelDetails channel={selectedChannel} userId={userId ? userId : "N/A"} />
             :
             <div className="w-full h-full flex flex-col justify-center items-center">
               <QuestionMarkCircledIcon className="w-10 h-10" />

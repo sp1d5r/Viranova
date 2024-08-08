@@ -33,6 +33,7 @@ import {documentToUserVideo, UserVideo} from "../../types/collections/UserVideo"
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "../ui/select";
 import {VideoSegments} from "../../pages/VideoSegments";
 import {Progress} from "../ui/progress";
+import {VideoRow} from "./videos/VideoRow";
 
 const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
   const getStatusColor = (status: string) => {
@@ -195,33 +196,12 @@ export const DashboardVideos: React.FC = () => {
         <TableBody>
           {currentVideos && currentVideos.map((video) => (
             <React.Fragment key={video.id}>
-              <TableRow className="cursor-pointer" onClick={() => toggleRowExpansion(video.id ? video.id : 'N/A')}>
-                <TableCell>{video.originalFileName}</TableCell>
-                <TableCell>
-
-                  <a className="text-primary underline">{video.link}</a></TableCell>
-                <TableCell>
-                  <StatusBadge status={video.status} />
-                </TableCell>
-                <TableCell>{video.processingProgress}% <Progress value={video.processingProgress}/></TableCell>
-                <TableCell>{new Date(video.uploadTimestamp).toLocaleDateString()}</TableCell>
-                <TableCell>
-                  {expandedRows.has(video.id ? video.id : 'N/A') ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                </TableCell>
-              </TableRow>
-              {expandedRows.has(video.id ? video.id : 'N/A') && (
-                <TableRow>
-                  <TableCell colSpan={6} className="bg-muted/50">
-                    <div className="p-4">
-                      <VideoSegments videoId={video.id ? video.id : 'N/A'}/>
-                      <h3 className="font-semibold mb-2">Additional Details:</h3>
-                      <p>Link: {video.link || 'N/A'}</p>
-                      <p>Backend Status: {video.backend_status}</p>
-                      <p>Progress Message: {video.progressMessage}</p>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )}
+              {video.id && <VideoRow
+                key={video.id}
+                videoId={video.id}
+                isExpanded={expandedRows.has(video.id)}
+                onToggle={() => toggleRowExpansion(video.id!)}
+              />}
             </React.Fragment>
           ))}
         </TableBody>

@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import { Channel } from '../../../types/collections/Channels';
+import {Channel, useAddChannelToTrack} from '../../../types/collections/Channels';
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
 import { ScrollArea } from '../../ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '../../ui/avatar';
@@ -10,15 +10,18 @@ import {Button} from "../../ui/button";
 import FirebaseFirestoreService from "../../../services/database/strategies/FirebaseFirestoreService";
 import {useAuth} from "../../../contexts/Authentication";
 import {useNotification} from "../../../contexts/NotificationProvider";
+import {Loader2} from "lucide-react";
 
 interface ChannelDetailsProps {
   channel: Channel;
+  userId: string;
 }
 
-const ChannelDetails: React.FC<ChannelDetailsProps> = ({ channel }) => {
+const ChannelDetails: React.FC<ChannelDetailsProps> = ({ channel, userId }) => {
   const [videos, setVideos] = useState<Video[]>([]);
   const {authState} = useAuth();
   const { showNotification } = useNotification();
+  const { removeChannelFromTrack, isLoading, error } = useAddChannelToTrack(userId? userId : "N/A");
 
   useEffect(() => {
     getRecentChannelVideos(channel.channelId).then((vids) => {
@@ -70,6 +73,16 @@ const ChannelDetails: React.FC<ChannelDetailsProps> = ({ channel }) => {
     }
   }
 
+  const handleRemoveChannel = async () => {
+    try {
+      await removeChannelFromTrack(channel.channelId);
+      showNotification("Channel Removed", "Successfully removed the channel from tracking", "success");
+      window.location.reload();
+    } catch (err) {
+      showNotification("Error", "Failed to remove the channel. Please try again.", "error");
+    }
+  };
+
   return (
     <ScrollArea className="h-[calc(100vh-100px)] gap-2">
       <Card className="m-4 relative overflow-hidden">
@@ -86,7 +99,15 @@ const ChannelDetails: React.FC<ChannelDetailsProps> = ({ channel }) => {
             <div className="flex-1"/>
             <div className="flex flex-col items-end justify-center gap-2">
               <Button variant="default" size="sm">Auto-Download</Button>
-              <Button variant="destructive" size="sm">Remove</Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleRemoveChannel}
+                disabled={isLoading}
+              >
+                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                Remove
+              </Button>
             </div>
           </div>
         </CardHeader>
