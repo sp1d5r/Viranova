@@ -162,7 +162,7 @@ const BRollTab: React.FC<BRollTabContentProps> = ({ short, shortId }) => {
           <a className="text-primary underline" href="mailto:elijahahmad03@gmail.com">elijahahmad03@gmail.com</a>.
         </AlertDescription>
       </Alert>
-      <div className="flex-wrap md:flex-nowrap w-full flex justify-center items-center gap-2 my-5">
+      <div className="flex-wrap flex justify-center items-center gap-2 my-5">
         <VideoPlayer
           videoUrl={videoUrl}
           currentTime={currentTime}

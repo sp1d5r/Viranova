@@ -71,7 +71,7 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, totalFrames, currentTime,
   };
 
   return (
-    <div className="tracks-container overflow-x-auto w-full my-2">
+    <div className="tracks-container overflow-x-auto my-2">
       {tracks.map(track => (
         <div
           key={track.id}

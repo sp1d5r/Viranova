@@ -54,7 +54,7 @@ export const VideoTab: React.FC<VideoTabProps> = ({ short, shortId, segment }) =
   }, [short, segment]);
 
   return (
-    <Card className="w-full">
+    <Card className="w-full ">
       <CardHeader>
         <CardTitle>Video Editor</CardTitle>
       </CardHeader>

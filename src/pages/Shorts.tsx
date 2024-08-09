@@ -185,7 +185,7 @@ export const Shorts: React.FC<ShortsProps> = ({}) => {
             </button>
           </li>
           <div className="w-full flex-1" />
-          <div className="w-full md:h-[300px] relative flex md:justify-center items-start text-white">
+          <div className="w-full py-20 md:h-[300px] relative flex md:justify-center items-start text-white">
             <div className="md:absolute md:-rotate-90">
               <p className="text-4xl font-bold pt-3 sm:pt-5 w-full text-nowrap text-primary">The Kitchen</p>
               <p className="font-bold py-2 text-nowrap">Hold on a second and let him cook 🔥</p>
