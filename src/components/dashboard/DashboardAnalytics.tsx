@@ -8,6 +8,8 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { useNotification } from "../../contexts/NotificationProvider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Button } from "../ui/button";
+import {ChartTooltip, ChartTooltipContent} from '../ui/chart';
+import ImprovedDashboardChart from "./analytics/ImprovedDashboardChart";
 
 export interface DashboardAnalyticsProps {
   userId: string | undefined;
@@ -148,23 +150,13 @@ export const DashboardAnalytics: React.FC<DashboardAnalyticsProps> = ({ userId }
   };
 
   const renderChart = (metric: keyof typeof chartConfig) => (
-    <Card key={metric}>
-      <CardHeader>
-        <CardTitle>{chartConfig[metric].label}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
-          <AreaChart data={prepareChartData(metric as keyof VideoAnalytics | keyof VideoAnalytics['authorMeta'])}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Area type="monotone" dataKey="value" stroke={chartConfig[metric].color} fill={chartConfig[metric].color} fillOpacity={0.3} />
-          </AreaChart>
-        </ResponsiveContainer>
-      </CardContent>
-    </Card>
+    <ImprovedDashboardChart
+      key={metric}
+      title={chartConfig[metric].label}
+      data={prepareChartData(metric as keyof VideoAnalytics | keyof VideoAnalytics['authorMeta'])}
+      dataKey="value"
+      color={chartConfig[metric].color}
+    />
   );
 
   return (

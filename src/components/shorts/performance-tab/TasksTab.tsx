@@ -29,19 +29,7 @@ export const TasksTab: React.FC<TasksTabProps> = ({shortId}) => {
   const [scheduledTasks, setScheduledTasks] = useState<AnalyticsTask[]>([]);
 
   useEffect(() => {
-    FirebaseFirestoreService.queryDocuments(
-      'tasks',
-      'shortId',
-      shortId,
-      'scheduledTime',
-      (docs) => {
-        setAllTasks(docs.map((elem) => {return elem as AnalyticsTask}));
-        console.log('docs: ',docs)
-      },
-      (error) => {
-        console.error(error.message)
-      }
-    )
+    fetchTasks();
   }, []);
 
   useEffect(() => {
@@ -50,6 +38,37 @@ export const TasksTab: React.FC<TasksTabProps> = ({shortId}) => {
     setCompletedTasks(completedTasks);
     setScheduledTasks(scheduledTasks);
   }, [allTasks]);
+
+  const fetchTasks = () => {
+    FirebaseFirestoreService.queryDocuments(
+      'tasks',
+      'shortId',
+      shortId,
+      'scheduledTime',
+      (docs) => {
+        setAllTasks(docs.map((elem) => elem as AnalyticsTask));
+        console.log('docs: ', docs);
+      },
+      (error) => {
+        console.error(error.message);
+      }
+    );
+  };
+
+  const deleteTask = (taskId: string) => {
+    FirebaseFirestoreService.deleteDocument(
+      'tasks',
+      taskId,
+      () => {
+        console.log("Successfully deleted task!");
+        // Refresh the task list after deletion
+        fetchTasks();
+      },
+      (error) => {
+        console.error("Failed to delete task:", error.message);
+      }
+    );
+  };
 
   return <div className="w-full gap-4 my-4 flex flex-col">
     <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
@@ -84,11 +103,13 @@ export const TasksTab: React.FC<TasksTabProps> = ({shortId}) => {
         </tr>
         </thead>
         <tbody>
-        {
-          completedTasks.map((elem) => {
-            return <CompletedTaskRow task={elem} />
-          })
-        }
+        {completedTasks.map((elem) => (
+          <CompletedTaskRow
+            key={elem.id}
+            task={elem}
+            onTaskDeleted={fetchTasks}  // Pass the fetchTasks function as the callback
+          />
+        ))}
         </tbody>
       </table>
     </div>
@@ -100,45 +121,36 @@ export const TasksTab: React.FC<TasksTabProps> = ({shortId}) => {
         </caption>
         <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
         <tr>
+          <th scope="col" className="px-6 py-3">Task Type</th>
+          <th scope="col" className="px-6 py-3">Status</th>
+          <th scope="col" className="px-6 py-3">Scheduled Time</th>
+          <th scope="col" className="px-6 py-3">Reschedule</th>
           <th scope="col" className="px-6 py-3">
-            Task Type
-          </th>
-          <th scope="col" className="px-6 py-3">
-            Status
-          </th>
-          <th scope="col" className="px-6 py-3">
-            Scheduled Time
-          </th>
-          <th scope="col" className="px-6 py-3">
-            Reschedule
-          </th>
-          <th scope="col" className="px-6 py-3">
-            <span className="sr-only">Edit</span>
+            <span className="sr-only">Actions</span>
           </th>
         </tr>
         </thead>
         <tbody>
-        {
-          scheduledTasks.map((elem) => {
-            return <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-              <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                {elem.operation}
-              </th>
-              <td className="px-6 py-4">
-                {elem.status}
-              </td>
-              <td className="px-6 py-4">
-                {formatTimestamp(elem.scheduledTime)}
-              </td>
-              <td className="px-6 py-4">
-                <a href="#" className="font-medium text-emerald-500 hover:underline">Reschedule</a>
-              </td>
-              <td className="px-6 py-4 text-right">
-                <a href="#" className="font-medium text-red-500 hover:underline">Delete</a>
-              </td>
-            </tr>
-          })
-        }
+        {scheduledTasks.map((elem) => (
+          <tr key={elem.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+            <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+              {elem.operation}
+            </th>
+            <td className="px-6 py-4">{elem.status}</td>
+            <td className="px-6 py-4">{formatTimestamp(elem.scheduledTime)}</td>
+            <td className="px-6 py-4">
+              <a href="#" className="font-medium text-emerald-500 hover:underline">Reschedule</a>
+            </td>
+            <td className="px-6 py-4 text-right">
+              <button
+                onClick={() => deleteTask(elem.id!)}
+                className="font-medium text-red-500 hover:underline"
+              >
+                Delete
+              </button>
+            </td>
+          </tr>
+        ))}
         </tbody>
       </table>
     </div>

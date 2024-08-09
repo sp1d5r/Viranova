@@ -48,7 +48,7 @@ export const ARollTabContent: React.FC<ARollTabContentProps> = ({ short, shortId
           <div className="space-y-2">
             <p>Are you happy with the transcript created? If so you can begin the visual processing stages</p>
             <p>This will prepare you for creating the visual part of your video</p>
-            <Button onClick={handleBeginProcessing}>
+            <Button onClick={handleBeginProcessing} cooldown={100}>
               Begin
             </Button>
           </div>
