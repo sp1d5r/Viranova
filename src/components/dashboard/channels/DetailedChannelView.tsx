@@ -24,7 +24,7 @@ const ChannelDetails: React.FC<ChannelDetailsProps> = ({ channel, userId }) => {
   const { removeChannelFromTrack, isLoading, error } = useAddChannelToTrack(userId? userId : "N/A");
 
   useEffect(() => {
-    getRecentChannelVideos(channel.channelId).then((vids) => {
+    getRecentChannelVideos(channel.channelId, 50).then((vids) => {
       setVideos(vids);
     });
   }, [channel]);
@@ -83,6 +83,11 @@ const ChannelDetails: React.FC<ChannelDetailsProps> = ({ channel, userId }) => {
     }
   };
 
+  function numberWithCommas(x: string| undefined) {
+    if (x) return x.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    else return "Unknown..."
+  }
+
   return (
     <ScrollArea className="h-[calc(100vh-100px)] gap-2">
       <Card className="m-4 relative overflow-hidden">
@@ -108,6 +113,11 @@ const ChannelDetails: React.FC<ChannelDetailsProps> = ({ channel, userId }) => {
                 {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Remove
               </Button>
+              <a href={"/something"}>
+                <Button>
+                  View Channel
+                </Button>
+              </a>
             </div>
           </div>
         </CardHeader>
@@ -120,15 +130,15 @@ const ChannelDetails: React.FC<ChannelDetailsProps> = ({ channel, userId }) => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <h3 className="font-semibold">Subscribers</h3>
-                <p>{channel.subscriberCount}</p>
+                <p>{numberWithCommas(channel.subscriberCount)}</p>
               </div>
               <div>
                 <h3 className="font-semibold">Total Views</h3>
-                <p>{channel.viewCount}</p>
+                <p>{numberWithCommas(channel.viewCount)}</p>
               </div>
               <div>
                 <h3 className="font-semibold">Video Count</h3>
-                <p>{channel.videoCount}</p>
+                <p>{numberWithCommas(channel.videoCount)}</p>
               </div>
               <div>
                 <h3 className="font-semibold">Country</h3>

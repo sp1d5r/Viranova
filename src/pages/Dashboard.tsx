@@ -42,6 +42,8 @@ import {DashboardAnalytics} from "../components/dashboard/DashboardAnalytics";
 import {useNotification} from "../contexts/NotificationProvider";
 import {Popover, PopoverTrigger, PopoverContent} from "../components/ui/popover";
 import {ScrollArea} from "../components/ui/scroll-area";
+import FirebaseFirestoreService from "../services/database/strategies/FirebaseFirestoreService";
+import {ChannelsTracking} from "../types/collections/Channels";
 
 interface NavItem {
   id: string;
@@ -51,20 +53,43 @@ interface NavItem {
 }
 
 
-const navItems: NavItem[] = [
-  { id: 'dashboard', title: 'Dashboard', icon: <Home className="h-4 w-4" /> },
-  { id: 'channels', title: 'Channels', icon: <Tv className="h-4 w-4" />, badge: 6 },
-  { id: 'videos', title: 'Videos', icon: <Video className="h-4 w-4" /> },
-  { id: 'shorts', title: 'Shorts', icon: <Smartphone className="h-4 w-4" /> },
-  { id: 'analytics', title: 'Analytics', icon: <LineChart className="h-4 w-4" /> },
-];
-
 export default function Dashboard() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [selectedItem, setSelectedItem] = useState<string>('dashboard');
   const {authState, logout} = useAuth();
   const {showNotification, allNotifications} = useNotification();
+
+  const [navItems, setNavItems] = useState<NavItem[]>([
+    { id: 'dashboard', title: 'Dashboard', icon: <Home className="h-4 w-4" /> },
+    { id: 'channels', title: 'Channels', icon: <Tv className="h-4 w-4" />, badge: 6 },
+    { id: 'videos', title: 'Videos', icon: <Video className="h-4 w-4" /> },
+    { id: 'shorts', title: 'Shorts', icon: <Smartphone className="h-4 w-4" /> },
+    { id: 'analytics', title: 'Analytics', icon: <LineChart className="h-4 w-4" /> },
+  ]);
+
+  useEffect(() => {
+    if (authState.user) {
+      // Get channels
+      FirebaseFirestoreService.getDocument<ChannelsTracking>(
+        "channelstracking",
+        authState.user.uid,
+        (doc) => {
+          if (doc) {
+            setNavItems(
+              [
+                { id: 'dashboard', title: 'Dashboard', icon: <Home className="h-4 w-4" /> },
+                { id: 'channels', title: 'Channels', icon: <Tv className="h-4 w-4" />, badge: doc.channelsTracking.length  },
+                { id: 'videos', title: 'Videos', icon: <Video className="h-4 w-4" /> },
+                { id: 'shorts', title: 'Shorts', icon: <Smartphone className="h-4 w-4" /> },
+                { id: 'analytics', title: 'Analytics', icon: <LineChart className="h-4 w-4" /> },
+              ]
+            )
+          }
+        }
+      )
+    }
+  }, [authState])
 
   useEffect(() => {
     const tab = searchParams.get('tab');

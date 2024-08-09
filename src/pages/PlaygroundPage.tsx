@@ -120,7 +120,6 @@ export default function PlaygroundPage() {
 
         <div className="w-full  max-h-[700px] min-h-[600px] flex justify-start items-center flex-col relative sm:px-16 gap-8 pt-24  sm:pt-28 m-auto py-6">
             <BackgroundBeams />
-
             <div className="w-[60%] min-w-[350px] flex   justify-start items-center flex-col gap-8 my-8">
                 <div className="w-full min-h-[200px] z-0 overflow-hidden border-primary border rounded-xl text-white p-4">
                     <p className="text-2xl font-bold">Clip Video</p>

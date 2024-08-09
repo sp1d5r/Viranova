@@ -8,7 +8,6 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { useNotification } from "../../contexts/NotificationProvider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Button } from "../ui/button";
-import {ChartTooltip, ChartTooltipContent} from '../ui/chart';
 import ImprovedDashboardChart from "./analytics/ImprovedDashboardChart";
 
 export interface DashboardAnalyticsProps {
