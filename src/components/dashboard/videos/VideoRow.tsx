@@ -89,10 +89,12 @@ export const VideoRow: React.FC<{ videoId: string; isExpanded: boolean; onToggle
         <TableRow>
           <TableCell colSpan={6} className="bg-muted/50">
             <div className="p-4">
+
               <VideoSegments videoId={videoId}/>
               <h3 className="font-semibold mb-2">Additional Details:</h3>
               <p>Source: {source} </p>
               <p>Link: {video.link || 'N/A'}</p>
+              <p>Video Id: {videoId || 'N/A'}</p>
               <p>Backend Status: {video.backend_status}</p>
               <p>Progress Message: {video.progressMessage}</p>
               <div className="flex gap-2">

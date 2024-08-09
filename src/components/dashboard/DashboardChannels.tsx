@@ -168,7 +168,7 @@ export const DashboardChannels: React.FC<DashboardChannelsProps> = ({ userId }) 
                       <GitPullRequestCreateArrow size={16}/>
                     </Button>
                   </div>
-                  <ScrollArea className="h-[80vh]">
+                  <ScrollArea className="h-[80vh] my-2">
                     {channels.map((channel, index) => (
                       <ChannelCard
                         key={index}

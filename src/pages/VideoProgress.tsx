@@ -10,6 +10,9 @@ import Segments from "../assets/icons/Image.svg";
 import ThumbsUp from "../assets/icons/Thumbs Up.svg";
 import {Meteors} from "../components/ui/meteors";
 import {LoadingIcon} from "../components/loading/Loading";
+import ScrollableLayout from "../layouts/ScrollableLayout";
+import {Button} from "../components/ui/button";
+import {ChevronsLeft} from "lucide-react";
 
 
 export interface VideoProgressProps {
@@ -52,6 +55,15 @@ export const VideoProgress: React.FC<VideoProgressProps> = ({}) => {
 
     return <ModalLayout>
         <div className="absolute inset-0 h-full w-full bg-gradient-to-r from-emerald-400 to-emerald-700 transform scale-[0.50] bg-primary rounded-xl blur-3xl" />
+
+        <div className="absolute top-0 left-0 w-100vw py-2 px-4">
+            <a href="/dashboard">
+                <Button variant="outline">
+                    <ChevronsLeft color="#ffffff" />
+                </Button>
+            </a>
+        </div>
+
         <div className={"relative min-w-[300px] min-h-[300px] w-[50vw] h-[50vh] bg-background rounded-xl flex flex-col justify-center items-center gap-10 text-white border border-primary overflow-hidden p-2"}>
 
             {video ? (
