@@ -53,7 +53,7 @@ export default function AuthenticationPage() {
         e.preventDefault();
         console.log('Logging in with', formData);
         login(formData.email, formData.password, () => {
-            window.location.href="/playground"
+            window.location.href="/dashboard"
         }, ()=>{showNotification("Authentication Issue", "Failed to authenticate.", "error", 5000)})
     };
 
