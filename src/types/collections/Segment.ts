@@ -2,7 +2,7 @@ import {DocumentData} from "firebase/firestore";
 import FirebaseDatabaseService from "../../services/database/strategies/FirebaseFirestoreService";
 import {deleteShort, documentToShort, Short} from "./Shorts";
 import {FirebaseStorageService} from "../../services/storage/strategies";
-import {BackendServerMetadata} from "./BackendServerMetadata";
+import { BackendServerMetadata } from "./BackendServerMetadata";
 
 export interface Word {
     start_time: number;
@@ -42,6 +42,38 @@ export interface Segment extends BackendServerMetadata {
     words: Word[];
 }
 
+function fixStringRepresentation(inputString: string): any {
+    if (inputString.startsWith('"')) {
+        const cleanedString = inputString.slice(1, -1)
+          .replace(/\\'/g, "'")
+          .replace(/\\"/g, '"');
+        try {
+            return JSON.parse(cleanedString);
+        } catch (error) {
+            console.error("JSON parse failed, falling back to eval", error);
+            return eval(`(${cleanedString})`);
+        }
+    } else {
+        return eval(`(${inputString})`);
+    }
+}
+
+function parseSegmentWords(segmentDocument: DocumentData): Word[] {
+    try {
+        if (typeof segmentDocument.words === 'string') {
+            return fixStringRepresentation(segmentDocument.words);
+        } else if (Array.isArray(segmentDocument.words)) {
+            return segmentDocument.words;
+        } else {
+            console.error("Unexpected words format", segmentDocument.words);
+            return [];
+        }
+    } catch (error) {
+        console.error("Error parsing segment words:", error);
+        console.error("Problematic string:", segmentDocument.words?.slice(0, 100));
+        return [];
+    }
+}
 
 export function documentToSegment(docData: DocumentData): Segment {
     return {
@@ -71,7 +103,7 @@ export function documentToSegment(docData: DocumentData): Segment {
         shortRunId: docData.short_idea_run_id,
         videoSegmentLocation: docData.video_segment_location,
         progress: docData.progress,
-        words: docData.words ? (0, eval)('(' + docData.words + ')') : []
+        words: parseSegmentWords(docData)
     };
 }
 
