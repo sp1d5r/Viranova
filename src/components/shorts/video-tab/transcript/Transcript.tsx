@@ -1,291 +1,127 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Short, Logs } from "../../../../types/collections/Shorts";
+import React, { useState, useCallback, FormEvent } from 'react';
+import { Short } from "../../../../types/collections/Shorts";
 import { Segment } from "../../../../types/collections/Segment";
-import { FirebaseStorageService } from "../../../../services/storage/strategies";
+import { TranscriptEditor } from './TranscriptEditor';
+import FirebaseDatabaseService from "../../../../services/database/strategies/FirebaseFirestoreService";
+import { Input } from "../../../ui/input";
+import { Button } from "../../../ui/button";
 
-export interface TranscriptProps {
+export interface TranscriptTabProps {
   short: Short;
   shortId: string;
   segment: Segment;
 }
 
-interface Word {
-  word: string;
-  start_time: number;
-  end_time: number;
-  isKept: boolean;
-  fontSize?: number;
-  color?: string;
-}
+export const TranscriptTab: React.FC<TranscriptTabProps> = ({ short, shortId, segment }) => {
+  const [activeTab, setActiveTab] = useState<'title' | 'transcript'>('title');
+  const [isUploading, setIsUploading] = useState(false);
 
-interface Line {
-  words: Word[];
-  fontSize?: number;
-  position?: { x: number; y: number };
-}
+  const TitleEditor: React.FC = () => {
+    const [formState, setFormState] = useState({
+      topTitle: short.short_title_top || '',
+      bottomTitle: short.short_title_bottom || ''
+    });
 
-export const TranscriptTab: React.FC<TranscriptProps> = ({ short, shortId, segment }) => {
-  const [currentTime, setCurrentTime] = useState(0);
-  const [videoUrl, setVideoUrl] = useState<string | undefined>(undefined);
-  const [fps, setFps] = useState(30);
-  const bRollRef = useRef<HTMLVideoElement>(null);
-  const [words, setWords] = useState<Word[]>([]);
-  const [lines, setLines] = useState<Line[]>([]);
-  const [currentLine, setCurrentLine] = useState<Line | null>(null);
-
-  useEffect(() => {
-    const handleTimeUpdate = () => {
-      if (bRollRef.current) {
-        const newTime = bRollRef.current.currentTime;
-        setCurrentTime(newTime);
-        updateCurrentLine(newTime);
-        console.log(newTime);
-      }
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, value } = e.target;
+      setFormState(prev => ({ ...prev, [name]: value }));
     };
 
-    const videoElement = bRollRef.current;
-    videoElement?.addEventListener('timeupdate', handleTimeUpdate);
+    const handleSubmit = useCallback((e: FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      setIsUploading(true);
+      const updatedTitles = {
+        short_title_top: formState.topTitle,
+        short_title_bottom: formState.bottomTitle
+      };
 
-    return () => {
-      videoElement?.removeEventListener('timeupdate', handleTimeUpdate);
-    };
-  }, [fps, lines, bRollRef.current]);
-
-  useEffect(() => {
-    if (fps !== short.fps) {
-      setFps(short.fps);
-    }
-  }, [short.fps]);
-
-  useEffect(() => {
-    const initialWords: Word[] = segment.words.map((word) => ({
-      ...word,
-      start_time: word.start_time - segment.earliestStartTime,
-      end_time: word.end_time - segment.earliestStartTime,
-      isKept: true,
-      fontSize: 20,
-      color: 'white',
-    }));
-
-    if (short.logs && initialWords.length > 0) {
-      const updatedWords = handleOperationsFromLogs(short.logs, initialWords);
-      const adjustedWords = adjustTimestamps(updatedWords);
-      setWords(adjustedWords);
-      generateLines(adjustedWords);
-    }
-  }, [short.logs, segment.words, segment.earliestStartTime]);
-
-  const handleOperationsFromLogs = (logs: Logs[], words: Word[]): Word[] => {
-    logs.forEach((log) => {
-      if (log.type === "delete") {
-        for (let i = log.start_index; i <= log.end_index; i++) {
-          if (i < words.length) {
-            words[i].isKept = false;
-          }
+      FirebaseDatabaseService.updateDocument(
+        "shorts",
+        shortId,
+        updatedTitles,
+        () => {
+          console.log("Titles updated successfully");
+          setIsUploading(false);
+        },
+        (error) => {
+          console.error("Failed to update titles:", error);
+          setIsUploading(false);
         }
-      } else if (log.type === "undelete") {
-        for (let i = log.start_index; i <= log.end_index; i++) {
-          if (i < words.length) {
-            words[i].isKept = true;
-          }
-        }
-      }
-    });
-    return words.filter(word => word.isKept);
-  };
-
-  const mergeConsecutiveCuts = (words: Word[]): [number, number][] => {
-    const cuts: [number, number][] = [];
-    let currentCut: [number, number] | null = null;
-
-    words.forEach((word) => {
-      if (!currentCut) {
-        currentCut = [word.start_time, word.end_time];
-      } else if (word.start_time <= currentCut[1]) {
-        currentCut[1] = Math.max(currentCut[1], word.end_time);
-      } else {
-        cuts.push(currentCut);
-        currentCut = [word.start_time, word.end_time];
-      }
-    });
-
-    if (currentCut) {
-      cuts.push(currentCut);
-    }
-
-    return cuts;
-  };
-
-  const adjustTimestamps = (words: Word[]): Word[] => {
-    let cumulativeOffset = 0;
-    let previousEndTime = words[0].start_time;
-
-    const adjustedWords = words.map((word) => {
-      const gap = word.start_time - previousEndTime;
-      if (gap > 0) {
-        cumulativeOffset += gap;
-      }
-
-      const adjustedWord = { ...word };
-      adjustedWord.start_time = Math.max(0, word.start_time - cumulativeOffset);
-      adjustedWord.end_time = Math.max(0, word.end_time - cumulativeOffset);
-
-      previousEndTime = word.end_time;
-
-      return adjustedWord;
-    });
-    return adjustedWords.map((word) => {
-      const fixedWord = {...word}
-      fixedWord.start_time -= words[0].start_time;
-      fixedWord.end_time -= words[0].start_time;
-      return fixedWord;
-    })
-  };
-
-  const generateLines = (words: Word[]) => {
-    const newLines: Line[] = [];
-    let previouscurrentLine: Line = { words: [], fontSize: 24, position: { x: 10, y:  240 } };
-
-    words.forEach((word, index) => {
-      previouscurrentLine.words.push(word);
-      if (previouscurrentLine.words.length === 3 || index === words.length - 1) {
-        newLines.push(previouscurrentLine);
-        previouscurrentLine = { words: [], fontSize: 24, position: { x: 10, y: 240 } };
-      }
-    });
-    setLines(newLines);
-  };
-
-  const updateCurrentLine = (time: number) => {
-    const newCurrentLine = lines.find(line => {
-      const lineStartTime = line.words[0].start_time;
-      const lineEndTime = line.words[line.words.length - 1].end_time;
-      return lineStartTime <= time  && time <= lineEndTime;
-    });
-    console.log(time, newCurrentLine);
-    setCurrentLine(newCurrentLine || null);
-  };
-
-  const loadVideo = async (url: string) => {
-    try {
-      const res = await FirebaseStorageService.downloadFile(url);
-      return URL.createObjectURL(res);
-    } catch (err) {
-      console.error(`Failed to load video: ${url}`, err);
-      return undefined;
-    }
-  };
-
-  useEffect(() => {
-    if (short.short_b_roll && !videoUrl) {
-      loadVideo(short.short_b_roll).then(url =>
-        setVideoUrl(url)
       );
-    }
-  }, [short.short_b_roll]);
-
-  const Words: React.FC<{ line: Line | null }> = ({ line }) => {
-    if (!line) return null;
+    }, [formState, shortId]);
 
     return (
-      <div
-        className="absolute z-50 m-auto"
-        style={{
-          top: `${line.position?.y}px`,
-          fontSize: `${line.fontSize}px`,
-        }}
-      >
-        {line.words.map((word, index) => (
-          <span
-            key={index}
-            style={{
-              fontSize: `${word.fontSize || line.fontSize}px`,
-              color: word.color || 'white',
-              marginRight: '5px',
-            }}
-            className="font-bold font-montserrat outline-text"
-          >
-            {word.word}
-          </span>
-        ))}
-      </div>
-    );
-  };
-
-  const LineSettings: React.FC<{ line: Line, index: number }> = ({ line, index }) => {
-    const handleFontSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newLines = [...lines];
-      newLines[index].fontSize = Number(e.target.value);
-      setLines(newLines);
-    };
-
-    const handlePositionChange = (axis: 'x' | 'y', value: number) => {
-      const newLines = [...lines];
-      if (newLines[index].position) {
-        newLines[index].position![axis] = value;
-        setLines(newLines);
-      }
-    };
-
-    return (
-      <div className="mb-4 p-2 border rounded">
-        <h3 className="text-lg font-semibold mb-2">Line {index + 1}</h3>
-        <p>Start Time: {line.words[0].start_time}</p>
-        <p>End Time: {line.words[line.words.length - 1].start_time}</p>
-        <div className="flex items-center mb-2">
-          <label className="mr-2">Font Size:</label>
-          <input
-            type="number"
-            value={line.fontSize}
-            onChange={handleFontSizeChange}
-            className="w-16 px-1 py-0.5 text-black"
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="topTitle" className="block text-sm font-medium text-gray-700">Top Title</label>
+          <Input
+            type="text"
+            id="topTitle"
+            name="topTitle"
+            value={formState.topTitle}
+            onChange={handleInputChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-white"
           />
         </div>
-        <div className="flex items-center mb-2">
-          <label className="mr-2">X Position:</label>
-          <input
-            type="number"
-            value={line.position?.x}
-            onChange={(e) => handlePositionChange('x', Number(e.target.value))}
-            className="w-16 px-1 py-0.5 text-black"
+        <div>
+          <label htmlFor="bottomTitle" className="block text-sm font-medium text-gray-700">Bottom Title</label>
+          <Input
+            type="text"
+            id="bottomTitle"
+            name="bottomTitle"
+            value={formState.bottomTitle}
+            onChange={handleInputChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-white"
           />
         </div>
-        <div className="flex items-center">
-          <label className="mr-2">Y Position:</label>
-          <input
-            type="number"
-            value={line.position?.y}
-            onChange={(e) => handlePositionChange('y', Number(e.target.value))}
-            className="w-16 px-1 py-0.5 text-black"
-          />
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {line.words.map((word) => {
-            return <p>{word.word}</p>
-          })}
-        </div>
-      </div>
+        <Button
+          type="submit"
+          disabled={isUploading}
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-50"
+        >
+          {isUploading ? 'Uploading...' : 'Save Titles'}
+        </Button>
+      </form>
     );
   };
 
   return (
-    <div className="w-full flex gap-2 items-start justify-center">
-      {/* Video Player */}
-      <div className="relative w-[270px] h-[480px] flex justify-center">
-        {videoUrl ? (
-          <video ref={bRollRef} className="z-10 h-full w-full" controls>
-            <source src={videoUrl} type="video/mp4" />
-          </video>
-        ) : (
-          <p>Video Will Play Here</p>
-        )}
-        <Words line={currentLine} />
+    <div className="w-full">
+      <div className="border-b border-gray-200">
+        <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+          <Button
+            type="button"
+            variant="ghost"
+            className={`${
+              activeTab === 'title'
+                ? 'border-indigo-500 text-indigo-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+            onClick={() => setActiveTab('title')}
+          >
+            Video Title
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            className={`${
+              activeTab === 'transcript'
+                ? 'border-indigo-500 text-indigo-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+            onClick={() => setActiveTab('transcript')}
+          >
+            Transcript
+          </Button>
+        </nav>
       </div>
-      <div className="flex-1 min-h-[480px] bg-zinc-950 p-4 overflow-y-auto">
-        <h2 className="text-xl font-bold mb-4 text-white">Edit Transcript</h2>
-        {lines.map((line, index) => (
-          <LineSettings key={index} line={line} index={index} />
-        ))}
+
+      <div className="mt-4">
+        {activeTab === 'title' ? (
+          <TitleEditor />
+        ) : (
+          <TranscriptEditor short={short} shortId={shortId} segment={segment} />
+        )}
       </div>
     </div>
   );
