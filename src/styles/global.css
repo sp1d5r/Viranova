@@ -294,3 +294,36 @@
     --rose-900: 341.5 75.5% 30.4%;
     --rose-950: 343.1 87.7% 15.9%;
 }
+
+
+.neon-card {
+    --glow-color-1: #00ff00;
+    --glow-color-2: #ff00ff;
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+.neon-card::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border: linear-gradient(45deg, var(--glow-color-1), var(--glow-color-2));
+    z-index: -1;
+    filter: blur(10px);
+    opacity: 0.7;
+    transition: opacity 0.3s ease-in-out;
+}
+.neon-card:hover::before {
+    opacity: 1;
+}
+.glass-effect {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(5px);
+    border-radius: 10px;
+}
