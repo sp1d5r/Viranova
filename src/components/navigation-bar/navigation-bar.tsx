@@ -168,16 +168,19 @@ export const NavigationBar = () => {
                           </Button>
                       </SheetTrigger>
                       <SheetContent side="left">
-                          <div className="grid gap-4 py-4">
+                          <div className="py-4 h-full text-white flex flex-col justify-between">
                               <Logo />
-                              {navItems.map((item, index) => (
-                                <SheetClose key={index} asChild>
-                                    <div>
-                                        {item.options &&  <NavMenu name={item.name} options={item.options} /> }
-                                        {item.link && <NavLink href={item.link}>{item.name}</NavLink> }
-                                    </div>
-                                </SheetClose>
-                              ))}
+                              <div className="flex-1" />
+                              {authState.isAuthenticated ? (
+                                <Button variant="ghost" onClick={handleLogout}>
+                                    <LogOut className="mr-2 h-4 w-4" />
+                                    Sign Out
+                                </Button>
+                              ) : (
+                                <Button variant="ghost" asChild>
+                                    <Link to="/authenticate">Sign Up</Link>
+                                </Button>
+                              )}
                           </div>
                       </SheetContent>
                   </Sheet>

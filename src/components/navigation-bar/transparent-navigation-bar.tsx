@@ -165,19 +165,26 @@ export const TransparentNavigationBar = () => {
                           </Button>
                       </SheetTrigger>
                       <SheetContent side="left" className="bg-black/80 text-white border-r border-white">
-                          <div className="grid gap-4 py-4">
+                          <div className="flex flex-col items-center h-full py-4">
                               <Logo />
-                              {navItems.map((item, index) => (
-                                <SheetClose key={index} asChild>
-                                    <div>
-                                        {item.options ? (
-                                          <NavMenu name={item.name} options={item.options} />
-                                        ) : (
-                                          <NavLink to={item.link}>{item.name}</NavLink>
-                                        )}
-                                    </div>
-                                </SheetClose>
-                              ))}
+                              <div className="flex-1" />
+                              {authState.isAuthenticated && (
+                                <Button variant="outline" size="icon" className="ml-auto h-8 w-8 bg-transparent border-white text-white" asChild>
+                                    <Link to="/settings">
+                                        <Settings className="h-4 w-4" />
+                                    </Link>
+                                </Button>
+                              )}
+                              {authState.isAuthenticated ? (
+                                <Button variant="ghost" onClick={handleLogout} className="text-white hover:bg-white/10">
+                                    <LogOut className="mr-2 h-4 w-4" />
+                                    Sign Out
+                                </Button>
+                              ) : (
+                                <Button variant="ghost" asChild className="text-white hover:bg-white/10">
+                                    <Link to="/authenticate">Sign Up</Link>
+                                </Button>
+                              )}
                           </div>
                       </SheetContent>
                   </Sheet>
