@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Segment } from '../../types/collections/Segment';
 import FirebaseDatabaseService from "../../services/database/strategies/FirebaseFirestoreService";
 import { useNotification } from "../../contexts/NotificationProvider";
@@ -7,7 +7,7 @@ import { ReviewLangchainLogs } from "../review-langchain-run/ReviewLangchainLog"
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { ScrollArea } from "../ui/scroll-area";
-import {Sparkles} from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 interface RecommendedShortIdeasProps {
   segments: Segment[];
@@ -18,13 +18,39 @@ interface RecommendedShortIdeasProps {
 export const RecommendedShortIdeas: React.FC<RecommendedShortIdeasProps> = ({ segments, currentTime, onSeek }) => {
   const { showNotification } = useNotification();
   const { authState } = useAuth();
-  const currentCardRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [currentSegment, setCurrentSegment] = useState<Segment | null>(null);
+
+  const filteredAndSortedSegments = segments
+    .filter(segment => {
+      const wordCount = segment.transcript.split(" ").length;
+      return wordCount >= 100 && wordCount <= 300;
+    })
+    .sort((a, b) => a.earliestStartTime - b.earliestStartTime);
 
   useEffect(() => {
-    if (currentCardRef.current) {
-      currentCardRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    const newCurrentSegment = filteredAndSortedSegments.find(
+      segment => segment.earliestStartTime <= currentTime && currentTime <= segment.latestEndTime
+    );
+    setCurrentSegment(newCurrentSegment || null);
+  }, [currentTime, filteredAndSortedSegments]);
+
+  useEffect(() => {
+    if (currentSegment && scrollContainerRef.current) {
+      const segmentElement = document.getElementById(`segment-${currentSegment.id}`);
+
+      if (segmentElement) {
+        const containerTop = scrollContainerRef.current.offsetTop;
+        const segmentTop = segmentElement.offsetTop;
+        const offset = segmentTop - containerTop;
+
+        scrollContainerRef.current.scrollTo({
+          top: offset,
+          behavior: 'smooth'
+        });
+      }
     }
-  }, [currentTime]);
+  }, [currentSegment]);
 
   const handleGenerateShort = (segment: Segment) => {
     FirebaseDatabaseService.addDocument(
@@ -67,19 +93,6 @@ export const RecommendedShortIdeas: React.FC<RecommendedShortIdeasProps> = ({ se
     );
   };
 
-  const filteredAndSortedSegments = segments
-    .filter(segment => {
-      const wordCount = segment.transcript.split(" ").length;
-      return wordCount >= 100 && wordCount <= 300;
-    })
-    .sort((a, b) => {
-      const aCurrent = a.earliestStartTime <= currentTime && currentTime <= a.latestEndTime;
-      const bCurrent = b.earliestStartTime <= currentTime && currentTime <= b.latestEndTime;
-      if (aCurrent && !bCurrent) return -1;
-      if (!aCurrent && bCurrent) return 1;
-      return a.earliestStartTime - b.earliestStartTime;
-    });
-
   return (
     <div className="flex-1">
       <CardHeader>
@@ -89,12 +102,12 @@ export const RecommendedShortIdeas: React.FC<RecommendedShortIdeasProps> = ({ se
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-[50vh] pr-4">
-          {filteredAndSortedSegments.map((segment, index) => (
+        <ScrollArea className="h-[50vh] pr-4" ref={scrollContainerRef}>
+          {filteredAndSortedSegments.map((segment) => (
             <div
               key={segment.id}
-              ref={segment.earliestStartTime <= currentTime && currentTime <= segment.latestEndTime ? currentCardRef : null}
-              className={`mb-6 neon-card ${segment.earliestStartTime <= currentTime && currentTime <= segment.latestEndTime ? 'ring-2 ring-blue-500' : ''}`}
+              id={`segment-${segment.id}`}
+              className={`mb-6 neon-card ${segment.id === currentSegment?.id ? 'ring-2 ring-accent border-primary ' : ''}`}
             >
               <CardHeader className="glass-effect rounded-none">
                 <CardTitle className="text-xl text-white">{segment.segmentTitle}</CardTitle>
@@ -121,7 +134,7 @@ export const RecommendedShortIdeas: React.FC<RecommendedShortIdeasProps> = ({ se
                         Generate Short
                       </Button>
                       <Button
-                        onClick={() => onSeek(segment.earliestStartTime)}
+                        onClick={() => onSeek(segment.earliestStartTime + 1)}
                         className="bg-gradient-to-r from-purple-400 to-pink-500 hover:from-purple-500 hover:to-pink-600 text-white font-bold"
                       >
                         Jump to Segment

@@ -1,25 +1,38 @@
-import React, {useState} from "react";
-import {deleteShort, Short} from "../../types/collections/Shorts";
+import React, { useState, useEffect } from "react";
+import { deleteShort, Short } from "../../types/collections/Shorts";
 import FirebaseFirestoreService from "../../services/database/strategies/FirebaseFirestoreService";
-import {useNotification} from "../../contexts/NotificationProvider";
+import { useNotification } from "../../contexts/NotificationProvider";
+import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
+import { Button } from "../ui/button";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import { AlertCircle } from "lucide-react";
 
 export interface ShortSettingsTabProps {
   short: Short;
   shortId: string;
 }
 
-export const ShortSettingsTab :React.FC<ShortSettingsTabProps> = ({short, shortId}) => {
+export const ShortSettingsTab: React.FC<ShortSettingsTabProps> = ({ short, shortId }) => {
   const [shortIdea, setShortIdea] = useState<string>(short.short_idea);
-  const [shortIdeaExplanation, setShortIdeaExplanation] = useState(short.short_idea_explanation)
-  const {showNotification} = useNotification();
+  const [shortIdeaExplanation, setShortIdeaExplanation] = useState(short.short_idea_explanation);
+  const [isChanged, setIsChanged] = useState(false);
+  const { showNotification } = useNotification();
+
+  useEffect(() => {
+    setIsChanged(
+      shortIdea !== short.short_idea ||
+      shortIdeaExplanation !== short.short_idea_explanation
+    );
+  }, [shortIdea, shortIdeaExplanation, short.short_idea, short.short_idea_explanation]);
 
   const reset = () => {
     setShortIdea(short.short_idea);
     setShortIdeaExplanation(short.short_idea_explanation);
-  }
+  };
 
   const updateShortDetails = () => {
-    if (shortIdea != short.short_idea){
+    if (isChanged) {
       FirebaseFirestoreService.updateDocument(
         'shorts',
         shortId,
@@ -28,102 +41,69 @@ export const ShortSettingsTab :React.FC<ShortSettingsTabProps> = ({short, shortI
           short_idea_explanation: shortIdeaExplanation,
           short_idea_run_id: ''
         },
-        () => {showNotification('Updated', 'Updated Short Information', 'success');},
-        (err) => {showNotification('Updated', err.message, 'error');}
-      )
+        () => { showNotification('Updated', 'Updated Short Information', 'success'); },
+        (err) => { showNotification('Update Failed', err.message, 'error'); }
+      );
     }
-  }
+  };
 
-  return <div className="p-6 text-medium text-gray-400 bg-gray-900 rounded-lg w-full">
-    <nav className="flex my-2 mb-4 px-5 py-3 text-gray-700 border border-gray-200 rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700" aria-label="Breadcrumb">
-      <ol className="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse ">
-        <li className="inline-flex items-center">
-          <a href="/dashboard" className="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white">
-            <svg className="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-              <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
-            </svg>
-            Home
-          </a>
-        </li>
-        <li>
-          <div className="flex items-center">
-            <svg className="rtl:rotate-180 block w-3 h-3 mx-1 text-gray-400 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 9 4-4-4-4"/>
-            </svg>
-            <a href={`/video-temporal-segmentation?video_id=${short.video_id}`} className="ms-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ms-2 dark:text-gray-400 dark:hover:text-white">Segments</a>
-          </div>
-        </li>
-        <li aria-current="page">
-          <div className="flex items-center">
-            <svg className="rtl:rotate-180  w-3 h-3 mx-1 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 9 4-4-4-4"/>
-            </svg>
-            <span className="ms-1 text-sm font-medium text-gray-500 md:ms-2 dark:text-gray-400">{shortId}</span>
-          </div>
-        </li>
-      </ol>
-    </nav>
+  return (
+    <div className="space-y-6">
+      <div>
+        <h4 className="text-sm font-medium mb-2">Original Transcript:</h4>
+        <p className="text-sm bg-secondary p-3 rounded-md">{short.transcript}</p>
+      </div>
 
+      {!short.short_idea_run_id && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Warning</AlertTitle>
+          <AlertDescription>
+            This idea was not generated by us. Analytics will only update transcript editor.
+          </AlertDescription>
+        </Alert>
+      )}
 
-    <h3 className="text-xl font-bold text-white mb-2">Short Settings</h3>
-    <p className="mb-2">Before progressing with the next few stages, take a second here and make sure everything looks in order</p>
-
-    <p className="text-white font-bold pt-5">Original Transcript:</p>
-    <p className="bg-gray-900 px-2 py-2 m-2">
-      {short.transcript}
-    </p>
-    {!short.short_idea_run_id  && <p className="text-rose-600">This idea was not generated by us... Analytics will only update transcript editor.</p>}
-    <div className="mb-2">
-      <p className="text-white font-bold pt-2">Short Idea:</p>
-      <label htmlFor="default-input" className="block mb-2 text-sm font-medium text-white">
-        <input
-          type="text"
-          id="default-input"
+      <div>
+        <label htmlFor="shortIdea" className="text-sm font-medium block mb-2">
+          Short Idea:
+        </label>
+        <Input
+          id="shortIdea"
           value={shortIdea}
-          onChange={(e)=>{
-            setShortIdea(e.target.value)
-          }}
-          className="border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" />
-      </label>
-    </div>
-    <div className="mb-6">
-      <p className="text-white font-bold pt-2">Idea Justification:</p>
-      <label htmlFor="large-input" className="block mb-2 text-sm font-medium text-white">
-        <textarea
-          id="message"
-          rows={4}
+          onChange={(e) => setShortIdea(e.target.value)}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="ideaJustification" className="text-sm font-medium block mb-2">
+          Idea Justification:
+        </label>
+        <Textarea
+          id="ideaJustification"
           value={shortIdeaExplanation}
-          onChange={(e)=>{
-            setShortIdeaExplanation(e.target.value)
-          }}
-          className="block p-2.5 w-full text-sm rounded-lg border bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
-          placeholder="Write your thoughts here..."
-        ></textarea>
-     </label>
+          onChange={(e) => setShortIdeaExplanation(e.target.value)}
+          rows={4}
+        />
+      </div>
+
+      <div className="flex justify-between items-center">
+        <div>
+          <Button variant="outline" onClick={reset} className="mr-2">
+            Reset
+          </Button>
+          <Button onClick={updateShortDetails} disabled={!isChanged}>
+            Submit
+          </Button>
+        </div>
+        <Button variant="destructive" onClick={() => deleteShort(shortId)}>
+          Delete Short
+        </Button>
+      </div>
+
+      <p className="text-sm text-muted-foreground">
+        *Note: Updating short information will de-tag the short idea generation pipeline. Analytics from this video will not feed into the idea generation stage.
+      </p>
     </div>
-    <div>
-      <button
-        type="button"
-        className="text-white focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-blue-800"
-        onClick={() => {reset()}}
-      >
-        Reset
-      </button>
-      <button
-        type="button"
-        className="focus:outline-none text-white focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 bg-green-600 hover:bg-green-700 focus:ring-green-800"
-        onClick={() => {updateShortDetails()}}
-      >
-        Submit
-      </button>
-      <button
-        type="button"
-        className="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
-        onClick={() => {deleteShort(shortId)}}
-      >
-        Delete Short
-      </button>
-    </div>
-    <p>*Note - Updating short information will de-tag the short idea generation pipeline. Essentially, analytics from this video will not feed into the idea generation stage.</p>
-  </div>
-}
+  );
+};

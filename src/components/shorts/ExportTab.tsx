@@ -156,11 +156,7 @@ export const ExportTab: React.FC<ExportTabProps> = ({ short, shortId }) => {
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Export Short</CardTitle>
-        <CardDescription>Preview, post, and collect analytics for your short</CardDescription>
-      </CardHeader>
+    <div className="w-full">
       <CardContent className="space-y-6">
         {!isPreviewRequested && (
           <div className="flex flex-col space-y-2 w-full">
@@ -224,6 +220,6 @@ export const ExportTab: React.FC<ExportTabProps> = ({ short, shortId }) => {
           Download Short
         </Button>
       </CardFooter>
-    </Card>
+    </div>
   );
 };

@@ -54,10 +54,7 @@ export const VideoTab: React.FC<VideoTabProps> = ({ short, shortId, segment }) =
   }, [short, segment]);
 
   return (
-    <Card className="w-full ">
-      <CardHeader>
-        <CardTitle>Video Editor</CardTitle>
-      </CardHeader>
+    <div className="w-full ">
       <CardContent>
         <ShadcnTabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-3">
@@ -76,6 +73,6 @@ export const VideoTab: React.FC<VideoTabProps> = ({ short, shortId, segment }) =
           </TabsContent>
         </ShadcnTabs>
       </CardContent>
-    </Card>
+    </div>
   );
 };

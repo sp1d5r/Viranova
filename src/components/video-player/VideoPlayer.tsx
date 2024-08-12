@@ -1,56 +1,70 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { FirebaseStorageService } from "../../services/storage/strategies";
 import { LoadingIcon } from "../loading/Loading";
 
-export interface SegmentVideoProps {
-  className?:string,
+export interface VideoPlayerProps {
+  className?: string;
   path: string;
   loadingText?: string;
   setCurrentTime?: (time: number) => void;
   seekTo?: number;
 }
 
-export const VideoPlayer: React.FC<SegmentVideoProps> = ({ className = 'w-full flex-1 py-2', path, loadingText = "Loading Video ...", setCurrentTime,seekTo }) => {
+export const VideoPlayer: React.FC<VideoPlayerProps> = ({
+                                                          className = 'w-full flex-1 py-2',
+                                                          path,
+                                                          loadingText = "Loading Video ...",
+                                                          setCurrentTime,
+                                                          seekTo
+                                                        }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | undefined>(undefined);
   const [source, setSource] = useState<string | undefined>(undefined);
-  const videoRef = useRef<HTMLVideoElement>(null);  // Reference to the video element
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const prevPathRef = useRef<string>("");
+
+  const fetchVideoUrl = useCallback(async (videoPath: string) => {
+    if (videoPath === prevPathRef.current) return;
+
+    try {
+      setLoading(true);
+      const url = await FirebaseStorageService.getDownloadURL(videoPath);
+      setSource(url);
+      setError(undefined);
+      prevPathRef.current = videoPath;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred while loading the video.");
+      setSource(undefined);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (path) {
-      setLoading(true);
-      FirebaseStorageService.getDownloadURL(path).then((url) => {
-        setSource(url);
-        setLoading(false);
-      }).catch((err) => {
-        setError(err.toString());
-        setLoading(false);
-      });
+      fetchVideoUrl(path);
     } else {
       setError("Path is empty...");
       setLoading(false);
     }
-  }, [path]);
+  }, [path, fetchVideoUrl]);
+
+  const handleTimeUpdate = useCallback(() => {
+    if (videoRef.current && setCurrentTime) {
+      const currentTime = videoRef.current.currentTime;
+      setCurrentTime(currentTime);
+    }
+  }, [setCurrentTime]);
 
   useEffect(() => {
     const videoElement = videoRef.current;
-
-    const handleTimeUpdate = () => {
-      if (videoElement && setCurrentTime) {
-        setCurrentTime(videoElement.currentTime);
-      }
-    };
-
-    if (videoElement) {
+    if (videoElement && source) {
       videoElement.addEventListener('timeupdate', handleTimeUpdate);
-    }
-
-    return () => {
-      if (videoElement) {
+      return () => {
         videoElement.removeEventListener('timeupdate', handleTimeUpdate);
-      }
-    };
-  }, [setCurrentTime]);
+      };
+    }
+  }, [handleTimeUpdate, source]);
 
   useEffect(() => {
     if (videoRef.current && seekTo !== undefined) {
@@ -58,50 +72,30 @@ export const VideoPlayer: React.FC<SegmentVideoProps> = ({ className = 'w-full f
     }
   }, [seekTo]);
 
-  useEffect(() => {
-    const videoElement = videoRef.current;
+  if (loading) {
+    return (
+      <div className={`${className} flex justify-center items-center`}>
+        <LoadingIcon id={"video-player-loader"} text={loadingText} />
+      </div>
+    );
+  }
 
-    const handleTimeUpdate = () => {
-      if (videoElement && setCurrentTime) {
-        setCurrentTime(videoElement.currentTime);
-      }
-    };
-
-    if (videoElement) {
-      videoElement.addEventListener('timeupdate', handleTimeUpdate);
-    }
-
-    return () => {
-      if (videoElement) {
-        videoElement.removeEventListener('timeupdate', handleTimeUpdate);
-      }
-    };
-  }, [setCurrentTime]);
+  if (error) {
+    return (
+      <div className={`${className} p-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400`} role="alert">
+        <span className="font-medium">Error:</span> {error}
+      </div>
+    );
+  }
 
   return (
     <div className={className}>
-      {loading ? (
-        <div className="w-full h-full flex justify-center items-center py-16">
-          <LoadingIcon id={"video-player-loader"} text={loadingText} />
-        </div>
-      ) : (
-        <>
-          {source ? (
-            <video className="w-full h-full aspect-video" controls ref={videoRef}>
-              <source src={source} type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
-          ) : (
-            <p className="text-primary font-bold">Video not available.</p>
-          )}
-        </>
-      )}
-
-      {error && (
-        <div className="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
-          <span className="font-medium">Error:</span> {error}
-        </div>
+      {source && (
+        <video className="w-full h-full aspect-video" controls ref={videoRef}>
+          <source src={source} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
       )}
     </div>
   );
-}
+};

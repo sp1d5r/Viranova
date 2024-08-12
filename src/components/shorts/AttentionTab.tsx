@@ -5,7 +5,7 @@ import {Segment} from "../../types/collections/Segment";
 import {SegmentVideo} from "./attention-options/SegmentVideo";
 import {PreviewShortVideo} from "./attention-options/PreviewShortVideo";
 import {SaliencyVideo} from "./attention-options/SaliencyVideo";
-import {Tabs} from "../../pages/Shorts";
+import {TabType} from "../../pages/Shorts";
 import {BoundingBoxSuggestions} from "./attention-options/BoundingBoxSuggestions";
 import {LoadingIcon} from "../loading/Loading";
 import Stepper from "../stepper/Stepper";
@@ -15,7 +15,7 @@ export interface AttentionTabProps{
   short: Short;
   shortId: string;
   segment: Segment;
-  setTab: React.Dispatch<React.SetStateAction<Tabs>>;
+  setTab: React.Dispatch<React.SetStateAction<TabType>>;
 }
 
 type AttentionOptions = "View Segment Video" | "Preview Clipped Video" | "Saliency" | "Bounding Box Suggestions" | "After Effects";
@@ -79,7 +79,7 @@ export const AttentionTab: React.FC<AttentionTabProps> = ({short, shortId, segme
         } />
 
       { !short.pending_operation && options[currentTab] === "View Segment Video" && <SegmentVideo segment={segment} segmentId={short.segment_id} continueButton={() => {setSelectedOption("Preview Clipped Video")}} /> }
-      { !short.pending_operation && options[currentTab] === "Preview Clipped Video" && <PreviewShortVideo short={short} shortId={shortId} continueButton={(()=>{setTab("Transcript Editor")})}/> }
+      { !short.pending_operation && options[currentTab] === "Preview Clipped Video" && <PreviewShortVideo short={short} shortId={shortId} continueButton={(()=>{setTab("transcript-editor")})}/> }
       { !short.pending_operation && options[currentTab] === "Saliency" && <SaliencyVideo short={short} shortId={shortId} /> }
       { !short.pending_operation && options[currentTab] === "Bounding Box Suggestions" && <BoundingBoxSuggestions short={short} shortId={shortId} /> }
       { !short.pending_operation && options[currentTab] === "After Effects" && <AfterEffects short={short} shortId={shortId} />}

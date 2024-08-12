@@ -1,36 +1,40 @@
 import React from 'react';
+import { Segment } from '../../types/collections/Segment';
 
 interface TimelineProps {
-  segments: Array<{ id: string; earliestStartTime: number; latestEndTime: number; flagged: boolean }>;
-  totalDuration: number;
+  segments: Segment[];
   currentTime: number;
   onSeek: (time: number) => void;
 }
 
-export const Timeline: React.FC<TimelineProps> = ({ segments, totalDuration, currentTime, onSeek }) => {
-  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const clickedTime = (x / rect.width) * totalDuration;
-    onSeek(clickedTime);
-  };
-
+export const Timeline: React.FC<TimelineProps> = ({ segments, currentTime, onSeek }) => {
   return (
-    <div className="w-full h-8 bg-gray-700 relative cursor-pointer" onClick={handleClick}>
-      {segments.map((segment) => (
-        <div
+    <div className="w-full flex gap-[2px]">
+      {segments.map((segment, index) => (
+        <button
           key={segment.id}
-          className={`absolute h-full ${segment.flagged ? 'bg-red-500' : 'bg-blue-500'}`}
+          onClick={() => onSeek(segment.earliestStartTime)}
+          className={`h-5 rounded-md relative border 
+                        ${segment.flagged ? 'border-red-500' : 'border-emerald-500'}
+                        ${segment.latestEndTime <= currentTime ? 'bg-emerald-700' : ''}
+                        ${segment.earliestStartTime <= currentTime && currentTime <= segment.latestEndTime ? 'bg-emerald-950' : ''}
+                        ${segment.earliestStartTime >= currentTime ? 'bg-gray-700' : ''}`}
           style={{
-            left: `${(segment.earliestStartTime / totalDuration) * 100}%`,
-            width: `${((segment.latestEndTime - segment.earliestStartTime) / totalDuration) * 100}%`,
+            width: `${100 * ((segment.latestEndTime - segment.earliestStartTime) / (segments[segments.length - 1].latestEndTime))}%`
           }}
-        />
+        >
+          <div className="absolute top-0 left-0 rounded-md w-full h-full overflow-hidden">
+            <div
+              className="absolute bg-emerald-700 h-[98%] left-0 top-0 translate-y-[1%] rounded-md overflow-hidden border-emerald-500"
+              style={{
+                width: segment.earliestStartTime <= currentTime && currentTime <= segment.latestEndTime
+                  ? `${100 - 100 * ((segment.latestEndTime - currentTime) / (segment.latestEndTime - segment.earliestStartTime))}%`
+                  : 0
+              }}
+            />
+          </div>
+        </button>
       ))}
-      <div
-        className="absolute h-full w-1 bg-white"
-        style={{ left: `${(currentTime / totalDuration) * 100}%` }}
-      />
     </div>
   );
 };
