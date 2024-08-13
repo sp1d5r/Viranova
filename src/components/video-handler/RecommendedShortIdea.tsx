@@ -8,6 +8,8 @@ import { CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { ScrollArea } from "../ui/scroll-area";
 import { Sparkles } from "lucide-react";
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "../ui/tooltip";
+import ConfirmationModal from "./ConfirmationModal";
 
 interface RecommendedShortIdeasProps {
   segments: Segment[];
@@ -20,6 +22,8 @@ export const RecommendedShortIdeas: React.FC<RecommendedShortIdeasProps> = ({ se
   const { authState } = useAuth();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [currentSegment, setCurrentSegment] = useState<Segment | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedSegment, setSelectedSegment] = useState<Segment | undefined>(undefined);
 
   const filteredAndSortedSegments = segments
     .filter(segment => {
@@ -93,6 +97,56 @@ export const RecommendedShortIdeas: React.FC<RecommendedShortIdeasProps> = ({ se
     );
   };
 
+  const handleAutoGenerate = (segment: Segment) => {
+    setSelectedSegment(segment);
+    setIsModalOpen(true);
+  };
+
+  const handleConfirmGeneration = () => {
+    if (selectedSegment) {
+      FirebaseDatabaseService.addDocument(
+        "shorts",
+        {
+          "segment_id": selectedSegment.id,
+          "logs": [],
+          "transcript": selectedSegment.transcript,
+          "short_idea": selectedSegment.shortIdea,
+          "short_idea_explanation": selectedSegment.shortIdeaExplanation,
+          "short_idea_run_id": selectedSegment.shortRunId,
+          "video_id": selectedSegment.videoId,
+          "start_index": selectedSegment.startIndex,
+          "end_index": selectedSegment.endIndex,
+          "error_count": 5,
+          "previous_short_status": "Request AI Extraction",
+          "short_status": "Edit Transcript",
+          "pending_operation": false,
+          "uid": authState.user?.uid,
+          "auto_generate": true
+        },
+        (shortId) => {
+          FirebaseDatabaseService.updateDocument(
+            "topical_segments",
+            selectedSegment.id,
+            {
+              segment_status: 'Crop Segment'
+            },
+            () => {
+              showNotification("Short Generation", "Short generation started", "success");
+              window.location.href = `/shorts?short_id=${shortId}`;
+            },
+            (error) => {
+              showNotification("Cropping Segment", `${error}`, "error");
+            }
+          );
+        },
+        (error) => {
+          showNotification("Document Creation", `${error}`, "error");
+        }
+      );
+    }
+    setIsModalOpen(false);
+  };
+
   return (
     <div className="flex-1">
       <CardHeader>
@@ -135,10 +189,28 @@ export const RecommendedShortIdeas: React.FC<RecommendedShortIdeasProps> = ({ se
                       </Button>
                       <Button
                         onClick={() => onSeek(segment.earliestStartTime + 1)}
-                        className="bg-gradient-to-r from-purple-400 to-pink-500 hover:from-purple-500 hover:to-pink-600 text-white font-bold"
                       >
                         Jump to Segment
                       </Button>
+                      <TooltipProvider key={segment.id}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              onClick={() => handleAutoGenerate(segment)}
+                              className="bg-gradient-to-r from-purple-400 to-pink-500 hover:from-purple-500 hover:to-pink-600 text-white font-bold"
+                            >
+                              <Sparkles />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <div className="text-sm max-w-[200px]">
+                              <p><strong>Automatically generate this short</strong></p>
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </div>
                     <div className="glass-effect p-3">
                       <ReviewLangchainLogs runId={segment.shortRunId} />
@@ -152,6 +224,13 @@ export const RecommendedShortIdeas: React.FC<RecommendedShortIdeasProps> = ({ se
           ))}
         </ScrollArea>
       </CardContent>
+
+      <ConfirmationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleConfirmGeneration}
+        segment={selectedSegment}
+      />
     </div>
   );
 };

@@ -259,7 +259,7 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({ 
 
   return (
     <div className="w-full flex flex-col gap-2 items-center">
-      <div className="flex w-full flex-col gap-2 h-full overflow-hidden">
+      <div className="flex max-w-screen-xl w-full flex-col gap-2 h-full overflow-hidden">
         <div className="relative video-overlay-container w-full mt-5 overflow-hidden">
           {videoUrls.clippedVideo && (
             <video ref={clippedVideoRef} className="z-10 w-full" muted playsInline>

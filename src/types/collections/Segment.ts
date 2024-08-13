@@ -43,19 +43,54 @@ export interface Segment extends BackendServerMetadata {
 }
 
 function fixStringRepresentation(inputString: string): any {
-    if (inputString.startsWith('"')) {
+    if (typeof inputString !== 'string') {
+        console.error("Input is not a string:", inputString);
+        return [];
+    }
+
+    // Remove any leading/trailing whitespace
+    inputString = inputString.trim();
+
+    // If it's already a valid JSON, parse it directly
+    if (inputString.startsWith('[') && inputString.endsWith(']')) {
+        try {
+            return JSON.parse(inputString);
+        } catch (error) {
+            console.error("Failed to parse JSON array:", error);
+        }
+    }
+
+    // If it's a string representation of an object, try to parse it
+    if (inputString.startsWith('{') && inputString.endsWith('}')) {
+        try {
+            return JSON.parse(inputString);
+        } catch (error) {
+            console.error("Failed to parse JSON object:", error);
+        }
+    }
+
+    // If it's wrapped in quotes, remove them and try to parse
+    if (inputString.startsWith('"') && inputString.endsWith('"')) {
         const cleanedString = inputString.slice(1, -1)
           .replace(/\\'/g, "'")
           .replace(/\\"/g, '"');
         try {
             return JSON.parse(cleanedString);
         } catch (error) {
-            console.error("JSON parse failed, falling back to eval", error);
-            return eval(`(${cleanedString})`);
+            console.error("Failed to parse cleaned JSON:", error);
         }
-    } else {
-        return eval(`(${inputString})`);
     }
+
+    // As a last resort, try to evaluate the string (be cautious with this approach)
+    try {
+        return eval(`(${inputString})`);
+    } catch (error) {
+        console.error("Failed to evaluate string:", error);
+    }
+
+    // If all parsing attempts fail, return an empty array
+    console.error("Unable to parse string:", inputString);
+    return [];
 }
 
 function parseSegmentWords(segmentDocument: DocumentData): Word[] {
