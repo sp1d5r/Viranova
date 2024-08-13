@@ -7,6 +7,7 @@ import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { AlertCircle } from "lucide-react";
+import {Tooltip, TooltipTrigger, TooltipProvider, TooltipContent } from "../ui/tooltip";
 
 export interface ShortSettingsTabProps {
   short: Short;
@@ -92,9 +93,19 @@ export const ShortSettingsTab: React.FC<ShortSettingsTabProps> = ({ short, short
           <Button variant="outline" onClick={reset} className="mr-2">
             Reset
           </Button>
-          <Button onClick={updateShortDetails} disabled={!isChanged}>
-            Submit
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button onClick={updateShortDetails} disabled={false}>
+                  Submit
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Only press this if you want to update the short idea you're creating.</p>
+                <p>If you manually override the short idea, feedback won't propagate to the language model in charge of generating ideas.</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
         <Button variant="destructive" onClick={() => deleteShort(shortId)}>
           Delete Short
