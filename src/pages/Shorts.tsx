@@ -172,7 +172,7 @@ export const Shorts: React.FC = () => {
       </div>
 
       {short && short.pending_operation && (
-        <Card className="mt-4 mx-4 md:mx-0">
+        <Card className="mt-4 mx-auto fixed bottom-2 w-[90vw]">
           <CardHeader>
             <CardTitle>Operation in Progress</CardTitle>
             <CardDescription>{short.progress_message}</CardDescription>
