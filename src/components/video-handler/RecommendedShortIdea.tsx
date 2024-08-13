@@ -4,7 +4,7 @@ import FirebaseDatabaseService from "../../services/database/strategies/Firebase
 import { useNotification } from "../../contexts/NotificationProvider";
 import { useAuth } from "../../contexts/Authentication";
 import { ReviewLangchainLogs } from "../review-langchain-run/ReviewLangchainLog";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { ScrollArea } from "../ui/scroll-area";
 import { Sparkles } from "lucide-react";

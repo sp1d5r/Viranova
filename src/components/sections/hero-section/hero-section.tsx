@@ -81,7 +81,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ className = '' }) => {
             <BorderButton duration={2000} onClick={() => {window.location.href="/dashboard"}}>
                 <p className="text-white font-bold tracking-widest px-5">Begin Clipping!</p>
             </BorderButton>
-            <p className={"text-secondary font-bold tracking-widest underline "}>Continue Scrolling</p>
+            <p className={"text-accent font-bold tracking-widest underline "}>Continue Scrolling</p>
         </div>
     </Vortex>
 };

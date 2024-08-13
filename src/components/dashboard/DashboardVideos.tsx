@@ -25,6 +25,7 @@ import {
   ChevronUp,
   Filter,
   Loader2,
+  Plus,
   X
 } from "lucide-react";
 import { useAuth } from "../../contexts/Authentication";
@@ -33,6 +34,7 @@ import { documentToUserVideo, UserVideo } from "../../types/collections/UserVide
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { VideoRow } from "./videos/VideoRow";
 import { Channel, ChannelsTracking } from '../../types/collections/Channels';
+import {useNotification} from "../../contexts/NotificationProvider";
 
 export const DashboardVideos: React.FC = () => {
   const [videos, setVideos] = useState<UserVideo[]>([]);
@@ -44,6 +46,9 @@ export const DashboardVideos: React.FC = () => {
   const [viewMode, setViewMode] = useState<'all' | 'manual' | 'channel'>('all');
   const [isLoading, setIsLoading] = useState(true);
   const { authState } = useAuth();
+  const [newVideoLink, setNewVideoLink] = useState('');
+  const [isAddingVideo, setIsAddingVideo] = useState(false);
+  const { showNotification } = useNotification();
 
   const fetchVideos = useCallback(async () => {
     if (!authState.user?.uid) return;
@@ -181,6 +186,51 @@ export const DashboardVideos: React.FC = () => {
     return <div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div>;
   }
 
+  const isValidYouTubeUrl = (url: string) => {
+    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})$/;
+    return youtubeRegex.test(url);
+  }
+
+  const handleAddVideo = () => {
+    if (newVideoLink) {
+      if (isValidYouTubeUrl(newVideoLink)) {
+        FirebaseFirestoreService.addDocument("videos", {
+            uid: authState.user!.uid,
+            processingProgress: 0,
+            status: "Link Provided",
+            previousStatus: "Started...",
+            uploadTimestamp: Date.now(),
+            progressMessage: "Performing Download",
+            queuePosition: -1,
+            link: newVideoLink,
+          },
+          (doc_id) => {
+            showNotification(
+              "Video Added!",
+              `Successfully added new video: ${doc_id}`,
+              "success",
+              10000
+            );
+            setNewVideoLink('');
+            setIsAddingVideo(false);
+            fetchVideos();  // Refresh the video list
+          },
+          () => {
+            showNotification(
+              "Error Adding Video",
+              'Failed to add video... Please try again later.',
+              "error",
+              10000
+            );
+          });
+      } else {
+        showNotification("Invalid Link", "Please provide a valid YouTube link.", "error");
+      }
+    } else {
+      showNotification("No Link", "You need to add a YouTube link", "error");
+    }
+  };
+
   return (
     <main className="flex flex-1 flex-col p-4 md:p-8">
       <h1 className="text-2xl font-bold mb-4">Videos Dashboard</h1>
@@ -206,6 +256,14 @@ export const DashboardVideos: React.FC = () => {
           </Select>
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setIsAddingVideo(!isAddingVideo)}
+            className="flex items-center gap-2"
+          >
+            {isAddingVideo ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+            {isAddingVideo ? 'Cancel' : 'Add Video'}
+          </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="flex items-center gap-2" size="sm">
@@ -236,6 +294,20 @@ export const DashboardVideos: React.FC = () => {
           )}
         </div>
       </div>
+      {isAddingVideo && (
+        <div className="mb-4 flex gap-2">
+          <Input
+            type="text"
+            placeholder="Enter YouTube video link"
+            value={newVideoLink}
+            onChange={(e) => setNewVideoLink(e.target.value)}
+            className="flex-grow"
+          />
+          <Button onClick={handleAddVideo} disabled={!newVideoLink}>
+            Add New Video
+          </Button>
+        </div>
+      )}
 
       <Table>
         <TableHeader>
