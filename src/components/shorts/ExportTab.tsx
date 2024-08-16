@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Label } from "../ui/label";
 import { ReloadIcon } from "@radix-ui/react-icons";
+import {useShortRequestManagement} from "../../contexts/ShortRequestProvider";
 
 export interface ExportTabProps {
   short: Short;
@@ -78,6 +79,7 @@ export const ExportTab: React.FC<ExportTabProps> = ({ short, shortId }) => {
   const { showNotification } = useNotification();
   const [isPreviewRequested, setIsPreviewRequested] = useState(false);
   const [isTikTokLinkSubmitted, setIsTikTokLinkSubmitted] = useState(false);
+  const { createShortRequest } = useShortRequestManagement();
 
   const updateTikTokLink = async () => {
     try {
@@ -123,18 +125,15 @@ export const ExportTab: React.FC<ExportTabProps> = ({ short, shortId }) => {
   };
 
   const handlePreviewRequest = () => {
-    FirebaseFirestoreService.updateDocument(
-      "shorts",
+    createShortRequest(
       shortId,
-      {
-        "short_status": "Preview Video",
-        "previous_short_status": "Requested to Preview Video"
+      "v1/create-short-video",
+      (requestId) => {
+        showNotification("Preview Video", `Request ID: ${requestId}`, "success");
       },
-      () => {
-        showNotification("Success", "Requested to preview video", "success");
-        setIsPreviewRequested(true);
-      },
-      (error) => {showNotification("Failed", error.message, "error")},
+      (error) => {
+        showNotification("Preview Video Failed", `${error}`, "error");
+      }
     );
   };
 

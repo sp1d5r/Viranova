@@ -8,6 +8,7 @@ import {deleteShort, Short} from "../../../types/collections/Shorts";
 import LangSmithFeedback from "../../../services/langchain";
 import {ReviewLangchainLogs} from "../../review-langchain-run/ReviewLangchainLog";
 import {useAuth} from "../../../contexts/Authentication";
+import {useShortRequestManagement} from "../../../contexts/ShortRequestProvider";
 
 export interface SegmentCardProps{
   currentSegment: Segment,
@@ -21,6 +22,7 @@ export const SegmentCard: React.FC<SegmentCardProps> = ({currentSegment, segment
   const [shorts, setShorts] = useState<Short[]>([])
   const [fullTranscriptShown, setFullTranscript] = useState(false);
   const {authState} = useAuth();
+  const { createShortRequest } = useShortRequestManagement();
 
   useEffect(() => {
     FirebaseFirestoreService.listenToDocument(
@@ -51,6 +53,45 @@ export const SegmentCard: React.FC<SegmentCardProps> = ({currentSegment, segment
       )
     }
   }, [segment]);
+
+  const handleGenerateShort = () => {
+    FirebaseDatabaseService.addDocument(
+      "shorts",
+      {
+        "segment_id": segmentId,
+        "logs": [],
+        "transcript": segment.transcript,
+        "short_idea": segment.shortIdea,
+        "short_idea_explanation": segment?.shortIdeaExplanation,
+        "short_idea_run_id": segment?.shortRunId,
+        "video_id": segment?.videoId,
+        "start_index": segment.startIndex,
+        "end_index": segment.endIndex,
+        "error_count": 5,
+        "previous_short_status": "Request AI Extraction",
+        "short_status": "Edit Transcript",
+        "pending_operation": false,
+        "uid": authState.user?.uid,
+      },
+      (shortId) => {
+        // Create a short request instead of updating the status
+        createShortRequest(
+          shortId,
+          "v1/temporal-segmentation",
+          (requestId) => {
+            showNotification("Short Request Created", `Request ID: ${requestId}`, "success");
+            window.location.href = `/shorts?short_id=${shortId}`;
+          },
+          (error) => {
+            showNotification("Short Request Creation Failed", `${error}`, "error");
+          }
+        );
+      },
+      (error) => {
+        showNotification("Document Creation", `${error}`, "error");
+      }
+    );
+  };
 
   if (segment) {
     return <div
@@ -171,45 +212,7 @@ export const SegmentCard: React.FC<SegmentCardProps> = ({currentSegment, segment
           </p>
           <div className="flex gap-2 items-center w-full">
             <button
-              onClick={() => {
-              FirebaseDatabaseService.addDocument(
-                "shorts",
-                {
-                  "segment_id": segmentId,
-                  "logs": [],
-                  "transcript": segment.transcript,
-                  "short_idea": segment.shortIdea,
-                  "short_idea_explanation": segment?.shortIdeaExplanation,
-                  "short_idea_run_id": segment?.shortRunId,
-                  "video_id": segment?.videoId,
-                  "start_index": segment.startIndex,
-                  "end_index": segment.endIndex,
-                  "error_count": 5,
-                  "previous_short_status": "Request AI Extraction",
-                  "short_status": "Edit Transcript",
-                  "pending_operation": false,
-                  "uid": authState.user?.uid,
-                },
-                (shortId)=>{
-                  FirebaseFirestoreService.updateDocument(
-                    "topical_segments",
-                    segmentId,
-                    {
-                      segment_status: 'Crop Segment'
-                    },
-                    (doc) => {
-                      window.location.href = `/shorts?short_id=${shortId}`
-                    },
-                    (error) => {
-                      showNotification("Cropping Segment", `${error}`, "error")
-                    }
-                  )
-                },
-                (error) => {
-                  showNotification("Document Creation", `${error}`, "error")
-                }
-              )
-            }}
+              onClick={handleGenerateShort}
               className="inline-flex items-center px-4 py-2 my-2 text-sm font-medium border rounded-lg focus:z-10 focus:ring-4 focus:outline-none focus:text-emerald-700 bg-gray-800 text-gray-200 border-emerald-600 hover:text-white hover:bg-emerald-700 focus:ring-emerald-700 gap-3">
               Generate Short
               <svg className="w-3 h-3 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">

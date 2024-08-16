@@ -10,6 +10,7 @@ import { ScrollArea } from "../ui/scroll-area";
 import { Sparkles } from "lucide-react";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "../ui/tooltip";
 import ConfirmationModal from "./ConfirmationModal";
+import {useShortRequestManagement} from "../../contexts/ShortRequestProvider";
 
 interface RecommendedShortIdeasProps {
   segments: Segment[];
@@ -24,6 +25,7 @@ export const RecommendedShortIdeas: React.FC<RecommendedShortIdeasProps> = ({ se
   const [currentSegment, setCurrentSegment] = useState<Segment | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSegment, setSelectedSegment] = useState<Segment | undefined>(undefined);
+  const { createShortRequest } = useShortRequestManagement();
 
   const filteredAndSortedSegments = segments
     .filter(segment => {
@@ -84,7 +86,17 @@ export const RecommendedShortIdeas: React.FC<RecommendedShortIdeasProps> = ({ se
           },
           () => {
             showNotification("Short Generation", "Short generation started", "success");
-            window.location.href = `/shorts?short_id=${shortId}`;
+            createShortRequest(
+              shortId,
+              "v1/temporal-segmentation",
+              (requestId) => {
+                showNotification("Short Request Created", `Request ID: ${requestId}`, "success");
+                window.location.href = `/shorts?short_id=${shortId}`;
+              },
+              (error) => {
+                showNotification("Short Request Creation Failed", `${error}`, "error");
+              }
+            );
           },
           (error) => {
             showNotification("Cropping Segment", `${error}`, "error");
@@ -132,7 +144,17 @@ export const RecommendedShortIdeas: React.FC<RecommendedShortIdeasProps> = ({ se
             },
             () => {
               showNotification("Short Generation", "Short generation started", "success");
-              window.location.href = `/shorts?short_id=${shortId}`;
+              createShortRequest(
+                shortId,
+                "v1/temporal-segmentation",
+                (requestId) => {
+                  showNotification("Short Request Created", `Request ID: ${requestId}`, "success");
+                  window.location.href = `/shorts?short_id=${shortId}`;
+                },
+                (error) => {
+                  showNotification("Short Request Creation Failed", `${error}`, "error");
+                }
+              );
             },
             (error) => {
               showNotification("Cropping Segment", `${error}`, "error");

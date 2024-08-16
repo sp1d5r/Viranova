@@ -9,6 +9,7 @@ import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { ScrollArea } from "../ui/scroll-area";
+import {useShortRequestManagement} from "../../contexts/ShortRequestProvider";
 
 export interface TranscriptEditorTabProps {
   short: Short;
@@ -127,6 +128,7 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({ short,
   const [editing, setEditing] = useState(false);
   const [deleteRange, setDeleteRange] = useState<DeleteRange>({ startIndex: undefined, endIndex: undefined });
   const { showNotification } = useNotification();
+  const { createShortRequest } = useShortRequestManagement();
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -204,39 +206,27 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({ short,
   };
 
   const requestAIGeneration = () => {
-    FirebaseFirestoreService.updateDocument(
-      "shorts",
+    createShortRequest(
       shortId,
-      {
-        "previous_short_status": "Request AI Extraction",
-        "short_status": "Edit Transcript"
-      },
-      () => {
-        showNotification("Edited", "Requested AI Extraction", "success");
-        setEditing(false);
+      "v1/temporal-segmentation",
+      (requestId) => {
+        showNotification("AI Transcript Editing", `Request ID: ${requestId}`, "success");
       },
       (error) => {
-        showNotification("Error", `Failed: ${error}`, "error");
-        setEditing(false);
+        showNotification("AI Transcript Editing Failed", `${error}`, "error");
       }
     );
   };
 
   const requestSoundPreview = () => {
-    FirebaseFirestoreService.updateDocument(
-      "shorts",
+    createShortRequest(
       shortId,
-      {
-        "previous_short_status": "Request Audio Generation",
-        "short_status": "Generate Audio"
-      },
-      () => {
-        showNotification("Updated operation", "Requested Sound Preview", "success");
-        setDeleteRange({ startIndex: undefined, endIndex: undefined });
+      "v1/generate-test-audio",
+      (requestId) => {
+        showNotification("Generate Test Audio", `Request ID: ${requestId}`, "success");
       },
       (error) => {
-        showNotification("Failed Update", "Failed to update document", "error");
-        setDeleteRange({ startIndex: undefined, endIndex: undefined });
+        showNotification("Generate Test Audio Failed", `${error}`, "error");
       }
     );
   };

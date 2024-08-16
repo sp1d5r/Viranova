@@ -8,6 +8,7 @@ import "./bounding-box.css";
 import ClipPathOverlay from "./ClipPathOverlay";
 import {Button} from "../../../ui/button";
 import {Slider} from "../../../ui/slider";
+import {useShortRequestManagement} from "../../../../contexts/ShortRequestProvider";
 
 export interface BoundingBoxSuggestionsProps {
   short: Short;
@@ -32,6 +33,7 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({ 
   const audioRef = useRef<HTMLAudioElement>(null);
   const [audioUrl, setAudioUrl] = useState("");
   const [currentBoxType, setCurrentBoxType] = useState<string>("standard_tiktok");
+  const { createShortRequest } = useShortRequestManagement();
 
   useEffect(() => {
     if (short.box_type && short.box_type.length >= currentFrame) {
@@ -317,20 +319,16 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({ 
           <div className="flex-1"/>
           <Button
             onClick={() => {
-              FirebaseFirestoreService.updateDocument(
-                "shorts",
+              createShortRequest(
                 shortId,
-                {
-                  previous_short_status: "Generating A-Roll",
-                  short_status: "Generate A-Roll",
-                },
-                () => {
-                  showNotification("Success", "Generated A Roll", "success");
+                "v1/generate-a-roll",
+                (requestId) => {
+                  showNotification("Generate A-Roll", `Request ID: ${requestId}`, "success");
                 },
                 (error) => {
-                  showNotification("Success", error.message, "error");
+                  showNotification("Generate A-Roll Failed", `${error}`, "error");
                 }
-              )
+              );
             }}
             cooldown={100}
           >

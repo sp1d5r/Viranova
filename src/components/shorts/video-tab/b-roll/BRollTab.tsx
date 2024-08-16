@@ -10,6 +10,7 @@ import {Button} from "../../../ui/button";
 import FirebaseFirestoreService from "../../../../services/database/strategies/FirebaseFirestoreService";
 import {Terminal} from "lucide-react";
 import {useNotification} from "../../../../contexts/NotificationProvider";
+import {useShortRequestManagement} from "../../../../contexts/ShortRequestProvider";
 
 interface BRollTabContentProps {
   short: Short;
@@ -23,6 +24,7 @@ const BRollTab: React.FC<BRollTabContentProps> = ({ short, shortId }) => {
   const [tracks, setTracks] = useState<Track[]>([
     { id: '1', name: 'B-Roll Track 1', items: [] },
   ]);
+  const { createShortRequest } = useShortRequestManagement();
   const [selectedItem, setSelectedItem] = useState<TrackItem | null>(null);
   const [fps, setFps] = useState(30);
   const {showNotification} = useNotification();
@@ -217,20 +219,16 @@ const BRollTab: React.FC<BRollTabContentProps> = ({ short, shortId }) => {
         <Button
           cooldown={100}
           onClick={() => {
-            FirebaseFirestoreService.updateDocument(
-              "shorts",
+            createShortRequest(
               shortId,
-              {
-                short_status: "Generate B-Roll",
-                previous_short_status: "Generating B-Roll"
-              },
-              () => {
-                showNotification("Requested B-Roll", "Generating B-Roll", "success");
+              "v1/generate-b-roll",
+              (requestId) => {
+                showNotification("Generate A-Roll", `Request ID: ${requestId}`, "success");
               },
               (error) => {
-                showNotification("Failed to generate B-Roll", error.message, "error");
+                showNotification("Generate A-Roll Failed", `${error}`, "error");
               }
-            )
+            );
           }}
         >
           Generate B-Roll

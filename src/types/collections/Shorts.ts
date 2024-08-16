@@ -126,6 +126,7 @@ export interface Short extends BackendServerMetadata{
   background_audio: string,
   background_percentage: number,
   tiktok_link: string,
+  auto_generate?: boolean
 }
 
 
@@ -189,6 +190,7 @@ export function documentToShort(docData: DocumentData): Short {
     short_a_roll: docData.short_a_roll,
     short_b_roll: docData.short_b_roll,
     tiktok_link: docData.tiktok_link,
+    auto_generate: docData.auto_generate
   };
 }
 

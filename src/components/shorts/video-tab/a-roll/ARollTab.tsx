@@ -9,6 +9,7 @@ import { Segment } from "../../../../types/collections/Segment";
 import {BoundingBoxSuggestions} from "./BoundingBoxSuggestion";
 import {LoadingIcon} from "../../../loading/Loading";
 import {Alert, AlertDescription, AlertTitle} from "../../../ui/alert";
+import {useShortRequestManagement} from "../../../../contexts/ShortRequestProvider";
 
 type ProcessingStage = {
   id: string;
@@ -25,17 +26,19 @@ interface ARollTabContentProps {
 
 export const ARollTabContent: React.FC<ARollTabContentProps> = ({ short, shortId, segment, stages }) => {
   const { showNotification } = useNotification();
+  const { createShortRequest } = useShortRequestManagement();
+
   const handleBeginProcessing = () => {
-    FirebaseFirestoreService.updateDocument(
-      "shorts",
+    createShortRequest(
       shortId,
-      {
-        "short_status": "Create Short Video",
-        "previous_short_status": "Requested to Create Short"
+      "v1/create-cropped-video",
+      (requestId) => {
+        showNotification("Crop Short Video", `Request ID: ${requestId}`, "success");
       },
-      () => { showNotification("Success", "Requested to create short video.", "success") },
-      (error) => { showNotification("Failed", error.message, "error") },
-    )
+      (error) => {
+        showNotification("Crop Short Video Failed", `${error}`, "error");
+      }
+    );
   };
 
   if (stages[0].status === 'completed' && stages[1].status === 'pending') {
