@@ -15,6 +15,7 @@ import {Shorts} from "./pages/Shorts";
 import TermsOfServicePages from "./pages/TermsOfServicePage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import Dashboard from "./pages/Dashboard";
+import {Onboarding} from "./pages/Onboarding";
 
 
 function App() {
@@ -49,6 +50,7 @@ function App() {
           <Route path={"/video-handler"} element={<VideoProgress />} />
           <Route path={"/video-temporal-segmentation"} element={<VideoSegments />} />
           <Route path={"/shorts"} element={<Shorts />} />
+          <Route path={"/onboarding"} element={<Onboarding />} />
 
           <Route path={"*"} element={<NotFound />} />
         </Routes>

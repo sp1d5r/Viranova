@@ -44,6 +44,7 @@ import {Popover, PopoverTrigger, PopoverContent} from "../components/ui/popover"
 import {ScrollArea} from "../components/ui/scroll-area";
 import FirebaseFirestoreService from "../services/database/strategies/FirebaseFirestoreService";
 import {ChannelsTracking} from "../types/collections/Channels";
+import {User} from "../types/User";
 
 interface NavItem {
   id: string;
@@ -57,6 +58,7 @@ export default function Dashboard() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [selectedItem, setSelectedItem] = useState<string>('dashboard');
+  const [userDocument, setUserDocument] = useState<User | null>(null);
   const {authState, logout} = useAuth();
   const {showNotification, allNotifications} = useNotification();
 
@@ -71,6 +73,24 @@ export default function Dashboard() {
   useEffect(() => {
     if (authState.user) {
       // Get channels
+      FirebaseFirestoreService.getDocument<User>(
+        "users",
+        authState.user.uid,
+        (doc) => {
+          if (doc) {
+            setUserDocument(doc);
+          } else {
+            // User document doesn't exist, you might want to handle this case
+            navigate("/onboarding");
+            console.log("User document not found. Consider creating one or redirecting to onboarding.");
+          }
+        },
+        (error) => {
+          console.error("Error fetching user document:", error);
+          showNotification("Error", "Failed to load user data", "error");
+        }
+      );
+
       FirebaseFirestoreService.getDocument<ChannelsTracking>(
         "channelstracking",
         authState.user.uid,
@@ -315,7 +335,6 @@ export default function Dashboard() {
         {
           selectedItem === 'analytics' && <DashboardAnalytics userId={authState.user?.uid}/>
         }
-
       </div>
     </div>
   )
