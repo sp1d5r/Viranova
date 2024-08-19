@@ -100,7 +100,7 @@ export const RequestsTab: React.FC<RequestsTabProps> = ({ shortId, short }) => {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-4">Requests for {short.short_idea}</h2>
+      <h2 className="text-2xl font-bold mb-4 text-white">Requests for {short.short_idea}</h2>
       {requests.length === 0 ? (
         <p>No requests found for this short.</p>
       ) : (

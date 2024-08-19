@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../../ui/dialog";
-import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "../../ui/card";
 import { Button } from "../../ui/button";
 import { Timestamp } from "firebase/firestore";
 import { Short } from "../../../types/collections/Shorts";
 import FirebaseFirestoreService from "../../../services/database/strategies/FirebaseFirestoreService";
 import { useNotification } from "../../../contexts/NotificationProvider";
 import { CheckCircle2, Loader2, Circle } from 'lucide-react';
-import { RequestsTab } from './RequestsTab';
+import { RequestsTab } from '../../shorts/RequestsTab';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
 
 interface ProcessingDialogProps {
@@ -100,7 +100,7 @@ export const ProcessingDialog: React.FC<ProcessingDialogProps> = ({
             <TabsTrigger value="requests">Requests</TabsTrigger>
           </TabsList>
           <TabsContent value="overview">
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 p-2">
               {stages.map((stage) => (
                 <div key={stage.id} className="flex items-center space-x-2">
                   {stage.status === 'completed' && <CheckCircle2 className="text-green-500" />}
@@ -115,7 +115,7 @@ export const ProcessingDialog: React.FC<ProcessingDialogProps> = ({
             </div>
             <Card className="mt-4">
               <CardHeader>
-                <CardTitle>{short.progress_message}</CardTitle>
+                <CardDescription>{short.progress_message}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="w-full bg-secondary rounded-full h-2.5 dark:bg-gray-700">
