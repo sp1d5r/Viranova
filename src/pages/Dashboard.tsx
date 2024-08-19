@@ -287,7 +287,7 @@ export default function Dashboard() {
               {authState.user?.uid ? <DropdownMenuLabel>My Account</DropdownMenuLabel> : <DropdownMenuLabel>Create an Account</DropdownMenuLabel>}
               {authState.user?.uid ? <></> : <DropdownMenuItem>Make a profile and join us on our journey!</DropdownMenuItem>}
               <DropdownMenuSeparator />
-              {authState.user?.uid ? <DropdownMenuItem>Settings</DropdownMenuItem> : <DropdownMenuItem><a href="/authenticate">Login</a></DropdownMenuItem>}
+              {authState.user?.uid ? <a href="/settings"><DropdownMenuItem>Settings</DropdownMenuItem></a> : <DropdownMenuItem><a href="/authenticate">Login</a></DropdownMenuItem>}
               {authState.user?.uid ? <DropdownMenuItem>Support</DropdownMenuItem> : <DropdownMenuItem><a href="/authenticate">Register</a></DropdownMenuItem>}
               <DropdownMenuSeparator />
               {authState.user?.uid && <DropdownMenuItem>

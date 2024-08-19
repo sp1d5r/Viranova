@@ -14,10 +14,11 @@ import {Loader2} from "lucide-react";
 
 interface ChannelDetailsProps {
   channel: Channel;
+  channelId: string;
   userId: string;
 }
 
-const ChannelDetails: React.FC<ChannelDetailsProps> = ({ channel, userId }) => {
+const ChannelDetails: React.FC<ChannelDetailsProps> = ({ channel, channelId, userId }) => {
   const [videos, setVideos] = useState<Video[]>([]);
   const {authState} = useAuth();
   const { showNotification } = useNotification();
@@ -103,7 +104,28 @@ const ChannelDetails: React.FC<ChannelDetailsProps> = ({ channel, userId }) => {
             </div>
             <div className="flex-1"/>
             <div className="flex flex-col items-end justify-center gap-2">
-              <Button variant="default" size="sm">Auto-Download</Button>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => {
+                  FirebaseFirestoreService.updateDocument(
+                    "channels",
+                    channelId,
+                    {
+                      'status': 'New Channel',
+                      'previous_status': 'New Channel Requested'
+                    },
+                    () => {
+                      console.log('Updating Channel')
+                    },
+                    (error) => {
+                      console.error(error.message);
+                    }
+                  )
+                }}
+              >
+                Auto-Download
+              </Button>
               <Button
                 variant="destructive"
                 size="sm"
