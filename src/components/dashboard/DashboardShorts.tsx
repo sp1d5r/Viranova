@@ -218,7 +218,7 @@ export const DashboardShorts: React.FC = () => {
                       <p>Short Idea Explanation: {short.short_idea_explanation}</p>
                       <p>Progress Message: {short.progress_message}</p>
                       <p>TikTok Link: {short.tiktok_link || 'N/A'}</p>
-                      <a className="text-primary underline" href={`/shorts?tab=Short+Settings&short_id=${short.id}`}>Open Editor</a>
+                      <a className="text-primary underline" href={`/shorts?short_id=${short.id}`}>Open Editor</a>
                     </div>
                   </TableCell>
                 </TableRow>

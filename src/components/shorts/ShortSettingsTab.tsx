@@ -19,7 +19,7 @@ export const ShortSettingsTab: React.FC<ShortSettingsTabProps> = ({ short, short
   const [shortIdeaExplanation, setShortIdeaExplanation] = useState(short.short_idea_explanation);
   const [isChanged, setIsChanged] = useState(false);
   const { showNotification } = useNotification();
-
+  console.log('here');
   useEffect(() => {
     setIsChanged(
       shortIdea !== short.short_idea ||

@@ -127,7 +127,7 @@ export const ExportTab: React.FC<ExportTabProps> = ({ short, shortId }) => {
   const handlePreviewRequest = () => {
     createShortRequest(
       shortId,
-      "v1/create-short-video",
+      "v1/create-cropped-video",
       (requestId) => {
         showNotification("Preview Video", `Request ID: ${requestId}`, "success");
       },

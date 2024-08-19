@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {useCallback, useEffect, useState, useRef} from "react";
 import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
@@ -15,8 +15,9 @@ import { documentToShort, Short } from "../types/collections/Shorts";
 import { documentToSegment, Segment } from "../types/collections/Segment";
 import { Timestamp } from "firebase/firestore";
 import ScrollableLayout from "../layouts/ScrollableLayout";
+import {RequestsTab} from "../components/shorts/RequestsTab";
 
-export type TabType = "short-settings" | "transcript-editor" | "attention-capture" | "export" | "performance";
+export type TabType = "short-settings" | "transcript-editor" | "attention-capture" | "export" | "performance" | "requests";
 
 const tabConfig: { value: TabType; title: string; description: string; icon: React.ReactNode }[] = [
   { value: "short-settings", title: "Short Settings", description: "Configure your short video settings", icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg> },
@@ -24,6 +25,7 @@ const tabConfig: { value: TabType; title: string; description: string; icon: Rea
   { value: "attention-capture", title: "Attention Capture", description: "Enhance viewer engagement", icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg> },
   { value: "export", title: "Export", description: "Prepare your short for publishing", icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> },
   { value: "performance", title: "Performance", description: "Track your short's performance", icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg> },
+  { value: "requests", title: "Requests", description: "Manage requests for this short", icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg> },
 ];
 
 export const Shorts: React.FC = () => {
@@ -37,17 +39,34 @@ export const Shorts: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>(initialTab);
 
   useEffect(() => {
-    setSearchParams({ tab: activeTab, ...(short_id && { short_id }) });
-  }, [activeTab, short_id, setSearchParams]);
+    let unsubscribeShort: (() => void) | undefined;
+    let unsubscribeSegment: (() => void) | undefined;
 
-  useEffect(() => {
     if (short_id) {
-      FirebaseFirestoreService.listenToDocument(
+      unsubscribeShort = FirebaseFirestoreService.listenToDocument(
         "shorts",
         short_id,
         (document) => {
           if (document) {
-            setShort(documentToShort(document));
+            const updatedShort = documentToShort(document);
+            setShort(updatedShort);
+
+            // Setup segment listener
+            if (unsubscribeSegment) {
+              unsubscribeSegment();
+            }
+            unsubscribeSegment = FirebaseFirestoreService.listenToDocument(
+              "topical_segments",
+              updatedShort.segment_id,
+              (segmentDoc) => {
+                if (segmentDoc) {
+                  setSegment(documentToSegment(segmentDoc));
+                }
+              },
+              (error) => {
+                showNotification("Get Document", "Failed to get Segment", "error");
+              }
+            );
           }
         },
         (error) => {
@@ -55,25 +74,18 @@ export const Shorts: React.FC = () => {
         }
       );
     }
+
+    setLoading(false);
+
+    return () => {
+      if (unsubscribeShort) unsubscribeShort();
+      if (unsubscribeSegment) unsubscribeSegment();
+    };
   }, [short_id, showNotification]);
 
   useEffect(() => {
-    if (short) {
-      FirebaseFirestoreService.listenToDocument(
-        "topical_segments",
-        short.segment_id,
-        (document) => {
-          if (document) {
-            setSegment(documentToSegment(document));
-          }
-        },
-        (error) => {
-          showNotification("Get Document", "Failed to get Segment", "error");
-        }
-      );
-      setLoading(false);
-    }
-  }, [short, showNotification]);
+    setSearchParams({ tab: activeTab, ...(short_id && { short_id }) });
+  }, [activeTab, short_id, setSearchParams]);
 
   const [isOlderThanTwoMinutes, setIsOlderThanTwoMinutes] = useState(false);
 
@@ -121,14 +133,18 @@ export const Shorts: React.FC = () => {
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabType)} className="flex flex-col md:flex-row md:space-x-8">
-            <TabsList className="flex-shrink-0 flex flex-row md:flex-col h-full space-y-0 space-x-2 md:space-x-0 md:space-y-2 w-full md:w-64 mb-4 md:mb-0 overflow-x-auto md:overflow-x-visible">
-              {tabConfig.map((tab) => (
-                <TabsTrigger key={tab.value} value={tab.value} className="flex-shrink-0 md:w-full justify-start">
-                  <span className="mr-2 hidden md:inline">{tab.icon}</span>
-                  <span className="md:hidden">{tab.icon}</span>
-                  <span className="hidden md:inline">{tab.title}</span>
+            <TabsList className="flex-shrink-0 flex flex-col h-full space-y-2 w-64 mb-4 md:mb-0">
+              {tabConfig.slice(0, -1).map((tab) => (
+                <TabsTrigger key={tab.value} value={tab.value} className="w-full justify-start">
+                  <span className="mr-2">{tab.icon}</span>
+                  <span>{tab.title}</span>
                 </TabsTrigger>
               ))}
+              <div className="flex-1"></div> {/* This creates the spacer */}
+              <TabsTrigger value="requests" className="w-full justify-start">
+                <span className="mr-2">{tabConfig[tabConfig.length - 1].icon}</span>
+                <span>{tabConfig[tabConfig.length - 1].title}</span>
+              </TabsTrigger>
             </TabsList>
             <div className="flex-1 flex-grow">
               {tabConfig.map((tab) => (
@@ -154,13 +170,16 @@ export const Shorts: React.FC = () => {
                       {tab.value === "performance" && short && short_id && segment && (
                         <PerformanceTab shortId={short_id} short={short} />
                       )}
+                      {tab.value === "requests" && short && short_id && (
+                        <RequestsTab shortId={short_id} short={short} />
+                      )}
                     </CardContent>
                   </Card>
                   <div className="flex justify-between mt-4">
                     <Button onClick={handlePreviousTab} disabled={activeTab === "short-settings"}>
                       Previous
                     </Button>
-                    <Button onClick={handleNextTab} disabled={activeTab === "performance"}>
+                    <Button onClick={handleNextTab} disabled={activeTab === "requests"}>
                       Next
                     </Button>
                   </div>
@@ -172,7 +191,7 @@ export const Shorts: React.FC = () => {
       </div>
 
       {short && short.pending_operation && (
-        <Card className="mt-4 mx-auto fixed bottom-2 w-[90vw]">
+        <Card className="mt-4 mx-auto fixed translate-x-[5vw] bottom-2 w-[90vw]">
           <CardHeader>
             <CardTitle>Operation in Progress</CardTitle>
             <CardDescription>{short.progress_message}</CardDescription>

@@ -31,7 +31,7 @@ export const ARollTabContent: React.FC<ARollTabContentProps> = ({ short, shortId
   const handleBeginProcessing = () => {
     createShortRequest(
       shortId,
-      "v1/create-cropped-video",
+      "v1/create-short-video",
       (requestId) => {
         showNotification("Crop Short Video", `Request ID: ${requestId}`, "success");
       },
