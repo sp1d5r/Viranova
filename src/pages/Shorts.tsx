@@ -16,6 +16,7 @@ import { documentToSegment, Segment } from "../types/collections/Segment";
 import { Timestamp } from "firebase/firestore";
 import ScrollableLayout from "../layouts/ScrollableLayout";
 import {RequestsTab} from "../components/shorts/RequestsTab";
+import {ProcessingDialog} from "../components/shorts/processing-dialog/ProcessingDialog";
 
 export type TabType = "short-settings" | "transcript-editor" | "attention-capture" | "export" | "performance" | "requests";
 
@@ -189,6 +190,12 @@ export const Shorts: React.FC = () => {
           </Tabs>
         </CardContent>
       </div>
+
+      {
+        short && short_id && short.auto_generate && (
+          <ProcessingDialog shortId={short_id} short={short} isOpen={true} onClose={() => {}} />
+        )
+      }
 
       {short && short.pending_operation && (
         <Card className="mt-4 mx-auto fixed translate-x-[5vw] bottom-2 w-[90vw]">
