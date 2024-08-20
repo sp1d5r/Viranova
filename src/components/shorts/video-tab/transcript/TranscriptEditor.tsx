@@ -1,14 +1,14 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Short, Logs } from "../../../../types/collections/Shorts";
+import React, { useEffect, useRef, useState } from 'react';
+import { Short, Line, Word } from "../../../../types/collections/Shorts";
 import { Segment } from "../../../../types/collections/Segment";
 import { FirebaseStorageService } from "../../../../services/storage/strategies";
 import { Input } from "../../../ui/input";
 import { Button } from "../../../ui/button";
 import { Slider } from "../../../ui/slider";
-import {Crosshair, Terminal} from "lucide-react";
-import {Alert, AlertDescription, AlertTitle} from "../../../ui/alert";
-import {LoadingSpinner} from "@tremor/react/dist/assets";
-import {IconTruckLoading} from "@tabler/icons-react";
+import { Crosshair } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "../../../ui/alert";
+import { IconTruckLoading } from "@tabler/icons-react";
+import FirebaseFirestoreService from "../../../../services/database/strategies/FirebaseFirestoreService";
 
 interface TranscriptEditorProps {
   short: Short;
@@ -16,49 +16,47 @@ interface TranscriptEditorProps {
   segment: Segment;
 }
 
-interface Word {
-  word: string;
-  start_time: number;
-  end_time: number;
-  isKept?: boolean;
-  color?: string;
-}
-
-interface Line {
-  words: Word[];
-  y_position: number;
-}
-
 export const TranscriptEditor: React.FC<TranscriptEditorProps> = ({ short, shortId, segment }) => {
   const [videoUrl, setVideoUrl] = useState<string | undefined>(undefined);
   const [lines, setLines] = useState<Line[]>([]);
   const [currentLine, setCurrentLine] = useState<Line | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
-  const [selectedWord, setSelectedWord] = useState<Word | null>(null);
   const [colorScheme, setColorScheme] = useState("#1FFF01");
-  const [wordColor, setWordColor] = useState("#FFFFFF");
+  const [editedWords, setEditedWords] = useState<Word[]>([]);
   const bRollRef = useRef<HTMLVideoElement>(null);
   const transcriptRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (short.short_b_roll && !videoUrl) {
       loadVideo(short.short_b_roll).then(url => setVideoUrl(url));
+    } else if (short.short_a_roll && !videoUrl) {
+      loadVideo(short.short_a_roll).then(url => setVideoUrl(url));
     }
-  }, [short.short_b_roll]);
+  }, [short.short_b_roll, short.short_a_roll, videoUrl]);
 
   useEffect(() => {
-    const initialWords = adjustTimestamps(handleOperationsFromLogs(short.logs, segment.words.map((word) => {
-      return {
+    if (!short.lines) {
+      const initialWords = adjustTimestamps(handleOperationsFromLogs(short.logs, segment.words.map((word) => ({
         ...word,
-        isKept:false,
-      } as Word
-    })));
-    const initialLines = generateInitialLines(initialWords);
-    setLines(initialLines);
-    setCurrentLine(initialLines[0] || null);
-  }, [segment.words, short.logs]);
+        isKept: true,
+        color: short.defaultWordColor || "#FFFFFF"
+      }))));
+      const initialLines = generateInitialLines(initialWords);
+      setLines(initialLines);
+      setCurrentLine(initialLines[0] || null);
+    } else {
+      setLines(short.lines);
+      setCurrentLine(short.lines[0] || null);
+    }
+  }, [segment.words, short.logs, short.lines, short.defaultWordColor]);
 
-  const handleOperationsFromLogs = (logs: Logs[], words: Word[]): Word[] => {
+  useEffect(() => {
+    if (currentLine) {
+      setEditedWords(currentLine.words);
+    }
+  }, [currentLine]);
+
+  const handleOperationsFromLogs = (logs: any[], words: Word[]): Word[] => {
     const updatedWords = words.map(word => ({ ...word, isKept: true }));
     logs.forEach((log) => {
       if (log.type === "delete") {
@@ -130,44 +128,77 @@ export const TranscriptEditor: React.FC<TranscriptEditorProps> = ({ short, short
     }
   };
 
-  const handleWordClick = (word: Word) => {
-    setSelectedWord(word);
-  };
-
-  const handleIsolateWord = () => {
-    if (selectedWord && currentLine) {
-      const updatedLines = lines.map(line =>
-        line === currentLine
-          ? { ...line, words: [selectedWord] }
-          : line
-      );
-      setLines(updatedLines);
+  const updateFirebaseLines = async (updatedLines: Line[]) => {
+    try {
+      await FirebaseFirestoreService.updateDocument("shorts", shortId, { lines: updatedLines });
+    } catch (error) {
+      console.error("Failed to update lines in Firebase:", error);
     }
   };
 
-  const handleSplitLine = () => {
-    if (selectedWord && currentLine) {
-      const wordIndex = currentLine.words.indexOf(selectedWord);
-      if (wordIndex > -1) {
-        const newLines = lines.flatMap(line =>
-          line === currentLine
-            ? [
-              { words: line.words.slice(0, wordIndex + 1), y_position: line.y_position },
-              { words: line.words.slice(wordIndex + 1), y_position: line.y_position + 40 }
-            ]
-            : [line]
-        );
-        setLines(newLines);
+  const handleWordChange = (index: number, newWord: string) => {
+    if (currentLine) {
+      const updatedWords = [...editedWords];
+      const oldWord = updatedWords[index];
+      const wordDuration = oldWord.end_time - oldWord.start_time;
+      const newWordDuration = (newWord.length / oldWord.word.length) * wordDuration;
+
+      updatedWords[index] = {
+        ...oldWord,
+        word: newWord,
+        end_time: oldWord.start_time + newWordDuration
+      };
+
+      // Adjust timestamps for subsequent words
+      for (let i = index + 1; i < updatedWords.length; i++) {
+        updatedWords[i] = {
+          ...updatedWords[i],
+          start_time: updatedWords[i-1].end_time,
+          end_time: updatedWords[i-1].end_time + (updatedWords[i].end_time - updatedWords[i].start_time)
+        };
       }
+
+      setEditedWords(updatedWords);
+    }
+  };
+
+  const handleWordColorChange = (index: number, color: string) => {
+    if (currentLine) {
+      const updatedWords = [...editedWords];
+      updatedWords[index] = { ...updatedWords[index], color: color };
+      setEditedWords(updatedWords);
+    }
+  };
+
+  const handleLineColorChange = (color: string) => {
+    setColorScheme(color);
+    if (currentLine) {
+      const updatedLines = lines.map(line =>
+        line === currentLine ? { ...line, color: color } : line
+      );
+      setLines(updatedLines);
+      updateFirebaseLines(updatedLines);
     }
   };
 
   const handleYPositionChange = (value: number) => {
     if (currentLine) {
+      const yPosition = (value / 100) - 0.5;
       const updatedLines = lines.map(line =>
-        line === currentLine ? { ...line, y_position: value } : line
+        line === currentLine ? { ...line, y_position: yPosition } : line
       );
       setLines(updatedLines);
+      updateFirebaseLines(updatedLines);
+    }
+  };
+
+  const updateCurrentLine = () => {
+    if (currentLine) {
+      const updatedLines = lines.map(line =>
+        line === currentLine ? { ...line, words: editedWords } : line
+      );
+      setLines(updatedLines);
+      updateFirebaseLines(updatedLines);
     }
   };
 
@@ -177,7 +208,7 @@ export const TranscriptEditor: React.FC<TranscriptEditorProps> = ({ short, short
     }
   };
 
-  const updateCurrentLine = useCallback(() => {
+  const updateCurrentLineFromVideoTime = () => {
     if (bRollRef.current) {
       const videoTime = bRollRef.current.currentTime;
       setCurrentTime(videoTime);
@@ -191,7 +222,6 @@ export const TranscriptEditor: React.FC<TranscriptEditorProps> = ({ short, short
       if (newCurrentLineIndex !== -1 && lines[newCurrentLineIndex] !== currentLine) {
         setCurrentLine(lines[newCurrentLineIndex]);
 
-        // Scroll to the current line within the div
         if (transcriptRef.current) {
           const lineElement = document.getElementById(`line-${newCurrentLineIndex}`);
           if (lineElement) {
@@ -205,17 +235,17 @@ export const TranscriptEditor: React.FC<TranscriptEditorProps> = ({ short, short
         }
       }
     }
-  }, [lines, currentLine, bRollRef.current]);
+  };
 
   useEffect(() => {
     const videoElement = bRollRef.current;
     if (videoElement) {
-      videoElement.addEventListener('timeupdate', updateCurrentLine);
+      videoElement.addEventListener('timeupdate', updateCurrentLineFromVideoTime);
       return () => {
-        videoElement.removeEventListener('timeupdate', updateCurrentLine);
+        videoElement.removeEventListener('timeupdate', updateCurrentLineFromVideoTime);
       };
     }
-  }, [updateCurrentLine]);
+  }, [lines, currentLine, bRollRef.current]);
 
   return (
     <div className="w-full flex flex-col gap-4 text-white p-4">
@@ -245,17 +275,16 @@ export const TranscriptEditor: React.FC<TranscriptEditorProps> = ({ short, short
             {currentLine && (
               <div
                 className="absolute z-10 text-center w-full"
-                style={{ top: `${currentLine.y_position}px` }}
+                style={{ top: `${(currentLine.y_position + 0.5) * 100}%` }}
               >
                 {currentLine.words.map((word, index) => (
                   <span
                     key={index}
                     className="font-bold mx-1 cursor-pointer"
-                    style={{ color: word === selectedWord ? wordColor : colorScheme }}
-                    onClick={() => handleWordClick(word)}
+                    style={{ color: word.color || currentLine.color || colorScheme }}
                   >
-                  {word.word}
-                </span>
+                    {word.word}
+                  </span>
                 ))}
               </div>
             )}
@@ -264,81 +293,72 @@ export const TranscriptEditor: React.FC<TranscriptEditorProps> = ({ short, short
         <div className="w-1/2">
           <h3 className="text-xl font-semibold mb-2">Transcription Settings</h3>
           <div className="mb-4">
-            <label className="block mb-1">Colour Scheme:</label>
+            <label className="block mb-1">Line Colour:</label>
             <div className="flex items-center">
               <Input
                 type="color"
                 value={colorScheme}
-                onChange={(e) => setColorScheme(e.target.value)}
+                onChange={(e) => handleLineColorChange(e.target.value)}
                 className="w-8 h-8 p-0 mr-2"
               />
               <span>{colorScheme}</span>
             </div>
           </div>
-          <h3 className="text-xl font-semibold mb-2">Word Settings</h3>
-          <div className="mb-4">
-            <label className="block mb-1">Selected Word:</label>
-            <div className="bg-gray-700 p-2 rounded">{selectedWord?.word || 'None'}</div>
-          </div>
-          <div className="mb-4">
-            <label className="block mb-1">Word Colour:</label>
-            <div className="flex items-center">
+          <h3 className="text-xl font-semibold mb-2">Current Line Words</h3>
+          {editedWords.map((word, index) => (
+            <div key={index} className="mb-4 flex items-center gap-2">
+              <Input
+                value={word.word}
+                onChange={(e) => handleWordChange(index, e.target.value)}
+                className="flex-grow"
+              />
               <Input
                 type="color"
-                value={wordColor}
-                onChange={(e) => setWordColor(e.target.value)}
-                className="w-8 h-8 p-0 mr-2"
+                value={word.color || colorScheme}
+                onChange={(e) => handleWordColorChange(index, e.target.value)}
+                className="w-8 h-8 p-0"
               />
-              <span>{wordColor}</span>
+              <span>{word.start_time.toFixed(2)} - {word.end_time.toFixed(2)}</span>
             </div>
-          </div>
-          <div className="flex gap-2 mb-4">
-            <Button onClick={handleIsolateWord}>Isolate Word</Button>
-            <Button onClick={handleSplitLine}>Split Line (After)</Button>
-          </div>
-          <h3 className="text-xl font-semibold mb-2">Line Settings</h3>
-          <div className="mb-4">
-            <label className="block mb-1">Current Line:</label>
-            <div className="bg-gray-700 p-2 rounded">
-              {currentLine?.words.map(w => w.word).join(' ') || 'None'}
-            </div>
-          </div>
+          ))}
+          <Button onClick={updateCurrentLine}>Update Line</Button>
+          <h3 className="text-xl font-semibold mb-2 mt-4">Line Settings</h3>
           <div className="mb-4">
             <label className="block mb-1">Y-Position:</label>
             <Slider
-              value={[currentLine?.y_position || 0]}
+              value={[currentLine ? (currentLine.y_position + 0.5) * 100 : 50]}
               onValueChange={(value) => handleYPositionChange(value[0])}
-              max={480}
+              max={100}
               step={1}
             />
           </div>
         </div>
       </div>
       <div>
-      <h3 className="text-xl font-semibold mb-2">Navigate Transcript</h3>
-      <div className="space-y-2 h-[300px] overflow-y-auto" ref={transcriptRef}>
-        {lines.map((line, index) => {
-          const isPastLine = currentTime > line.words[line.words.length - 1].end_time;
-          const isCurrentLine = line === currentLine;
-          return (
-            <div
-              id={`line-${index}`}
-              key={index}
-              className={`flex justify-between cursor-pointer p-2 rounded ${
-                isCurrentLine ? 'bg-gray-700' : 'hover:bg-gray-700'
-              }`}
-              onClick={() => navigateTranscript(line)}
-              style={{
-                color: isPastLine ? '#666' : (isCurrentLine ? colorScheme : 'white'),
-                opacity: isPastLine ? 0.7 : 1,
-              }}
-            >
-              <span>{line.words.map(w => w.word).join(' ')}</span>
-              <span>{`${line.words[0].start_time.toFixed(2)} - ${line.words[line.words.length - 1].end_time.toFixed(2)}`}</span>
-            </div>
-          );
-        })}
-      </div>
+        <h3 className="text-xl font-semibold mb-2">Navigate Transcript</h3>
+        <div className="space-y-2 h-[300px] overflow-y-auto" ref={transcriptRef}>
+          {lines.map((line, index) => {
+            const isPastLine = currentTime > line.words[line.words.length - 1].end_time;
+            const isCurrentLine = line === currentLine;
+            return (
+              <div
+                id={`line-${index}`}
+                key={index}
+                className={`flex justify-between cursor-pointer p-2 rounded ${
+                  isCurrentLine ? 'bg-gray-700' : 'hover:bg-gray-700'
+                }`}
+                onClick={() => navigateTranscript(line)}
+                style={{
+                  color: isPastLine ? '#666' : (isCurrentLine ? colorScheme : 'white'),
+                  opacity: isPastLine ? 0.7 : 1,
+                }}
+              >
+                <span>{line.words.map(w => w.word).join(' ')}</span>
+                <span>{`${line.words[0].start_time.toFixed(2)} - ${line.words[line.words.length - 1].end_time.toFixed(2)}`}</span>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

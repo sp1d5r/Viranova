@@ -51,6 +51,7 @@ export const Shorts: React.FC = () => {
           if (document) {
             const updatedShort = documentToShort(document);
             setShort(updatedShort);
+            console.log(updatedShort)
 
             // Setup segment listener
             if (unsubscribeSegment) {

@@ -83,6 +83,19 @@ export type SaliencyCaptured = {
   saliency_vals: number[]
 }
 
+export interface Word {
+  word: string;
+  start_time: number;
+  end_time: number;
+  isKept: boolean;
+  color?: string; // Add color property for individual words
+}
+
+export interface Line {
+  words: Word[];
+  y_position: number;
+  color?: string; // Add color property for the entire line
+}
 
 export interface Short extends BackendServerMetadata{
   id: string,
@@ -127,6 +140,9 @@ export interface Short extends BackendServerMetadata{
   background_percentage: number,
   tiktok_link: string,
   auto_generate?: boolean
+  lines?: Line[];
+  defaultLineColor?: string;
+  defaultWordColor?: string;
 }
 
 
@@ -190,7 +206,17 @@ export function documentToShort(docData: DocumentData): Short {
     short_a_roll: docData.short_a_roll,
     short_b_roll: docData.short_b_roll,
     tiktok_link: docData.tiktok_link,
-    auto_generate: docData.auto_generate
+    auto_generate: docData.auto_generate,
+    lines: docData.lines ? docData.lines.map((line: any) => ({
+      ...line,
+      words: line.words.map((word: any) => ({
+        ...word,
+        color: word.color || docData.defaultWordColor || "#FFFFFF" // Use default if not set
+      })),
+      color: line.color || docData.defaultLineColor || "#1FFF01" // Use default if not set
+    })) : undefined,
+    defaultLineColor: docData.defaultLineColor || "#1FFF01",
+    defaultWordColor: docData.defaultWordColor || "#FFFFFF",
   };
 }
 

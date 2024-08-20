@@ -69,6 +69,7 @@ export const VideoRow: React.FC<{ videoId: string; isExpanded: boolean; onToggle
 
   if (!video) return null;
 
+
   return (
     <React.Fragment>
       <TableRow className="cursor-pointer" onClick={onToggle}>
