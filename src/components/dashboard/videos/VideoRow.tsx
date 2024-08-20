@@ -79,7 +79,7 @@ export const VideoRow: React.FC<{ videoId: string; isExpanded: boolean; onToggle
         <TableCell>
           <StatusBadge status={video.status} />
         </TableCell>
-        <TableCell>{video.processingProgress.toFixed(2)}% <Progress value={video.processingProgress}/></TableCell>
+        <TableCell>{video.processingProgress && video.processingProgress.toFixed(2)}% <Progress value={video.processingProgress}/></TableCell>
         <TableCell>{new Date(video.uploadTimestamp).toLocaleDateString()}</TableCell>
         <TableCell>
           {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
