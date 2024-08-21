@@ -322,7 +322,7 @@ export const DashboardVideos: React.FC = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {currentVideos.map((video) => (
+          {currentVideos.filter((elem) => !!elem.originalFileName).map((video) => (
             <React.Fragment key={video.id}>
               {video.id && (
                 <VideoRow

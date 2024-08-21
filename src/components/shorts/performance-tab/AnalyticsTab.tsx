@@ -53,19 +53,32 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ shortId }) => {
 
   const processedData: ProcessedDataPoint[] = allAnalytics.map((analytic) => ({
     date: formatDate(analytic.taskTime),
-    comments: analytic.videoAnalytics[0]?.commentCount || 0,
-    likes: analytic.videoAnalytics[0]?.diggCount || 0,
-    shares: analytic.videoAnalytics[0]?.shareCount || 0,
-    plays: analytic.videoAnalytics[0]?.playCount || 0,
+    comments: analytic.videoAnalytics?.[0]?.commentCount ?? 0,
+    likes: analytic.videoAnalytics?.[0]?.diggCount ?? 0,
+    shares: analytic.videoAnalytics?.[0]?.shareCount ?? 0,
+    plays: analytic.videoAnalytics?.[0]?.playCount ?? 0,
   }));
 
-  const authorProcessedData: AuthorProcessedDataPoint[] = allAnalytics.map((analytic) => ({
-    date: formatDate(analytic.taskTime),
-    fans: analytic.videoAnalytics[0]?.authorMeta.fans || 0,
-    heart: analytic.videoAnalytics[0]?.authorMeta.heart || 0,
-    video: analytic.videoAnalytics[0]?.authorMeta.video || 0,
-    digg: analytic.videoAnalytics[0]?.authorMeta.digg || 0,
-  }));
+  const authorProcessedData: AuthorProcessedDataPoint[] = allAnalytics.map((analytic) => {
+    const authorMeta = analytic.videoAnalytics?.[0]?.authorMeta;
+    return {
+      date: formatDate(analytic.taskTime),
+      fans: authorMeta?.fans ?? 0,
+      heart: authorMeta?.heart ?? 0,
+      video: authorMeta?.video ?? 0,
+      digg: authorMeta?.digg ?? 0,
+    };
+  });
+
+  const getAuthorNickName = (): string => {
+    for (const analytic of allAnalytics) {
+      const nickName = analytic?.videoAnalytics?.[0]?.authorMeta?.nickName;
+      if (nickName) {
+        return nickName;
+      }
+    }
+    return 'Author';
+  };
 
   const chartConfig = {
     comments: {
@@ -233,7 +246,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ shortId }) => {
                   Profile <User className="h-4 w-4" />
                 </div>
                 <div className="flex items-center gap-2 leading-none text-muted-foreground">
-                  {allAnalytics[0]?.videoAnalytics[0]?.authorMeta.nickName || 'Author'}
+                  {getAuthorNickName()}
                 </div>
               </div>
             </div>
