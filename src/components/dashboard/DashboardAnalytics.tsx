@@ -112,24 +112,32 @@ export const DashboardAnalytics: React.FC<DashboardAnalyticsProps> = ({ userId }
     if (selectedShort) {
       return analytics
         .filter(a => a.shortId === selectedShort)
-        .map(a => ({
-          name: a.taskTime.toDate().toLocaleDateString(),
-          value: metric in a.videoAnalytics[0]
-            ? a.videoAnalytics[0][metric as keyof VideoAnalytics]
-            : a.videoAnalytics[0].authorMeta[metric as keyof VideoAnalytics['authorMeta']]
-        }));
+        .map(a => {
+          const videoAnalytics = a.videoAnalytics && a.videoAnalytics[0];
+          if (!videoAnalytics) {
+            console.warn(`No video analytics for short: ${a.shortId}`);
+            return { name: a.taskTime.toDate().toLocaleDateString(), value: 0 };
+          }
+          return {
+            name: a.taskTime.toDate().toLocaleDateString(),
+            value: metric in videoAnalytics
+              ? (videoAnalytics[metric as keyof VideoAnalytics] as number) || 0
+              : (videoAnalytics.authorMeta && videoAnalytics.authorMeta[metric as keyof VideoAnalytics['authorMeta']] as number) || 0
+          };
+        });
     } else {
       const shortMap = new Map<string, VideoAnalytics>();
       analytics.forEach(a => {
-        if (!shortMap.has(a.shortId) || a.taskTime.toDate() > new Date(shortMap.get(a.shortId)!.createTimeISO)) {
-          shortMap.set(a.shortId, a.videoAnalytics[0]);
+        const videoAnalytics = a.videoAnalytics && a.videoAnalytics[0];
+        if (videoAnalytics && (!shortMap.has(a.shortId) || a.taskTime.toDate() > new Date(shortMap.get(a.shortId)!.createTimeISO))) {
+          shortMap.set(a.shortId, videoAnalytics);
         }
       });
       return Array.from(shortMap.entries()).map(([shortId, videoAnalytics]) => ({
         name: shortId,
         value: metric in videoAnalytics
-          ? videoAnalytics[metric as keyof VideoAnalytics]
-          : videoAnalytics.authorMeta[metric as keyof VideoAnalytics['authorMeta']]
+          ? (videoAnalytics[metric as keyof VideoAnalytics] as number) || 0
+          : (videoAnalytics.authorMeta && videoAnalytics.authorMeta[metric as keyof VideoAnalytics['authorMeta']] as number) || 0
       }));
     }
   };
@@ -137,16 +145,18 @@ export const DashboardAnalytics: React.FC<DashboardAnalyticsProps> = ({ userId }
   const prepareFansData = () => {
     const shortMap = new Map<string, VideoAnalytics>();
     analytics.forEach(a => {
-      if (!shortMap.has(a.shortId) || a.taskTime.toDate() > new Date(shortMap.get(a.shortId)!.createTimeISO)) {
-        shortMap.set(a.shortId, a.videoAnalytics[0]);
+      const videoAnalytics = a.videoAnalytics && a.videoAnalytics[0];
+      if (videoAnalytics && (!shortMap.has(a.shortId) || a.taskTime.toDate() > new Date(shortMap.get(a.shortId)!.createTimeISO))) {
+        shortMap.set(a.shortId, videoAnalytics);
       }
     });
     return Array.from(shortMap.entries()).map(([shortId, videoAnalytics]) => ({
       name: shortId,
-      fans: videoAnalytics.authorMeta.fans,
-      following: videoAnalytics.authorMeta.following
+      fans: videoAnalytics.authorMeta?.fans || 0,
+      following: videoAnalytics.authorMeta?.following || 0
     }));
   };
+
 
   const renderChart = (metric: keyof typeof chartConfig) => (
     <ImprovedDashboardChart
