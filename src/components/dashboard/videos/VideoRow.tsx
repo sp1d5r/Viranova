@@ -82,10 +82,7 @@ export const VideoRow: React.FC<{ videoId: string; isExpanded: boolean; onToggle
         </TableCell>
         <TableCell>{video.processingProgress && video.processingProgress.toFixed(2)}% <Progress value={video.processingProgress}/></TableCell>
         <TableCell>{new Date(video.uploadTimestamp).toLocaleDateString()}</TableCell>
-        <TableCell>
-          {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-        </TableCell>
-        <TableCell>
+        <TableCell className="flex gap-4 items-center">
           <Button size="icon" variant="outline" onClick={() => {
             FirebaseFirestoreService.deleteDocument(
               "videos",
@@ -98,6 +95,7 @@ export const VideoRow: React.FC<{ videoId: string; isExpanded: boolean; onToggle
           }}>
             <TrashIcon className={"text-destructive"}/>
           </Button>
+          {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </TableCell>
       </TableRow>
       {isExpanded && (

@@ -317,8 +317,7 @@ export const DashboardVideos: React.FC = () => {
             <TableHead>Status</TableHead>
             <TableHead>Progress</TableHead>
             <TableHead>Upload Date</TableHead>
-            <TableHead>Source</TableHead>
-            <TableHead>Remove</TableHead>
+            <TableHead></TableHead>
             <TableHead></TableHead>
           </TableRow>
         </TableHeader>
