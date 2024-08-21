@@ -85,6 +85,20 @@ export const VideoRow: React.FC<{ videoId: string; isExpanded: boolean; onToggle
         <TableCell>
           {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </TableCell>
+        <TableCell>
+          <Button size="icon" variant="outline" onClick={() => {
+            FirebaseFirestoreService.deleteDocument(
+              "videos",
+              videoId,
+              () => {
+                showNotification("Successfully Deleted Video", videoId + " - Deleted successfully", "success");
+                window.location.reload();
+              }
+            )
+          }}>
+            <TrashIcon className={"text-destructive"}/>
+          </Button>
+        </TableCell>
       </TableRow>
       {isExpanded && (
         <TableRow>
