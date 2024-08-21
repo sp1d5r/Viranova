@@ -195,7 +195,11 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
         'last_updated',
         (documents) => {
           setShorts(documents.map(doc => documentToShort(doc))
-            .sort((elem1, elem2) => toNumber(elem2.last_updated) - toNumber(elem1.last_updated)));
+            .sort((elem1, elem2) => {
+              const date1 = elem1.last_updated ? toNumber(elem1.last_updated) : 0;
+              const date2 = elem2.last_updated ? toNumber(elem2.last_updated) : 0;
+              return date2 - date1;
+            }));
         },
         (error) => {
           showNotification("Error", error.message, "error");
@@ -252,18 +256,44 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
 
   useEffect(() => {
     if (analytics && analytics.length > 0) {
-      const processedData = analytics.map(item => {
-        const videoAnalytics = item.videoAnalytics[0]; // Most recent video analytics
+      const processedData: TikTokVideo[] = analytics.map(item => {
+        const videoAnalytics = item.videoAnalytics && item.videoAnalytics[0]; // Most recent video analytics
+        if (!videoAnalytics) {
+          console.error('Video analytics not found for item:', item);
+          return {
+            id: 'Unknown',
+            description: 'No description',
+            link: '#',
+            likes: 0,
+            comments: 0,
+            views: 0,
+            date: 'Invalid Date'
+          };
+        }
+        let dateString = '';
+        try {
+          // Ensure createTime is a valid number
+          const createTime = Number(videoAnalytics.createTime);
+          if (!isNaN(createTime) && isFinite(createTime)) {
+            dateString = new Date(createTime * 1000).toISOString();
+          } else {
+            dateString = 'Invalid Date';
+          }
+        } catch (error) {
+          console.error('Error processing date:', error);
+          dateString = 'Invalid Date';
+        }
         return {
-          id: videoAnalytics.id,
-          description: videoAnalytics.text,
-          link: videoAnalytics.webVideoUrl,
-          likes: videoAnalytics.diggCount,
-          comments: videoAnalytics.commentCount,
-          views: videoAnalytics.playCount,
-          date: new Date(videoAnalytics.createTime * 1000).toISOString(),
+          id: videoAnalytics.id || 'Unknown',
+          description: videoAnalytics.text || 'No description',
+          link: videoAnalytics.webVideoUrl || '#',
+          likes: videoAnalytics.diggCount || 0,
+          comments: videoAnalytics.commentCount || 0,
+          views: videoAnalytics.playCount || 0,
+          date: dateString,
         };
       });
+
       setTikTokVideoData(processedData);
 
       // Calculate totals and changes
@@ -275,28 +305,24 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
 
       processedData.forEach(video => {
         const videoDate = new Date(video.date);
-        if (videoDate >= lastMonthDate) {
+        if (!isNaN(videoDate.getTime()) && videoDate >= lastMonthDate) {
           totalViews += video.views;
           totalLikes += video.likes;
           totalComments += video.comments;
-        } else {
+        } else if (!isNaN(videoDate.getTime())) {
           lastMonthViews += video.views;
           lastMonthLikes += video.likes;
           lastMonthComments += video.comments;
         }
       });
 
-      const viewsChange = ((totalViews - lastMonthViews) / lastMonthViews) * 100;
-      const likesChange = ((totalLikes - lastMonthLikes) / lastMonthLikes) * 100;
-      const commentsChange = ((totalComments - lastMonthComments) / lastMonthComments) * 100;
+      const viewsChange = lastMonthViews !== 0 ? ((totalViews - lastMonthViews) / lastMonthViews) * 100 : 0;
+      const likesChange = lastMonthLikes !== 0 ? ((totalLikes - lastMonthLikes) / lastMonthLikes) * 100 : 0;
+      const commentsChange = lastMonthComments !== 0 ? ((totalComments - lastMonthComments) / lastMonthComments) * 100 : 0;
 
-      // Get the most recent follower count and update time
-      const mostRecentAnalytics = analytics.reduce((latest, current) => {
-        return new Date(latest.taskTime.seconds * 1000) > new Date(current.taskTime.seconds * 1000) ? latest : current;
-      });
-
-      const followerCount = mostRecentAnalytics.videoAnalytics[0].authorMeta.fans;
-      const followerCountUpdated = new Date(mostRecentAnalytics.taskTime.seconds * 1000).toLocaleString();
+      // Simplify follower count logic
+      const followerCount = 0;
+      const followerCountUpdated = 'N/A';
 
       setAnalyticsSummary({
         totalViews,

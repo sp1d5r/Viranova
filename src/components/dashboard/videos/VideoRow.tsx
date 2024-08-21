@@ -68,7 +68,7 @@ export const VideoRow: React.FC<{ videoId: string; isExpanded: boolean; onToggle
   }, [videoId]);
 
   if (!video) return null;
-
+  
 
   return (
     <React.Fragment>

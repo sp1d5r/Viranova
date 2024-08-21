@@ -20,6 +20,7 @@ export interface Request {
 }
 
 export type ShortRequestEndpoints = "v1/temporal-segmentation" |
+  "v2/temporal-segmentation" |
   "v1/generate-test-audio" |
   "v1/create-short-video" |
   "v1/get_saliency_for_short" |

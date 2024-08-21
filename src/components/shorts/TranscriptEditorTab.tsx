@@ -10,6 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { ScrollArea } from "../ui/scroll-area";
 import {useShortRequestManagement} from "../../contexts/ShortRequestProvider";
+import {Popover, PopoverContent, PopoverTrigger} from "../ui/popover";
+import {Sparkles} from "lucide-react";
 
 export interface TranscriptEditorTabProps {
   short: Short;
@@ -218,6 +220,19 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({ short,
     );
   };
 
+  const requestAIGenerationV2 = () => {
+    createShortRequest(
+      shortId,
+      "v2/temporal-segmentation",
+      (requestId) => {
+        showNotification("AI Transcript Editing", `Request ID: ${requestId}`, "success");
+      },
+      (error) => {
+        showNotification("AI Transcript Editing Failed", `${error}`, "error");
+      }
+    );
+  };
+
   const requestSoundPreview = () => {
     createShortRequest(
       shortId,
@@ -241,13 +256,31 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({ short,
               <TabsTrigger value="timeline">Timeline</TabsTrigger>
             </TabsList>
             <div className="flex gap-2 flex-wrap ">
-              <Button
-                onClick={requestAIGeneration}
-                variant="default"
-                className="!bg-primary text-purple-900 "
-              >
-                AI Generation
-              </Button>
+              <Popover>
+                <PopoverTrigger>
+                  <Button variant="outline">Request AI Generation</Button>
+                </PopoverTrigger>
+                <PopoverContent>
+                  <div className="flex flex-col gap-2">
+                    Select a version to generate
+                    <Button
+                      onClick={requestAIGeneration}
+                      variant="default"
+                      className="!bg-primary text-purple-900 "
+                    >
+                      AI Generation
+                    </Button>
+                    <Button
+                      onClick={requestAIGenerationV2}
+                      variant="outline"
+                      className="gap-2"
+                    >
+                      <Sparkles height={20} />
+                      Version 2
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
               <Button
                 onClick={requestSoundPreview}
                 variant="secondary"
