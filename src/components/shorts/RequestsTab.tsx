@@ -36,7 +36,7 @@ const RequestCard: React.FC<{ request: ShortRequest }> = ({ request }) => {
           <CardTitle className="text-lg">{request.requestEndpoint}</CardTitle>
           <Badge variant={status === 'Completed' ? 'default' : 'secondary'}>{status}</Badge>
         </div>
-        <CardDescription>Created: {request.requestCreated?.toDate().toLocaleString()}</CardDescription>
+        <CardDescription>Created: {request.requestCreated?.toDate().toLocaleString()}, {request.id? request.id : ''}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="mb-4">

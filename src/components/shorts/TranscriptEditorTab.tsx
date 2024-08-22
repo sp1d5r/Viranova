@@ -12,6 +12,8 @@ import { ScrollArea } from "../ui/scroll-area";
 import {useShortRequestManagement} from "../../contexts/ShortRequestProvider";
 import {Popover, PopoverContent, PopoverTrigger} from "../ui/popover";
 import {Sparkles} from "lucide-react";
+import {Textarea} from "../ui/textarea";
+import {Input} from "../ui/input";
 
 export interface TranscriptEditorTabProps {
   short: Short;
@@ -246,6 +248,37 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({ short,
     );
   };
 
+  const [contextTranscript, setContextTranscript] = useState(short.context_transcript || "");
+
+  const updateContextTranscript = () => {
+    if (contextTranscript.split(' ').length > 20) {
+      showNotification("Error", "Context must be 20 words or less", "error");
+      return;
+    }
+
+    FirebaseFirestoreService.updateDocument(
+      "shorts",
+      shortId,
+      { "context_transcript": contextTranscript },
+      () => {
+        showNotification("Updated Context", "Context transcript updated successfully", "success");
+        createShortRequest(
+          shortId,
+          "v1/generate-intro",
+          (requestId) => {
+            showNotification("Create Short Intro", `Request ID: ${requestId}`, "success");
+          },
+          (error) => {
+            showNotification("Create Short Intro Failed", `${error}`, "error");
+          }
+        );
+      },
+      (error) => {
+        showNotification("Failed Update", "Failed to update context transcript", "error");
+      }
+    );
+  };
+
   return (
     <div className="w-full">
       <CardContent>
@@ -254,6 +287,7 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({ short,
             <TabsList>
               <TabsTrigger value="transcript">Transcript</TabsTrigger>
               <TabsTrigger value="timeline">Timeline</TabsTrigger>
+              <TabsTrigger value="ai-context">AI Context</TabsTrigger>
             </TabsList>
             <div className="flex gap-2 flex-wrap ">
               <Popover>
@@ -364,6 +398,42 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({ short,
                 </Card>
               ))}
             </ScrollArea>
+          </TabsContent>
+          <TabsContent value="ai-context">
+            <Card>
+              <CardHeader>
+                <CardTitle>AI Context</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col gap-4">
+                  <Input
+                    value={contextTranscript}
+                    onChange={(e) => setContextTranscript(e.target.value)}
+                    placeholder="Enter context (max 20 words)"
+                    maxLength={100} // Approximate limit to prevent extremely long words
+                  />
+                  <Button onClick={updateContextTranscript}>
+                    Update Transcript
+                  </Button>
+                  {short.intro_audio_path && (
+                    <div>
+                      <p className="font-bold text-white mb-2">Intro Audio</p>
+                      <AudioPlayer path={short.intro_audio_path} />
+                    </div>
+                  )}
+                  {!short.intro_audio_path && (
+                    <Button
+                      onClick={() => {
+                        // This is a placeholder. You'll need to implement the actual logic to load the audio.
+                        showNotification("Load Audio", "Audio loading functionality to be implemented", "info");
+                      }}
+                    >
+                      Load Audio
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </CardContent>

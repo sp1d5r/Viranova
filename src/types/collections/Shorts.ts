@@ -143,6 +143,9 @@ export interface Short extends BackendServerMetadata{
   lines?: Line[];
   defaultLineColor?: string;
   defaultWordColor?: string;
+  context_transcript?: string;
+  intro_audio_path?: string;
+  intro_video_path?: string;
 }
 
 
@@ -217,6 +220,9 @@ export function documentToShort(docData: DocumentData): Short {
     })) : undefined,
     defaultLineColor: docData.defaultLineColor || "#1FFF01",
     defaultWordColor: docData.defaultWordColor || "#FFFFFF",
+    context_transcript: docData.context_transcript,
+    intro_audio_path: docData.intro_audio_path,
+    intro_video_path: docData.intro_video_path,
   };
 }
 

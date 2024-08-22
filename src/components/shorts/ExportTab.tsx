@@ -97,31 +97,83 @@ export const ExportTab: React.FC<ExportTabProps> = ({ short, shortId }) => {
     }
   };
 
-  const scheduleAnalyticsTasks = async () => {
+  const deleteFutureScheduledTasks = (): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      const now = Timestamp.now();
+      FirebaseFirestoreService.queryDocuments<AnalyticsTask>(
+        'tasks',
+        'shortId',
+        shortId,
+        'scheduledTime',
+        (tasks) => {
+          const futureTasks = tasks.filter(task => task.status === 'Pending');
+
+          Promise.all(futureTasks.map(task =>
+            new Promise<void>((resolveDelete, rejectDelete) => {
+              FirebaseFirestoreService.deleteDocument(
+                'tasks',
+                task.id!,
+                () => resolveDelete(),
+                (error) => rejectDelete(error)
+              );
+            })
+          )).then(() => {
+            console.log(`Deleted ${futureTasks.length} future scheduled tasks`);
+            resolve();
+          }).catch(error => {
+            console.error("Error deleting future scheduled tasks:", error);
+            reject(error);
+          });
+        },
+        (error) => {
+          console.error("Error querying tasks:", error);
+          reject(error);
+        }
+      );
+    });
+  };
+
+  const scheduleAnalyticsTasks = () => {
     const selectedOption = dataCollectionOptions.find(option => option.type === selectedDataCollection);
     if (!selectedOption) {
       showNotification("Data Collection Option", "Add a data collection option first", "error");
       return;
     }
 
-    const taskSchedule = selectedOption.schedule();
-    const tasks: AnalyticsTask[] = taskSchedule.map((scheduledTime) => ({
-      status: 'Pending',
-      scheduledTime: Timestamp.fromMillis(scheduledTime),
-      operation: 'Analytics',
-      taskResultId: `${shortId}_${scheduledTime}`,
-      shortId: shortId,
-      tikTokLink: tikTokLink
-    }));
+    deleteFutureScheduledTasks()
+      .then(() => {
+        const taskSchedule = selectedOption.schedule();
+        const tasks: AnalyticsTask[] = taskSchedule.map((scheduledTime) => ({
+          status: 'Pending',
+          scheduledTime: Timestamp.fromMillis(scheduledTime),
+          operation: 'Analytics',
+          taskResultId: `${shortId}_${scheduledTime}`,
+          shortId: shortId,
+          tikTokLink: tikTokLink
+        }));
 
-    try {
-      await Promise.all(tasks.map(task =>
-        FirebaseFirestoreService.addDocument('tasks', task)
-      ));
-      showNotification("Success", `Scheduled ${tasks.length} analytics tasks`, "success");
-    } catch (error) {
-      showNotification("Failed", "Error scheduling analytics tasks", "error");
-    }
+        let tasksAdded = 0;
+        tasks.forEach(task => {
+          FirebaseFirestoreService.addDocument(
+            'tasks',
+            task,
+            () => {
+              tasksAdded++;
+              if (tasksAdded === tasks.length) {
+                showNotification("Success", `Scheduled ${tasks.length} analytics tasks`, "success");
+              }
+            },
+            (error) => {
+              console.error("Error adding task:", error);
+              showNotification("Failed", "Error scheduling some analytics tasks", "error");
+            }
+          );
+        });
+      })
+      .catch(error => {
+        console.error("Error in scheduleAnalyticsTasks:", error);
+        showNotification("Failed", "Error scheduling analytics tasks", "error");
+      });
   };
 
   const handlePreviewRequest = () => {
