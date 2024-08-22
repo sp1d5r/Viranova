@@ -17,6 +17,7 @@ import { Timestamp } from "firebase/firestore";
 import ScrollableLayout from "../layouts/ScrollableLayout";
 import {RequestsTab} from "../components/shorts/RequestsTab";
 import {ProcessingDialog} from "../components/shorts/processing-dialog/ProcessingDialog";
+import {ChevronLeft} from "lucide-react";
 
 export type TabType = "short-settings" | "transcript-editor" | "attention-capture" | "export" | "performance" | "requests";
 
@@ -130,8 +131,20 @@ export const Shorts: React.FC = () => {
     <ScrollableLayout>
       <div className="m-auto my-2 text-white px-4 md:px-0">
         <CardHeader>
-          <CardTitle>Short Video Creator</CardTitle>
-          <CardDescription>Create and manage your short videos step by step</CardDescription>
+          <div className="flex gap-4 items-center justify-start">
+            <Button
+              onClick={() => {
+                window.location.href = "/dashboard?tab=shorts"
+              }}
+              variant={"outline"}
+            >
+              <ChevronLeft />
+            </Button>
+            <div>
+              <CardTitle>Short Video Creator</CardTitle>
+              <CardDescription>Create and manage your short videos step by step</CardDescription>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabType)} className="flex flex-col md:flex-row md:space-x-8">
