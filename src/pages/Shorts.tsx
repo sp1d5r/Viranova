@@ -40,6 +40,10 @@ export const Shorts: React.FC = () => {
   const initialTab = (searchParams.get("tab") as TabType) || "short-settings";
   const [activeTab, setActiveTab] = useState<TabType>(initialTab);
 
+  console.log('short_id', short_id);
+  console.log('short', short);
+  console.log ('segment', segment);
+
   useEffect(() => {
     let unsubscribeShort: (() => void) | undefined;
     let unsubscribeSegment: (() => void) | undefined;
@@ -52,7 +56,7 @@ export const Shorts: React.FC = () => {
           if (document) {
             const updatedShort = documentToShort(document);
             setShort(updatedShort);
-            console.log(updatedShort)
+            console.log('updated_short', updatedShort.segment_id)
 
             // Setup segment listener
             if (unsubscribeSegment) {
@@ -214,8 +218,17 @@ export const Shorts: React.FC = () => {
       {short && short.pending_operation && (
         <Card className="mt-4 mx-auto fixed translate-x-[5vw] bottom-2 w-[90vw]">
           <CardHeader>
-            <CardTitle>Operation in Progress</CardTitle>
-            <CardDescription>{short.progress_message}</CardDescription>
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-2">
+                <CardTitle>Operation in Progress</CardTitle>
+                <CardDescription>{short.progress_message}</CardDescription>
+              </div>
+              <a href="/dashboard?tab=shorts">
+                <Button>
+                  Return
+                </Button>
+              </a>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="w-full bg-secondary rounded-full h-2.5 dark:bg-gray-700">
@@ -234,6 +247,7 @@ export const Shorts: React.FC = () => {
                       {
                         backend_status: "Completed",
                         pending_operation: false,
+                        auto_generate: false
                       },
                       () => {
                         showNotification("Cancelled Operation", "Be careful of concurrency errors.", "success");

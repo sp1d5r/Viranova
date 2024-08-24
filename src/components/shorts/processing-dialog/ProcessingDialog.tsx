@@ -91,8 +91,17 @@ export const ProcessingDialog: React.FC<ProcessingDialogProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-white">Auto-Generate Requested</DialogTitle>
-          <DialogDescription>Please wait while the operation completes. You will be notified (hopefully).</DialogDescription>
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-2">
+              <DialogTitle className="text-white">Auto-Generate Requested</DialogTitle>
+              <DialogDescription>Please wait while the operation completes. You will be notified (hopefully).</DialogDescription>
+            </div>
+            <a href="/dashboard?tab=shorts">
+              <Button>
+                Return
+              </Button>
+            </a>
+          </div>
         </DialogHeader>
         <Tabs defaultValue="overview" className="w-full">
           <TabsList>
