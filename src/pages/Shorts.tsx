@@ -18,6 +18,8 @@ import ScrollableLayout from "../layouts/ScrollableLayout";
 import {RequestsTab} from "../components/shorts/RequestsTab";
 import {ProcessingDialog} from "../components/shorts/processing-dialog/ProcessingDialog";
 import {ChevronLeft} from "lucide-react";
+import {Switch} from "../components/ui/switch";
+import {Label} from "../components/ui/label";
 
 export type TabType = "short-settings" | "transcript-editor" | "attention-capture" | "export" | "performance" | "requests";
 
@@ -40,9 +42,27 @@ export const Shorts: React.FC = () => {
   const initialTab = (searchParams.get("tab") as TabType) || "short-settings";
   const [activeTab, setActiveTab] = useState<TabType>(initialTab);
 
-  console.log('short_id', short_id);
-  console.log('short', short);
-  console.log ('segment', segment);
+  const toggleAutoGenerate = useCallback(() => {
+    if (short && short_id) {
+      const newAutoGenerateValue = !short.auto_generate;
+      FirebaseFirestoreService.updateDocument(
+        "shorts",
+        short_id,
+        { auto_generate: newAutoGenerateValue },
+        () => {
+          showNotification(
+            "Auto-Generate Updated",
+            `Auto-generate has been ${newAutoGenerateValue ? "enabled" : "disabled"}`,
+            "success"
+          );
+        },
+        (error) => {
+          showNotification("Update Failed", "Failed to update auto-generate setting", "error");
+          console.error(error);
+        }
+      );
+    }
+  }, [short, short_id, showNotification]);
 
   useEffect(() => {
     let unsubscribeShort: (() => void) | undefined;
@@ -165,6 +185,7 @@ export const Shorts: React.FC = () => {
                 <span>{tabConfig[tabConfig.length - 1].title}</span>
               </TabsTrigger>
             </TabsList>
+
             <div className="flex-1 flex-grow">
               {tabConfig.map((tab) => (
                 <TabsContent key={tab.value} value={tab.value} className="mt-0">

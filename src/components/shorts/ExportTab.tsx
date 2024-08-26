@@ -14,6 +14,13 @@ import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Label } from "../ui/label";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import {useShortRequestManagement} from "../../contexts/ShortRequestProvider";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel,
+  AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
+} from "../ui/alert-dialog";
 
 export interface ExportTabProps {
   short: Short;
@@ -80,6 +87,7 @@ export const ExportTab: React.FC<ExportTabProps> = ({ short, shortId }) => {
   const [isPreviewRequested, setIsPreviewRequested] = useState(false);
   const [isTikTokLinkSubmitted, setIsTikTokLinkSubmitted] = useState(false);
   const { createShortRequest } = useShortRequestManagement();
+  const [isRescheduling, setIsRescheduling] = useState(false);
 
   const updateTikTokLink = async () => {
     try {
@@ -99,7 +107,6 @@ export const ExportTab: React.FC<ExportTabProps> = ({ short, shortId }) => {
 
   const deleteFutureScheduledTasks = (): Promise<void> => {
     return new Promise((resolve, reject) => {
-      const now = Timestamp.now();
       FirebaseFirestoreService.queryDocuments<AnalyticsTask>(
         'tasks',
         'shortId',
@@ -109,20 +116,20 @@ export const ExportTab: React.FC<ExportTabProps> = ({ short, shortId }) => {
           const futureTasks = tasks.filter(task => task.status === 'Pending');
 
           Promise.all(futureTasks.map(task =>
-            new Promise<void>((resolveDelete, rejectDelete) => {
+            new Promise<void>((resolveDelete) => {
               FirebaseFirestoreService.deleteDocument(
                 'tasks',
                 task.id!,
                 () => resolveDelete(),
-                (error) => rejectDelete(error)
+                (error) => {
+                  console.error("Error deleting task:", error);
+                  resolveDelete();
+                }
               );
             })
           )).then(() => {
             console.log(`Deleted ${futureTasks.length} future scheduled tasks`);
             resolve();
-          }).catch(error => {
-            console.error("Error deleting future scheduled tasks:", error);
-            reject(error);
           });
         },
         (error) => {
@@ -140,41 +147,49 @@ export const ExportTab: React.FC<ExportTabProps> = ({ short, shortId }) => {
       return;
     }
 
-    deleteFutureScheduledTasks()
-      .then(() => {
-        const taskSchedule = selectedOption.schedule();
-        const tasks: AnalyticsTask[] = taskSchedule.map((scheduledTime) => ({
-          status: 'Pending',
-          scheduledTime: Timestamp.fromMillis(scheduledTime),
-          operation: 'Analytics',
-          taskResultId: `${shortId}_${scheduledTime}`,
-          shortId: shortId,
-          tikTokLink: tikTokLink
-        }));
+    const scheduleTask = () => {
+      const taskSchedule = selectedOption.schedule();
+      const tasks: AnalyticsTask[] = taskSchedule.map((scheduledTime) => ({
+        status: 'Pending',
+        scheduledTime: Timestamp.fromMillis(scheduledTime),
+        operation: 'Analytics',
+        taskResultId: `${shortId}_${scheduledTime}`,
+        shortId: shortId,
+        tikTokLink: tikTokLink
+      }));
 
-        let tasksAdded = 0;
-        tasks.forEach(task => {
-          FirebaseFirestoreService.addDocument(
-            'tasks',
-            task,
-            () => {
-              tasksAdded++;
-              if (tasksAdded === tasks.length) {
-                showNotification("Success", `Scheduled ${tasks.length} analytics tasks`, "success");
-              }
-            },
-            (error) => {
-              console.error("Error adding task:", error);
-              showNotification("Failed", "Error scheduling some analytics tasks", "error");
+      let tasksAdded = 0;
+      tasks.forEach(task => {
+        FirebaseFirestoreService.addDocument(
+          'tasks',
+          task,
+          () => {
+            tasksAdded++;
+            if (tasksAdded === tasks.length) {
+              showNotification("Success", `Scheduled ${tasks.length} analytics tasks`, "success");
+              setIsRescheduling(false);
             }
-          );
-        });
-      })
-      .catch(error => {
-        console.error("Error in scheduleAnalyticsTasks:", error);
-        showNotification("Failed", "Error scheduling analytics tasks", "error");
+          },
+          (error) => {
+            console.error("Error adding task:", error);
+            showNotification("Failed", "Error scheduling some analytics tasks", "error");
+          }
+        );
       });
+    };
+
+    if (isRescheduling) {
+      deleteFutureScheduledTasks()
+        .then(scheduleTask)
+        .catch(error => {
+          console.error("Error in scheduleAnalyticsTasks:", error);
+          showNotification("Failed", "Error scheduling analytics tasks", "error");
+        });
+    } else {
+      scheduleTask();
+    }
   };
+
 
   const handlePreviewRequest = () => {
     createShortRequest(
@@ -253,9 +268,28 @@ export const ExportTab: React.FC<ExportTabProps> = ({ short, shortId }) => {
                   ))}
                 </RadioGroup>
                 <p className="text-sm text-muted-foreground">{dataCollectionOptions.find(o => o.type === selectedDataCollection)?.description}</p>
-                <Button onClick={scheduleAnalyticsTasks}>
-                  Schedule Analytics
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button>Schedule Analytics</Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="text-white">Confirm Analytics Scheduling</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {isRescheduling
+                          ? "This will delete all pending tasks and create new ones. Are you sure you want to reschedule?"
+                          : "Are you sure you want to schedule analytics tasks? If you've already scheduled tasks, consider updating the TikTok link instead of rescheduling."}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="text-white">Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => {
+                        setIsRescheduling(true);
+                        scheduleAnalyticsTasks();
+                      }}>Confirm</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             )}
 
