@@ -96,7 +96,7 @@ export const ProcessingDialog: React.FC<ProcessingDialogProps> = ({
               <DialogTitle className="text-white">Auto-Generate Requested</DialogTitle>
               <DialogDescription>Please wait while the operation completes. You will be notified (hopefully).</DialogDescription>
             </div>
-            <a href="/dashboard?tab=shorts">
+            <a href="/dashboard?tab=videos">
               <Button>
                 Return
               </Button>
