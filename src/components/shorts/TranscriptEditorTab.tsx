@@ -279,6 +279,20 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({ short,
     );
   };
 
+  const handleQuitEditing = () => {
+    setEditing(false);
+    createShortRequest(
+      shortId,
+      "v1/manual-override-transcript",
+      (requestId) => {
+        showNotification("Manual Override", `Request ID: ${requestId}`, "success");
+      },
+      (error) => {
+        showNotification("Manual Override Failed", `${error}`, "error");
+      }
+    );
+  };
+
   return (
     <div className="w-full">
       <CardContent>
@@ -322,7 +336,7 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({ short,
                 Preview Sound
               </Button>
               <Button
-                onClick={() => setEditing(!editing)}
+                onClick={() => editing ? handleQuitEditing() : setEditing(true)}
                 variant={editing ? "destructive" : "default"}
               >
                 {editing ? "Quit Editing" : "Edit Transcript"}

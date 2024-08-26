@@ -21,6 +21,7 @@ export interface Request {
 
 export type ShortRequestEndpoints = "v1/temporal-segmentation" |
   "v2/temporal-segmentation" |
+  "v1/manual-override-transcript" |
   "v1/generate-test-audio" |
   "v1/generate-intro" |
   "v1/create-short-video" |
