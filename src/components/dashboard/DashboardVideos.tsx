@@ -187,7 +187,7 @@ export const DashboardVideos: React.FC = () => {
   }
 
   const isValidYouTubeUrl = (url: string) => {
-    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})$/;
+    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
     return youtubeRegex.test(url);
   }
 
@@ -213,6 +213,7 @@ export const DashboardVideos: React.FC = () => {
             );
             setNewVideoLink('');
             setIsAddingVideo(false);
+            window.location.href = `/video-handler?video_id=${doc_id}`
             fetchVideos();  // Refresh the video list
           },
           () => {
