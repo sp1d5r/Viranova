@@ -50,6 +50,15 @@ export const DashboardVideos: React.FC = () => {
   const [isAddingVideo, setIsAddingVideo] = useState(false);
   const { showNotification } = useNotification();
 
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const expandedParam = url.searchParams.get('expanded');
+    if (expandedParam) {
+      const expandedIds = expandedParam.split(',');
+      setExpandedRows(new Set(expandedIds));
+    }
+  }, []);
+
   const fetchVideos = useCallback(async () => {
     if (!authState.user?.uid) return;
 
@@ -143,6 +152,17 @@ export const DashboardVideos: React.FC = () => {
       } else {
         newSet.add(id);
       }
+
+      // Update URL search params
+      const url = new URL(window.location.href);
+      const expandedParam = Array.from(newSet).join(',');
+      if (expandedParam) {
+        url.searchParams.set('expanded', expandedParam);
+      } else {
+        url.searchParams.delete('expanded');
+      }
+      window.history.pushState({}, '', url);
+
       return newSet;
     });
   };
@@ -231,6 +251,8 @@ export const DashboardVideos: React.FC = () => {
       showNotification("No Link", "You need to add a YouTube link", "error");
     }
   };
+
+
 
   return (
     <main className="flex flex-1 flex-col p-4 md:p-8">
