@@ -2,6 +2,7 @@ import { useAuth } from './Authentication';
 import FirebaseDatabaseService from '../services/database/strategies/FirebaseFirestoreService';
 import {ShortRequest, ShortRequestEndpoints} from '../types/collections/Request';
 import { Timestamp } from 'firebase/firestore';
+import {Short} from "../types/collections/Shorts";
 
 export const useShortRequestManagement = () => {
   const { authState } = useAuth();
@@ -10,7 +11,8 @@ export const useShortRequestManagement = () => {
     shortId: string,
     requestEndpoint: ShortRequestEndpoints,
     onSuccess?: (requestId: string) => void,
-    onFailure?: (error: Error) => void
+    onFailure?: (error: Error) => void,
+    autoGenerate: boolean = false,
   ) => {
     if (!authState.user) {
       onFailure?.(new Error('User not authenticated'));
@@ -19,6 +21,17 @@ export const useShortRequestManagement = () => {
 
     const currentDate = new Date();
     const requestCreatedTimestamp =  Timestamp.fromDate(currentDate);
+
+    if (autoGenerate) {
+      FirebaseDatabaseService.updateDocument<Short>(
+        "shorts",
+        shortId,
+        {
+          auto_generate: true,
+          progress_message: "Beginning auto-generate. Please wait..."
+        }
+      )
+    }
 
     const request: ShortRequest = {
       requestOperand: 'short',

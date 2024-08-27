@@ -46,7 +46,7 @@ export const ProcessingDialog: React.FC<ProcessingDialogProps> = ({
       return prevStages.map(stage => {
         switch (stage.id) {
           case 'edit_transcript':
-            return { ...stage, status: short.logs && short.logs.length > 0 && (short.logs[short.logs.length - 1].type === 'success' || short.error_count >= 5) ? 'completed' : 'processing' };
+            return { ...stage, status: short.lines && short.lines.length > 0  ? 'completed' : 'processing' };
           case 'generate_audio':
             return { ...stage, status: short.temp_audio_file ? 'completed' : 'processing' };
           case 'crop_clip':
@@ -73,12 +73,13 @@ export const ProcessingDialog: React.FC<ProcessingDialogProps> = ({
     : false;
 
   const handleCancelOperation = () => {
-    FirebaseFirestoreService.updateDocument(
+    FirebaseFirestoreService.updateDocument<Short>(
       "shorts",
       shortId,
       {
         backend_status: "Completed",
         pending_operation: false,
+        auto_generate: false
       },
       () => {
         showNotification("Cancelled Operation", "Be careful of concurrency errors.", "success");
