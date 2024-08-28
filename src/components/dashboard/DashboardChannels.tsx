@@ -25,15 +25,28 @@ export const DashboardChannels: React.FC<DashboardChannelsProps> = ({ userId }) 
   const [youtubeLink, setYoutubeLink] = useState('');
   const { addChannelToTrack, isLoading, error } = useAddChannelToTrack(userId ? userId : "N/A");
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [channelIdError, setChannelIdError] = useState<string | null>(null);
   const { showNotification } = useNotification();
   const { authState } = useAuth();
 
 
+  const isValidChannelId = (channelId: string): boolean => {
+    // YouTube channel IDs are typically 24 characters long
+    // They start with UC and contain only alphanumeric characters and underscores
+    const channelIdRegex = /^UC[\w-]{22}$/;
+    return channelIdRegex.test(channelId);
+  };
+
   const handleAddChannel = async () => {
     if (newChannelId) {
-      await addChannelToTrack(newChannelId);
-      setNewChannelId('');
-      window.location.reload();
+      if (isValidChannelId(newChannelId)) {
+        setChannelIdError(null);
+        await addChannelToTrack(newChannelId);
+        setNewChannelId('');
+        window.location.reload();
+      } else {
+        setChannelIdError('Invalid channel ID format. It should start with UC and be 24 characters long. Google it...');
+      }
     }
   };
 
@@ -147,6 +160,13 @@ export const DashboardChannels: React.FC<DashboardChannelsProps> = ({ userId }) 
                   <ExclamationTriangleIcon className="h-4 w-4" />
                   <AlertTitle>Error</AlertTitle>
                   <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              {channelIdError && (
+                <Alert variant="destructive">
+                  <ExclamationTriangleIcon className="h-4 w-4" />
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>{channelIdError} <a className="underline text-primary" href={"https://commentpicker.com/youtube-channel-id.php#google_vignette"}>Check here.</a></AlertDescription>
                 </Alert>
               )}
               <h1 className="w-full text-lg font-semibold md:text-2xl my-2">Channels</h1>
