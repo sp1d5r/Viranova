@@ -16,6 +16,7 @@ import TermsOfServicePages from "./pages/TermsOfServicePage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import Dashboard from "./pages/Dashboard";
 import {Onboarding} from "./pages/Onboarding";
+import {OnboardingSuccess} from "./pages/OnboardingSuccess";
 
 
 function App() {
@@ -51,6 +52,7 @@ function App() {
           <Route path={"/video-temporal-segmentation"} element={<VideoSegments />} />
           <Route path={"/shorts"} element={<Shorts />} />
           <Route path={"/onboarding"} element={<Onboarding />} />
+          <Route path="/onboarding-success" element={<OnboardingSuccess />} />
 
           <Route path={"*"} element={<NotFound />} />
         </Routes>

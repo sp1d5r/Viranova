@@ -18,7 +18,9 @@ import ShortIdeas from '../assets/gifs/Short Ideas.gif';
 import ShortManagement from '../assets/gifs/Short Management.gif';
 import VideoManagement from '../assets/gifs/Video Management.gif';
 import {User} from "../types/User";
-import {ChannelsTracking} from "../types/collections/Channels";
+import { SUBSCRIPTION_TIERS, SubscriptionTier, getSubscriptionDetails } from "../types/collections/User";
+import StripePaymentService from "../services/payments/strategies/StripePaymentService";
+
 
 export interface OnboardingProps {}
 
@@ -39,6 +41,7 @@ export const Onboarding: React.FC<OnboardingProps> = () => {
     brandTheme: [] as string[],
     clippingFor: 'self',
   });
+  const [selectedTier, setSelectedTier] = useState<SubscriptionTier>('basic');
   const [currentThemeWord, setCurrentThemeWord] = useState('');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -74,7 +77,7 @@ export const Onboarding: React.FC<OnboardingProps> = () => {
         authState.user.uid,
         (doc) => {
           if (doc) {
-            navigate('/dashboard')
+            // navigate('/dashboard')
           } else {
           }
         },
@@ -85,34 +88,70 @@ export const Onboarding: React.FC<OnboardingProps> = () => {
   }, [authState])
 
   const handleSubmit = async () => {
-    if (!authState.user?.uid) {
+    if (!authState.user?.uid || !authState.user?.email) {
       toast({
         title: "Error",
-        description: "You must be logged in to complete onboarding.",
+        description: "You must be logged in with a valid email to complete onboarding.",
         variant: "destructive",
       });
       return;
     }
 
     try {
-      await FirebaseFirestoreService.updateDocument(
-        "users",
-        authState.user.uid,
-        { ...formData, uid: authState.user.uid },
-        () => {
-          toast({
-            title: "Success",
-            description: "Your profile has been created successfully!",
-          });
-          navigate('/dashboard');
+      const tierDetails = getSubscriptionDetails(selectedTier);
+
+      // Step 1: Create Stripe customer
+      await StripePaymentService.createCustomer(
+        { email: authState.user.email },
+        async (customerId) => {
+          // Step 2: Store form data and initial subscription info in Firestore
+          await FirebaseFirestoreService.updateDocument(
+            "users",
+            authState.user!.uid,
+            {
+              ...formData,
+              stripeCustomerId: customerId,
+              selectedTier: selectedTier,
+              paymentPending: true,
+            },
+            async () => {
+              // Step 3: Create a Checkout Session
+              await StripePaymentService.createCheckoutSession(
+                tierDetails.stripePriceId,
+                customerId,
+                `${window.location.origin}/onboarding-success?userId=${authState.user!.uid}`, // Pass userId in URL
+                `${window.location.origin}/onboarding`,
+                (sessionUrl) => {
+                  // Redirect to Stripe Checkout
+                  window.location.href = sessionUrl;
+                },
+                (error) => {
+                  toast({
+                    title: "Error",
+                    description: "Failed to start checkout process. Please try again.",
+                    variant: "destructive",
+                  });
+                  console.error("Error creating checkout session:", error);
+                }
+              );
+            },
+            (error) => {
+              toast({
+                title: "Error",
+                description: "Failed to update user data. Please try again.",
+                variant: "destructive",
+              });
+              console.error("Error updating user document:", error);
+            }
+          );
         },
         (error) => {
           toast({
             title: "Error",
-            description: "Failed to create profile. Please try again.",
+            description: "Failed to create customer. Please try again.",
             variant: "destructive",
           });
-          console.error("Error creating user document:", error);
+          console.error("Error creating customer:", error);
         }
       );
     } catch (error) {
@@ -291,10 +330,30 @@ export const Onboarding: React.FC<OnboardingProps> = () => {
     </CardContent>
   );
 
+  const renderSubscriptionStep = () => (
+    <CardContent>
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">Choose your ViraNova Subscription</h3>
+        <RadioGroup value={selectedTier} onValueChange={(value) => setSelectedTier(value as SubscriptionTier)}>
+          {Object.entries(SUBSCRIPTION_TIERS).map(([key, tier]) => (
+            <div key={key} className="flex items-center space-x-2">
+              <RadioGroupItem value={key} id={key} />
+              <Label htmlFor={key}>
+                {tier.name} - £{tier.price}/month ({tier.credits} credits)
+              </Label>
+            </div>
+          ))}
+        </RadioGroup>
+        <Button onClick={handleSubmit}>Subscribe and Complete Setup</Button>
+      </div>
+    </CardContent>
+  );
+
   const renderStep = () => {
     if (step === 1) return renderStep1();
     if (step === 2) return renderStep2();
     if (step > 2 && step <= totalSteps) return renderPlatformInfoStep(step - 3);
+    if (step === totalSteps + 1) return renderSubscriptionStep();
   };
 
   return (
@@ -315,9 +374,9 @@ export const Onboarding: React.FC<OnboardingProps> = () => {
           )}
           {step < totalSteps ? (
             <Button onClick={() => setStep(step + 1)}>Next</Button>
-          ) : (
-            <Button onClick={handleSubmit}>Finish</Button>
-          )}
+          ) : step === totalSteps ? (
+            <Button onClick={() => setStep(step + 1)}>Choose Subscription</Button>
+          ) : null}
         </CardFooter>
       </Card>
       <BackgroundBeams />

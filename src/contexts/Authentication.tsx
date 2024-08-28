@@ -31,7 +31,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             if (firebaseUser) {
                 setAuthState({
                     isAuthenticated: true,
-                    user: { uid: firebaseUser.uid, name: firebaseUser.name || '' }
+                    user: { uid: firebaseUser.uid, name: firebaseUser.name || '', email: firebaseUser.email || '' }
                 });
             } else {
                 setAuthState({ isAuthenticated: false, user: null });

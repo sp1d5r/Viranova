@@ -2,20 +2,21 @@ import 'firebase/auth';
 import AuthService from "../AuthenticationInterface";
 import app from "../../../config/firebaseConfig";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, User as FirebaseUser, updateProfile } from 'firebase/auth';
-import {User} from "../../../types/User";
-const auth = getAuth(app);
+import { User } from "../../../types/User";
 
+const auth = getAuth(app);
 
 const FirebaseAuthService: AuthService = {
     async login(email: string, password: string) {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         return {
             uid: userCredential.user.uid,
-            name: userCredential.user.displayName || ''
+            name: userCredential.user.displayName || '',
+            email: userCredential.user.email || ''
         };
     },
 
-    async register(email: string, name:string, password: string) {
+    async register(email: string, name: string, password: string) {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         if (userCredential.user) {
             await updateProfile(userCredential.user, {
@@ -24,7 +25,8 @@ const FirebaseAuthService: AuthService = {
         }
         return {
             uid: userCredential.user.uid,
-            name: userCredential.user.displayName || ''
+            name: userCredential.user.displayName || '',
+            email: userCredential.user.email || ''
         };
     },
 
@@ -33,11 +35,12 @@ const FirebaseAuthService: AuthService = {
     },
 
     onAuthStateChanged(callback: (user: User | null) => void) {
-        return onAuthStateChanged(auth, (firebaseUser : FirebaseUser | null) => {
+        return onAuthStateChanged(auth, (firebaseUser: FirebaseUser | null) => {
             if (firebaseUser) {
                 callback({
                     uid: firebaseUser.uid,
-                    name: firebaseUser.displayName || ''
+                    name: firebaseUser.displayName || '',
+                    email: firebaseUser.email || ''
                 });
             } else {
                 callback(null);
