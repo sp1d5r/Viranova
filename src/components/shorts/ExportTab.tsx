@@ -21,6 +21,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger
 } from "../ui/alert-dialog";
+import {CreditButton} from "../ui/credit-button";
 
 export interface ExportTabProps {
   short: Short;
@@ -195,6 +196,7 @@ export const ExportTab: React.FC<ExportTabProps> = ({ short, shortId }) => {
     createShortRequest(
       shortId,
       "v1/create-cropped-video",
+      2,
       (requestId) => {
         showNotification("Preview Video", `Request ID: ${requestId}`, "success");
       },
@@ -231,9 +233,9 @@ export const ExportTab: React.FC<ExportTabProps> = ({ short, shortId }) => {
               <Button disabled={!!short.finished_short_location} id="preview" onClick={handlePreviewRequest} className="flex-1">
                 Preview Short
               </Button>
-              {!!short.finished_short_location && <Button size={"icon"} variant="outline" onClick={handlePreviewRequest}>
+              {!!short.finished_short_location && <CreditButton creditCost={2} confirmationMessage={"This costs 2 credits are you sure?"} size={"icon"} variant="outline" onClick={handlePreviewRequest}>
                 <ReloadIcon/>
-              </Button>}
+              </CreditButton>}
             </div>
           </div>
         )}
@@ -283,10 +285,16 @@ export const ExportTab: React.FC<ExportTabProps> = ({ short, shortId }) => {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel className="text-white">Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => {
-                        setIsRescheduling(true);
-                        scheduleAnalyticsTasks();
-                      }}>Confirm</AlertDialogAction>
+                      <AlertDialogAction>
+                        <CreditButton
+                          creditCost={2}
+                          onClick={() => {
+                          setIsRescheduling(true);
+                          scheduleAnalyticsTasks();
+                        }}>
+                          Confirm
+                        </CreditButton>
+                      </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>

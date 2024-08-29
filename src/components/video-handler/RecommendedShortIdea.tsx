@@ -11,6 +11,7 @@ import { Sparkles } from "lucide-react";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "../ui/tooltip";
 import ConfirmationModal from "./ConfirmationModal";
 import {useShortRequestManagement} from "../../contexts/ShortRequestProvider";
+import {CreditButton} from "../ui/credit-button";
 
 interface RecommendedShortIdeasProps {
   segments: Segment[];
@@ -89,6 +90,7 @@ export const RecommendedShortIdeas: React.FC<RecommendedShortIdeasProps> = ({ se
             createShortRequest(
               shortId,
               "v1/temporal-segmentation",
+              1,
               (requestId) => {
                 showNotification("Short Request Created", `Request ID: ${requestId}`, "success");
                 window.open(`/shorts?short_id=${shortId}`, '_blank');
@@ -147,6 +149,7 @@ export const RecommendedShortIdeas: React.FC<RecommendedShortIdeasProps> = ({ se
               createShortRequest(
                 shortId,
                 "v1/temporal-segmentation",
+                20,
                 (requestId) => {
                   showNotification("Short Request Created", `Request ID: ${requestId}`, "success");
                   window.open(`/shorts?short_id=${shortId}`, '_blank');
@@ -203,12 +206,14 @@ export const RecommendedShortIdeas: React.FC<RecommendedShortIdeasProps> = ({ se
                       {segment.shortIdeaExplanation}
                     </p>
                     <div className="flex gap-3 mb-4">
-                      <Button
+                      <CreditButton
+                        creditCost={1}
+                        confirmationMessage={"You're planning on generating a short, this will cost roughly 1 credit."}
                         onClick={() => handleGenerateShort(segment)}
                         className="!bg-primary !text-purple-900 font-bold"
                       >
                         Generate Short
-                      </Button>
+                      </CreditButton>
                       <Button
                         onClick={() => onSeek(segment.earliestStartTime + 1)}
                       >

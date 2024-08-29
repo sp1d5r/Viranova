@@ -1,15 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import {
-  Bell,
+  Bell, Bolt,
   CircleUser,
   Home,
   LineChart,
   Menu,
-  Package,
-  Package2,
   Search,
-  ShoppingCart, Smartphone, Tv,
-  Users, Video,
+  Smartphone, Tv,
+  Video,
 } from "lucide-react"
 
 import { Badge } from "../components/ui/badge"
@@ -44,7 +42,8 @@ import {Popover, PopoverTrigger, PopoverContent} from "../components/ui/popover"
 import {ScrollArea} from "../components/ui/scroll-area";
 import FirebaseFirestoreService from "../services/database/strategies/FirebaseFirestoreService";
 import {ChannelsTracking} from "../types/collections/Channels";
-import {User} from "../types/User";
+import {User} from "../types/collections/User";
+import {useUser} from "../contexts/UserProvider";
 
 interface NavItem {
   id: string;
@@ -58,8 +57,8 @@ export default function Dashboard() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [selectedItem, setSelectedItem] = useState<string>('dashboard');
-  const [userDocument, setUserDocument] = useState<User | null>(null);
   const {authState, logout} = useAuth();
+  const {userData, loading} = useUser();
   const {showNotification, allNotifications} = useNotification();
 
   const [navItems, setNavItems] = useState<NavItem[]>([
@@ -73,23 +72,12 @@ export default function Dashboard() {
   useEffect(() => {
     if (authState.user) {
       // Get channels
-      FirebaseFirestoreService.getDocument<User>(
-        "users",
-        authState.user.uid,
-        (doc) => {
-          if (doc) {
-            setUserDocument(doc);
-          } else {
-            // User document doesn't exist, you might want to handle this case
-            navigate("/onboarding");
-            console.log("User document not found. Consider creating one or redirecting to onboarding.");
-          }
-        },
-        (error) => {
-          console.error("Error fetching user document:", error);
-          showNotification("Error", "Failed to load user data", "error");
-        }
-      );
+      console.log(userData);
+      console.log(loading);
+      if (!userData && !loading) {
+        navigate("/onboarding");
+        console.log("User document not found. Consider creating one or redirecting to onboarding.");
+      }
 
       FirebaseFirestoreService.getDocument<ChannelsTracking>(
         "channelstracking",
@@ -109,7 +97,7 @@ export default function Dashboard() {
         }
       )
     }
-  }, [authState])
+  }, [authState, userData, loading])
 
   useEffect(() => {
     const tab = searchParams.get('tab');
@@ -186,7 +174,7 @@ export default function Dashboard() {
             </nav>
           </div>
           <div className="mt-auto p-4">
-            <Card x-chunk="A card with a call to action">
+            {userData && (!userData.subscription && userData.subscription!.status != 'active') && <Card x-chunk="A card with a call to action">
               <CardHeader className="p-2 pt-0 md:p-4">
                 <CardTitle>Upgrade to Pro</CardTitle>
                 <CardDescription>
@@ -200,6 +188,7 @@ export default function Dashboard() {
                 </Button>
               </CardContent>
             </Card>
+            }
           </div>
         </div>
       </div>
@@ -247,7 +236,7 @@ export default function Dashboard() {
                 ))}
               </nav>
               <div className="mt-auto">
-                <Card>
+                {userData && (!userData.subscription && userData.subscription!.status != 'active') && <Card>
                   <CardHeader>
                     <CardTitle>Upgrade to Pro</CardTitle>
                     <CardDescription>
@@ -260,7 +249,7 @@ export default function Dashboard() {
                       Upgrade
                     </Button>
                   </CardContent>
-                </Card>
+                </Card>}
               </div>
             </SheetContent>
           </Sheet>
@@ -276,9 +265,13 @@ export default function Dashboard() {
               </div>
             </form>
           </div>
+          <div className="flex gap-2 text-sm font-bold items center text-primary">
+            <p className="m-0">{userData?.credits?.current || 0} / {userData?.credits?.monthlyAllocation || 0}</p>
+            <Bolt />
+          </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="secondary" size="icon" className="rounded-full">
+              <Button variant="outline" size="icon" className="rounded-full">
                 <CircleUser className="h-5 w-5" />
                 <span className="sr-only">Toggle user menu</span>
               </Button>

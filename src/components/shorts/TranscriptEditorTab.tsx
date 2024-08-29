@@ -14,6 +14,7 @@ import {Popover, PopoverContent, PopoverTrigger} from "../ui/popover";
 import {Sparkles} from "lucide-react";
 import {Textarea} from "../ui/textarea";
 import {Input} from "../ui/input";
+import {CreditButton} from "../ui/credit-button";
 
 export interface TranscriptEditorTabProps {
   short: Short;
@@ -213,6 +214,7 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({ short,
     createShortRequest(
       shortId,
       "v1/temporal-segmentation",
+      1,
       (requestId) => {
         showNotification("AI Transcript Editing", `Request ID: ${requestId}`, "success");
       },
@@ -226,6 +228,7 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({ short,
     createShortRequest(
       shortId,
       "v2/temporal-segmentation",
+      1,
       (requestId) => {
         showNotification("AI Transcript Editing", `Request ID: ${requestId}`, "success");
       },
@@ -239,6 +242,7 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({ short,
     createShortRequest(
       shortId,
       "v1/generate-test-audio",
+      1,
       (requestId) => {
         showNotification("Generate Test Audio", `Request ID: ${requestId}`, "success");
       },
@@ -265,6 +269,7 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({ short,
         createShortRequest(
           shortId,
           "v1/generate-intro",
+          2,
           (requestId) => {
             showNotification("Create Short Intro", `Request ID: ${requestId}`, "success");
           },
@@ -284,6 +289,7 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({ short,
     createShortRequest(
       shortId,
       "v1/manual-override-transcript",
+      0,
       (requestId) => {
         showNotification("Manual Override", `Request ID: ${requestId}`, "success");
       },
@@ -311,30 +317,36 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({ short,
                 <PopoverContent>
                   <div className="flex flex-col gap-2">
                     Select a version to generate
-                    <Button
+                    <CreditButton
+                      creditCost={1}
+                      confirmationMessage={"AI Generation costs 1 credit."}
                       onClick={requestAIGeneration}
                       variant="default"
                       className="!bg-primary text-purple-900 "
                     >
                       AI Generation
-                    </Button>
-                    <Button
+                    </CreditButton>
+                    <CreditButton
+                      creditCost={1}
+                      confirmationMessage={"AI Generation costs 1 credit."}
                       onClick={requestAIGenerationV2}
                       variant="outline"
                       className="gap-2"
                     >
                       <Sparkles height={20} />
                       Version 2
-                    </Button>
+                    </CreditButton>
                   </div>
                 </PopoverContent>
               </Popover>
-              <Button
+              <CreditButton
+                creditCost={1}
+                confirmationMessage={"Requesting sound preview will cost you 1 credit. "}
                 onClick={requestSoundPreview}
                 variant="secondary"
               >
                 Preview Sound
-              </Button>
+              </CreditButton>
               <Button
                 onClick={() => editing ? handleQuitEditing() : setEditing(true)}
                 variant={editing ? "destructive" : "default"}
@@ -426,9 +438,12 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({ short,
                     placeholder="Enter context (max 20 words)"
                     maxLength={100} // Approximate limit to prevent extremely long words
                   />
-                  <Button onClick={updateContextTranscript}>
+                  <CreditButton
+                    creditCost={2}
+                    confirmationMessage={"You are requesting a contextual intro, this costs 2 credits."}
+                    onClick={updateContextTranscript}>
                     Update Transcript
-                  </Button>
+                  </CreditButton>
                   {short.intro_audio_path && (
                     <div>
                       <p className="font-bold text-white mb-2">Intro Audio</p>

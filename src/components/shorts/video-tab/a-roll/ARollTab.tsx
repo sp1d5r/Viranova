@@ -10,6 +10,7 @@ import {BoundingBoxSuggestions} from "./BoundingBoxSuggestion";
 import {LoadingIcon} from "../../../loading/Loading";
 import {Alert, AlertDescription, AlertTitle} from "../../../ui/alert";
 import {useShortRequestManagement} from "../../../../contexts/ShortRequestProvider";
+import {CreditButton} from "../../../ui/credit-button";
 
 type ProcessingStage = {
   id: string;
@@ -32,6 +33,7 @@ export const ARollTabContent: React.FC<ARollTabContentProps> = ({ short, shortId
     createShortRequest(
       shortId,
       "v1/create-short-video",
+      5,
       (requestId) => {
         showNotification("Crop Short Video", `Request ID: ${requestId}`, "success");
       },
@@ -97,11 +99,15 @@ export const ARollTabContent: React.FC<ARollTabContentProps> = ({ short, shortId
             This feature is still in beta, email me if you need help - {' '}
             <a className="text-primary underline" href="mailto:elijahahmad03@gmail.com">elijahahmad03@gmail.com</a>.
           </div>
-          <Button variant={"outline"} cooldown={200} onClick={() => {
+          <CreditButton
+            variant={"outline"}
+            creditCost={5}
+            confirmationMessage={"Regenerating the process will cost 5 credits to complete."}
+            cooldown={200} onClick={() => {
             handleBeginProcessing()
           }}>
             Regenerate...
-          </Button>
+          </CreditButton>
         </div>
       </AlertDescription>
     </Alert>

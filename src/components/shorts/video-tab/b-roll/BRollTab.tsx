@@ -11,6 +11,7 @@ import FirebaseFirestoreService from "../../../../services/database/strategies/F
 import {Terminal} from "lucide-react";
 import {useNotification} from "../../../../contexts/NotificationProvider";
 import {useShortRequestManagement} from "../../../../contexts/ShortRequestProvider";
+import {CreditButton} from "../../../ui/credit-button";
 
 interface BRollTabContentProps {
   short: Short;
@@ -216,12 +217,15 @@ const BRollTab: React.FC<BRollTabContentProps> = ({ short, shortId }) => {
         >
           Use A-Roll
         </Button>
-        <Button
+        <CreditButton
+          creditCost={2}
+          confirmationMessage={"You're generating the B-Roll, this will cost 2 credits."}
           cooldown={100}
           onClick={() => {
             createShortRequest(
               shortId,
               "v1/generate-b-roll",
+              2,
               (requestId) => {
                 showNotification("Generate A-Roll", `Request ID: ${requestId}`, "success");
               },
@@ -232,7 +236,7 @@ const BRollTab: React.FC<BRollTabContentProps> = ({ short, shortId }) => {
           }}
         >
           Generate B-Roll
-        </Button>
+        </CreditButton>
       </div>
     </div>
   );

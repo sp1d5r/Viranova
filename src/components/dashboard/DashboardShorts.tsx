@@ -93,6 +93,9 @@ export const DashboardShorts: React.FC = () => {
         });
 
         setShorts(sortedShorts);
+      },
+      (error) => {
+        console.log(error.message)
       }
     );
   }, [authState]);

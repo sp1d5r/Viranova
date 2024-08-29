@@ -24,6 +24,7 @@ import {PopoverContent} from "@radix-ui/react-popover";
 import {HoverCard, HoverCardContent, HoverCardTrigger} from "../components/ui/hover-card";
 import {useShortRequestManagement} from "../contexts/ShortRequestProvider";
 import {ShortRequestEndpoints} from "../types/collections/Request";
+import {CreditButton} from "../components/ui/credit-button";
 
 export type TabType = "short-settings" | "transcript-editor" | "attention-capture" | "export" | "performance" | "requests";
 
@@ -262,12 +263,15 @@ export const Shorts: React.FC = () => {
                             <div className="grid gap-2">
                               <div className="grid grid-cols-2 items-center gap-4">
                                 <Label htmlFor="width">Confirm AutoGenerate</Label>
-                                <Button
+                                <CreditButton
+                                  creditCost={20}
+                                  confirmationMessage={"You're auto-generating a video, we're expecting this to take 20 credits"}
                                   onClick={() => {
                                     if (short_id) {
                                       createShortRequest(
                                         short_id,
                                         stage.endpoint,
+                                        20,
                                         () => {
                                         },
                                         () => {
@@ -278,7 +282,7 @@ export const Shorts: React.FC = () => {
                                   }}
                                 >
                                   Generate
-                                </Button>
+                                </CreditButton>
                               </div>
                             </div>
                           </Card>

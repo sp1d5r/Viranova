@@ -9,6 +9,7 @@ import {NotificationProvider} from "./contexts/NotificationProvider";
 import {AuthProvider} from "./contexts/Authentication";
 import { PostHogProvider} from 'posthog-js/react'
 import {Toaster} from "./components/ui/toaster";
+import {UserProvider} from "./contexts/UserProvider";
 
 const options = {
   api_host: process.env.REACT_APP_PUBLIC_POSTHOG_HOST,
@@ -24,10 +25,12 @@ root.render(
       options={options}
     >
       <AuthProvider>
+        <UserProvider>
           <NotificationProvider>
               <App />
               <Toaster />
           </NotificationProvider>
+        </UserProvider>
       </AuthProvider>
     </PostHogProvider>
   </React.StrictMode>

@@ -9,6 +9,7 @@ import ClipPathOverlay from "./ClipPathOverlay";
 import {Button} from "../../../ui/button";
 import {Slider} from "../../../ui/slider";
 import {useShortRequestManagement} from "../../../../contexts/ShortRequestProvider";
+import {CreditButton} from "../../../ui/credit-button";
 
 export interface BoundingBoxSuggestionsProps {
   short: Short;
@@ -317,11 +318,14 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({ 
             </Button>
           ))}
           <div className="flex-1"/>
-          <Button
+          <CreditButton
+            creditCost={2}
+            confirmationMessage={"You are generating A-Roll, make sure this is accurate because it will cost 2 credits."}
             onClick={() => {
               createShortRequest(
                 shortId,
                 "v1/generate-a-roll",
+                2,
                 (requestId) => {
                   showNotification("Generate A-Roll", `Request ID: ${requestId}`, "success");
                 },
@@ -333,7 +337,7 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({ 
             cooldown={100}
           >
             Generate A-Roll
-          </Button>
+          </CreditButton>
         </div>
       </div>
     </div>

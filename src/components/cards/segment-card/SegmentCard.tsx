@@ -78,6 +78,7 @@ export const SegmentCard: React.FC<SegmentCardProps> = ({currentSegment, segment
         createShortRequest(
           shortId,
           "v1/temporal-segmentation",
+          1,
           (requestId) => {
             showNotification("Short Request Created", `Request ID: ${requestId}`, "success");
             window.location.href = `/shorts?short_id=${shortId}`;

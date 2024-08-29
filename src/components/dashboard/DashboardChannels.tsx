@@ -13,6 +13,7 @@ import { useAuth } from "../../contexts/Authentication";
 import FirebaseDatabaseService from "../../services/database/strategies/FirebaseFirestoreService";
 import ChannelDetails from "./channels/DetailedChannelView";
 import { useNotification } from "../../contexts/NotificationProvider";
+import {CreditButton} from "../ui/credit-button";
 
 export interface DashboardChannelsProps {
   userId?: string;
@@ -184,9 +185,9 @@ export const DashboardChannels: React.FC<DashboardChannelsProps> = ({ userId }) 
                       value={newChannelId}
                       onChange={(e) => setNewChannelId(e.target.value)}
                     />
-                    <Button className="h-9" onClick={handleAddChannel} disabled={isLoading}>
+                    <CreditButton className="h-9" onClick={handleAddChannel} disabled={isLoading} creditCost={50} confirmationMessage={"This action will cost 50 credits every month. Are you sure?"}>
                       <GitPullRequestCreateArrow size={16}/>
-                    </Button>
+                    </CreditButton>
                   </div>
                   <ScrollArea className="h-[80vh] my-2">
                     {channels.map((channel, index) => (

@@ -43,6 +43,8 @@ export const Onboarding: React.FC<OnboardingProps> = () => {
   });
   const [selectedTier, setSelectedTier] = useState<SubscriptionTier>('basic');
   const [currentThemeWord, setCurrentThemeWord] = useState('');
+  const [discountCode, setDiscountCode] = useState('');
+  const [isDiscountApplied, setIsDiscountApplied] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -59,6 +61,27 @@ export const Onboarding: React.FC<OnboardingProps> = () => {
         brandTheme: [...formData.brandTheme, currentThemeWord.trim()]
       });
       setCurrentThemeWord('');
+    }
+  };
+
+  const handleDiscountCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDiscountCode(e.target.value);
+  };
+
+  const applyDiscountCode = async () => {
+    if (discountCode === 'JHDNCKAJNDCKJCEOJEQOFPORKWE') {
+      setIsDiscountApplied(true);
+      toast({
+        title: "Success",
+        description: "Discount code applied successfully!",
+        variant: "default",
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: "Invalid discount code.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -100,60 +123,96 @@ export const Onboarding: React.FC<OnboardingProps> = () => {
     try {
       const tierDetails = getSubscriptionDetails(selectedTier);
 
-      // Step 1: Create Stripe customer
-      await StripePaymentService.createCustomer(
-        { email: authState.user.email },
-        async (customerId) => {
-          // Step 2: Store form data and initial subscription info in Firestore
-          await FirebaseFirestoreService.updateDocument(
-            "users",
-            authState.user!.uid,
-            {
-              ...formData,
-              stripeCustomerId: customerId,
-              selectedTier: selectedTier,
-              paymentPending: true,
+      // If discount is applied, skip payment process
+      if (isDiscountApplied) {
+        await FirebaseFirestoreService.updateDocument(
+          "users",
+          authState.user.uid,
+          {
+            ...formData,
+            subscription: {
+              status: 'active',
+              tier: selectedTier,
+              startDate: new Date(),
+              endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)), // Set end date to 1 year from now
+              lastPaymentDate: new Date(),
+              stripeSubscriptionId: 'COMP_' + authState.user.uid, // Use a prefix to indicate it's a complimentary subscription
             },
-            async () => {
-              // Step 3: Create a Checkout Session
-              await StripePaymentService.createCheckoutSession(
-                tierDetails.stripePriceId,
-                customerId,
-                `${window.location.origin}/onboarding-success?userId=${authState.user!.uid}`, // Pass userId in URL
-                `${window.location.origin}/onboarding`,
-                (sessionUrl) => {
-                  // Redirect to Stripe Checkout
-                  window.location.href = sessionUrl;
-                },
-                (error) => {
-                  toast({
-                    title: "Error",
-                    description: "Failed to start checkout process. Please try again.",
-                    variant: "destructive",
-                  });
-                  console.error("Error creating checkout session:", error);
-                }
-              );
+            credits: {
+              current: tierDetails.credits,
+              monthlyAllocation: tierDetails.credits,
             },
-            (error) => {
-              toast({
-                title: "Error",
-                description: "Failed to update user data. Please try again.",
-                variant: "destructive",
-              });
-              console.error("Error updating user document:", error);
-            }
-          );
-        },
-        (error) => {
-          toast({
-            title: "Error",
-            description: "Failed to create customer. Please try again.",
-            variant: "destructive",
-          });
-          console.error("Error creating customer:", error);
-        }
-      );
+          },
+          () => {
+            navigate('/dashboard');
+          },
+          (error) => {
+            toast({
+              title: "Error",
+              description: "Failed to update user data. Please try again.",
+              variant: "destructive",
+            });
+            console.error("Error updating user document:", error);
+          }
+        );
+      } else {
+        const tierDetails = getSubscriptionDetails(selectedTier);
+
+        // Step 1: Create Stripe customer
+        await StripePaymentService.createCustomer(
+          { email: authState.user.email },
+          async (customerId) => {
+            // Step 2: Store form data and initial subscription info in Firestore
+            await FirebaseFirestoreService.updateDocument(
+              "users",
+              authState.user!.uid,
+              {
+                ...formData,
+                stripeCustomerId: customerId,
+                selectedTier: selectedTier,
+                paymentPending: true,
+              },
+              async () => {
+                // Step 3: Create a Checkout Session
+                await StripePaymentService.createCheckoutSession(
+                  tierDetails.stripePriceId,
+                  customerId,
+                  `${window.location.origin}/onboarding-success?userId=${authState.user!.uid}`, // Pass userId in URL
+                  `${window.location.origin}/onboarding`,
+                  (sessionUrl) => {
+                    // Redirect to Stripe Checkout
+                    window.location.href = sessionUrl;
+                  },
+                  (error) => {
+                    toast({
+                      title: "Error",
+                      description: "Failed to start checkout process. Please try again.",
+                      variant: "destructive",
+                    });
+                    console.error("Error creating checkout session:", error);
+                  }
+                );
+              },
+              (error) => {
+                toast({
+                  title: "Error",
+                  description: "Failed to update user data. Please try again.",
+                  variant: "destructive",
+                });
+                console.error("Error updating user document:", error);
+              }
+            );
+          },
+          (error) => {
+            toast({
+              title: "Error",
+              description: "Failed to create customer. Please try again.",
+              variant: "destructive",
+            });
+            console.error("Error creating customer:", error);
+          }
+        );
+      }
     } catch (error) {
       console.error("Error in handleSubmit:", error);
     }
@@ -344,6 +403,24 @@ export const Onboarding: React.FC<OnboardingProps> = () => {
             </div>
           ))}
         </RadioGroup>
+        <div className="flex flex-col space-y-1.5">
+          <Label htmlFor="discountCode">Discount Code</Label>
+          <div className="flex space-x-2">
+            <Input
+              id="discountCode"
+              value={discountCode}
+              onChange={handleDiscountCodeChange}
+              placeholder="Enter discount code"
+              disabled={isDiscountApplied}
+            />
+            <Button onClick={applyDiscountCode} disabled={isDiscountApplied}>
+              Apply
+            </Button>
+          </div>
+        </div>
+        {isDiscountApplied && (
+          <p className="text-green-500">Discount applied: 100% off</p>
+        )}
         <Button onClick={handleSubmit}>Subscribe and Complete Setup</Button>
       </div>
     </CardContent>

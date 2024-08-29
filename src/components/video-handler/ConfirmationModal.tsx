@@ -13,6 +13,7 @@ import {Short} from "../../types/collections/Shorts";
 import FirebaseFirestoreService from "../../services/database/strategies/FirebaseFirestoreService";
 import {Segment} from "../../types/collections/Segment";
 import {Card, CardContent} from "../ui/card";
+import {CreditButton} from "../ui/credit-button";
 
 interface ConfirmationModalProps {
   isOpen: boolean;
@@ -55,6 +56,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         <AlertDialogHeader>
           <AlertDialogTitle className="text-white">Confirm Automatic Short Generation</AlertDialogTitle>
           <AlertDialogDescription>
+            Auto-generation can be intensive. It costs roughly 20 credits...
             Are you sure you want to automatically generate a short for the segment:
             <br />
             <strong>{segment ? segment.segmentTitle : "No segment selected..."}</strong>?
@@ -86,7 +88,14 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel onClick={onClose} className="text-white">Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm}>Confirm</AlertDialogAction>
+          <AlertDialogAction>
+            <CreditButton
+              creditCost={20}
+              onClick={onConfirm}
+            >
+              Confirm
+            </CreditButton>
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

@@ -38,6 +38,7 @@ import {useNotification} from "../../contexts/NotificationProvider";
 import FirebaseFirestoreService from "../../services/database/strategies/FirebaseFirestoreService";
 import {toNumber} from "lodash";
 import {useAuth} from "../../contexts/Authentication";
+import {Comment, documentToComment} from "../../types/collections/Comments";
 
 export interface DashboardLandingProps {
 
@@ -179,9 +180,10 @@ interface AnalyticsSummary {
 }
 
 
+
 export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
   const [shorts, setShorts] = useState<Short[]>([]);
-  const [analytics, setAnalytics] = useState<Analytics[]>([]);
+  const [comments, setComments] = useState<Comment[]>([])
   const [selectedShort, setSelectedShort] = useState<string | null>(null);
   const { showNotification } = useNotification();
   const {authState} = useAuth();
@@ -194,12 +196,31 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
         authState.user.uid,
         'last_updated',
         (documents) => {
-          setShorts(documents.map(doc => documentToShort(doc))
+          const shorts: Short[] = documents.map(doc => documentToShort(doc))
             .sort((elem1, elem2) => {
               const date1 = elem1.last_updated ? toNumber(elem1.last_updated) : 0;
               const date2 = elem2.last_updated ? toNumber(elem2.last_updated) : 0;
               return date2 - date1;
-            }));
+            })
+          setShorts(shorts);
+        },
+        (error) => {
+          showNotification("Error", error.message, "error");
+        }
+      );
+      FirebaseFirestoreService.queryDocuments(
+        '/comments',
+        'uid',
+        authState.user.uid,
+        'createTime',
+        (documents) => {
+          const qComments: Comment[] = documents.map(doc => documentToComment(doc))
+            .sort((elem1, elem2) => {
+              const date1 = elem1.createTime ? toNumber(elem1.createTime) : 0;
+              const date2 = elem2.createTime ? toNumber(elem2.createTime) : 0;
+              return date2 - date1;
+            })
+          setComments(qComments);
         },
         (error) => {
           showNotification("Error", error.message, "error");
@@ -208,39 +229,6 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
     }
   }, [authState]);
 
-  useEffect(() => {
-    const fetchAnalytics = async () => {
-      const allAnalytics: Analytics[] = [];
-      for (const short of shorts) {
-        await new Promise<void>((resolve) => {
-          FirebaseFirestoreService.queryDocuments<Analytics>(
-            'analytics',
-            'shortId',
-            short.id,
-            'taskTime',
-            (docs) => {
-              if (docs.length > 0) {
-                allAnalytics.push(docs[docs.length - 1]);
-              }
-              console.log(allAnalytics);
-              showNotification("Success", "Analytics Collected, analysis needed.", "success");
-              resolve();
-            },
-            (error) => {
-              showNotification("Error", error.message, "error");
-              console.log(error)
-            }
-          );
-        });
-      }
-      setAnalytics(allAnalytics);
-    };
-
-    if (shorts.length > 0) {
-      fetchAnalytics();
-      console.log('allanlytics', analytics);
-    }
-  }, [shorts]);
 
   const [tiktokVideoData, setTikTokVideoData] = useState<TikTokVideo[]>([]);
   const [analyticsSummary, setAnalyticsSummary] = useState<AnalyticsSummary>({
@@ -255,87 +243,60 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
   });
 
   useEffect(() => {
-    if (analytics && analytics.length > 0) {
-      const processedData: TikTokVideo[] = analytics.map(item => {
-        const videoAnalytics = item.videoAnalytics && item.videoAnalytics[0]; // Most recent video analytics
-        if (!videoAnalytics) {
-          console.error('Video analytics not found for item:', item);
-          return {
-            id: 'Unknown',
-            description: 'No description',
-            link: '#',
-            likes: 0,
-            comments: 0,
-            views: 0,
-            date: 'Invalid Date'
-          };
-        }
-        let dateString = '';
-        try {
-          // Ensure createTime is a valid number
-          const createTime = Number(videoAnalytics.createTime);
-          if (!isNaN(createTime) && isFinite(createTime)) {
-            dateString = new Date(createTime * 1000).toISOString();
-          } else {
-            dateString = 'Invalid Date';
-          }
-        } catch (error) {
-          console.error('Error processing date:', error);
-          dateString = 'Invalid Date';
-        }
-        return {
-          id: videoAnalytics.id || 'Unknown',
-          description: videoAnalytics.text || 'No description',
-          link: videoAnalytics.webVideoUrl || '#',
-          likes: videoAnalytics.diggCount || 0,
-          comments: videoAnalytics.commentCount || 0,
-          views: videoAnalytics.playCount || 0,
-          date: dateString,
-        };
-      });
-
-      setTikTokVideoData(processedData);
-
-      // Calculate totals and changes
+    if (shorts && shorts.length > 0) {
       const currentDate = new Date();
       const lastMonthDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, currentDate.getDate());
 
+      const processedData: TikTokVideo[] = shorts
+        .filter(short => {
+          if (short.last_updated){
+            try {
+              const shortDate = short.last_updated.toDate();
+              return !isNaN(shortDate.getTime()) && shortDate >= lastMonthDate;
+            } catch {
+              return false
+            }
+          } else {
+            return false
+          }
+        })
+        .map(short => {
+          return {
+            id: short.id || 'Unknown',
+            description: short.short_idea || 'No description',
+            link: short.tiktok_link || 'No Link Specified...',
+            likes: short.likes || 0,
+            comments: short.comments || 0,
+            views: short.views || 0,
+            date: short.last_updated.toDate().toString() || short.last_updated.toString() || 'Invalid Date',
+          };
+        });
+
+      setTikTokVideoData(processedData);
+
       let totalViews = 0, totalLikes = 0, totalComments = 0;
-      let lastMonthViews = 0, lastMonthLikes = 0, lastMonthComments = 0;
 
       processedData.forEach(video => {
-        const videoDate = new Date(video.date);
-        if (!isNaN(videoDate.getTime()) && videoDate >= lastMonthDate) {
-          totalViews += video.views;
-          totalLikes += video.likes;
-          totalComments += video.comments;
-        } else if (!isNaN(videoDate.getTime())) {
-          lastMonthViews += video.views;
-          lastMonthLikes += video.likes;
-          lastMonthComments += video.comments;
-        }
+        totalViews += video.views;
+        totalLikes += video.likes;
+        totalComments += video.comments;
       });
 
-      const viewsChange = lastMonthViews !== 0 ? ((totalViews - lastMonthViews) / lastMonthViews) * 100 : 0;
-      const likesChange = lastMonthLikes !== 0 ? ((totalLikes - lastMonthLikes) / lastMonthLikes) * 100 : 0;
-      const commentsChange = lastMonthComments !== 0 ? ((totalComments - lastMonthComments) / lastMonthComments) * 100 : 0;
-
-      // Simplify follower count logic
-      const followerCount = 0;
-      const followerCountUpdated = 'N/A';
+      // Since we're only looking at the last month, we don't need to calculate changes
+      // If you want to compare to the previous month, you'd need to fetch that data separately
 
       setAnalyticsSummary({
         totalViews,
         totalLikes,
         totalComments,
-        viewsChange,
-        likesChange,
-        commentsChange,
-        followerCount,
-        followerCountUpdated,
+        viewsChange: 0, // Set to 0 or remove if not needed
+        likesChange: 0, // Set to 0 or remove if not needed
+        commentsChange: 0, // Set to 0 or remove if not needed
+        followerCount: 0, // You might want to update this if you have follower data
+        followerCountUpdated: 'N/A',
       });
     }
-  }, [analytics]);
+  }, [shorts]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 5;
@@ -496,19 +457,22 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
         <CardContent className="grid gap-6">
           <div className="h-[400px] overflow-y-auto pr-4">
             <div className="grid gap-6">
-              {dummyComments.map((comment) => (
+              {comments.map((comment) => (
                 <div key={comment.id} className="flex items-start gap-4">
                   <Avatar className="h-9 w-9">
-                    <AvatarImage src={comment.user.avatar} alt={comment.user.name} />
-                    <AvatarFallback>{comment.user.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                    <AvatarImage src={comment.avatarThumbnail} alt={comment.uniqueId} />
+                    <AvatarFallback>{comment.uniqueId}</AvatarFallback>
                   </Avatar>
                   <div className="grid gap-1">
                     <div className="flex items-center">
-                      <p className="text-sm font-medium leading-none">{comment.user.name}</p>
-                      <p className="ml-2 text-sm text-muted-foreground">{comment.user.username}</p>
+                      <p className="text-sm font-medium leading-none">{comment.uniqueId}</p>
+                      <p className="ml-2 text-sm text-muted-foreground">Likes: {comment.likes}, Replies: {comment.replyCommentTotal}</p>
                     </div>
-                    <p className="text-sm text-muted-foreground">{comment.comment}</p>
-                    <p className="text-xs text-muted-foreground">{comment.timestamp}</p>
+                    <p className="text-sm text-muted-foreground">{comment.text}</p>
+                    <p className="text-xs text-muted-foreground">{comment.createTime.toDate().toString()}</p>
+                    <span className="text-xs text-muted-foreground">Clip:
+                      <a className="text-primary underline" href={`shorts?tab=performance&short_id=${comment.shortId}`}> {comment.shortId}</a>
+                    </span>
                   </div>
                 </div>
               ))}
