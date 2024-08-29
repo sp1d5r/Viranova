@@ -91,7 +91,7 @@ export const RecommendedShortIdeas: React.FC<RecommendedShortIdeasProps> = ({ se
               "v1/temporal-segmentation",
               (requestId) => {
                 showNotification("Short Request Created", `Request ID: ${requestId}`, "success");
-                window.location.href = `/shorts?short_id=${shortId}`;
+                window.open(`/shorts?short_id=${shortId}`, '_blank');
               },
               (error) => {
                 showNotification("Short Request Creation Failed", `${error}`, "error");
@@ -149,7 +149,7 @@ export const RecommendedShortIdeas: React.FC<RecommendedShortIdeasProps> = ({ se
                 "v1/temporal-segmentation",
                 (requestId) => {
                   showNotification("Short Request Created", `Request ID: ${requestId}`, "success");
-                  window.location.href = `/shorts?short_id=${shortId}`;
+                  window.open(`/shorts?short_id=${shortId}`, '_blank');
                 },
                 (error) => {
                   showNotification("Short Request Creation Failed", `${error}`, "error");
