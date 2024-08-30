@@ -3,7 +3,6 @@ import {User} from "../types/User";
 import firebase from "firebase/compat";
 import {FirebaseAuthService} from "../services/authentication/strategies";
 
-
 interface AuthState {
     isAuthenticated?: boolean;
     user: null | User;
@@ -14,6 +13,7 @@ interface AuthContextProps {
     login: (email: string, password: string, onSuccess?: () => void, onFailure?: (error: firebase.FirebaseError) => void) => void;
     logout: (onSuccess?: () => void, onFailure?: (error: firebase.FirebaseError) => void) => void;
     register: (email: string, name:string, password: string, onSuccess?: () => void, onFailure?: (error: any) => void) => void;
+    resetPassword: (email: string, onSuccess?: () => void, onFailure?: (error: any) => void) => void;
 }
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -68,10 +68,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
     };
 
+    const resetPassword = async (email: string, onSuccess?: () => void, onFailure?: (error: any) => void) => {
+        try {
+            await FirebaseAuthService.resetPassword(email);
+            if (onSuccess) onSuccess();
+        } catch (error) {
+            if (onFailure) onFailure(error);
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ authState, login, logout, register }}>
-            {children}
-        </AuthContext.Provider>
+      <AuthContext.Provider value={{ authState, login, logout, register, resetPassword }}>
+          {children}
+      </AuthContext.Provider>
     );
 }
 

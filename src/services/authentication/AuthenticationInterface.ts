@@ -5,6 +5,7 @@ export interface AuthService {
     logout(): Promise<void>;
     register(email: string, password: string, name: string): Promise<User | null>;
     onAuthStateChanged(callback: (user: User | null) => void): () => void;
+    resetPassword(email: string): Promise<void>;
 }
 
 export default AuthService;

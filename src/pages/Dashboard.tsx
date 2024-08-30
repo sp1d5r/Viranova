@@ -303,7 +303,9 @@ export default function Dashboard() {
                           "Signed Out",
                           "You've successfully signed out, it might take a second to propagate",
                           "success"
-                        )},
+                        )
+                      window.location.reload();
+                      },
                       () => {
                         showNotification(
                           "Failed to Sign Out",

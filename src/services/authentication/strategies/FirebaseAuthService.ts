@@ -1,7 +1,7 @@
 import 'firebase/auth';
 import AuthService from "../AuthenticationInterface";
 import app from "../../../config/firebaseConfig";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, User as FirebaseUser, updateProfile } from 'firebase/auth';
+import { getAuth, sendPasswordResetEmail, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, User as FirebaseUser, updateProfile } from 'firebase/auth';
 import { User } from "../../../types/User";
 
 const auth = getAuth(app);
@@ -46,6 +46,10 @@ const FirebaseAuthService: AuthService = {
                 callback(null);
             }
         });
+    },
+
+    async resetPassword(email: string) {
+        await sendPasswordResetEmail(auth, email);
     }
 }
 
