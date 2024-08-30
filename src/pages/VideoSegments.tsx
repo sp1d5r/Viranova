@@ -65,7 +65,7 @@ export const VideoSegments: React.FC<VideoSegmentsProps> = ({ videoId: propsVide
 
     return paramVideoId ? (
       <ScrollableLayout>
-          <h1 className="text-title">Video Segments</h1>
+          <h1 className="text-title text-white">Video Segments</h1>
           {VideoContent}
       </ScrollableLayout>
     ) : VideoContent;

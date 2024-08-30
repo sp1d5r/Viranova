@@ -13,7 +13,7 @@ import {
   MessageCircle,
   Eye,
   Heart,
-  Users, ChevronLeft, ChevronRight,
+  Users, ChevronLeft, ChevronRight, ChevronUp, Plus,
 } from "lucide-react"
 import {
   Avatar,
@@ -39,6 +39,7 @@ import FirebaseFirestoreService from "../../services/database/strategies/Firebas
 import {toNumber} from "lodash";
 import {useAuth} from "../../contexts/Authentication";
 import {Comment, documentToComment} from "../../types/collections/Comments";
+import {Input} from "../ui/input";
 
 export interface DashboardLandingProps {
 
@@ -184,7 +185,8 @@ interface AnalyticsSummary {
 export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
   const [shorts, setShorts] = useState<Short[]>([]);
   const [comments, setComments] = useState<Comment[]>([])
-  const [selectedShort, setSelectedShort] = useState<string | null>(null);
+  const [newVideoLink, setNewVideoLink] = useState('');
+  const [isAddingVideo, setIsAddingVideo] = useState(false);
   const { showNotification } = useNotification();
   const {authState} = useAuth();
 
@@ -319,6 +321,51 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
     setCurrentPage(1);
   }, [tiktokVideoData]);
 
+  const isValidYouTubeUrl = (url: string) => {
+    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+    return youtubeRegex.test(url);
+  }
+
+  const handleAddVideo = () => {
+    if (newVideoLink) {
+      if (isValidYouTubeUrl(newVideoLink)) {
+        FirebaseFirestoreService.addDocument("videos", {
+            uid: authState.user!.uid,
+            processingProgress: 0,
+            status: "Link Provided",
+            previousStatus: "Started...",
+            uploadTimestamp: Date.now(),
+            progressMessage: "Performing Download",
+            queuePosition: -1,
+            link: newVideoLink,
+          },
+          (doc_id) => {
+            showNotification(
+              "Video Added!",
+              `Successfully added new video: ${doc_id}`,
+              "success",
+              10000
+            );
+            setNewVideoLink('');
+            setIsAddingVideo(false);
+            window.location.href = `/video-handler?video_id=${doc_id}`
+          },
+          () => {
+            showNotification(
+              "Error Adding Video",
+              'Failed to add video... Please try again later.',
+              "error",
+              10000
+            );
+          });
+      } else {
+        showNotification("Invalid Link", "Please provide a valid YouTube link.", "error");
+      }
+    } else {
+      showNotification("No Link", "You need to add a YouTube link", "error");
+    }
+  };
+
   return <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
     <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
       <Card>
@@ -370,6 +417,41 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
         </CardContent>
       </Card>
     </div>
+    <div>
+      <div className="flex justify-between items-center mb-4">
+        <div className="px-2">
+          <h2 className="font-bold">Add New Video</h2>
+          <p className="text-sm">To add a new video press the add video button and then enter your video's link.</p>
+        </div>
+        <Button
+          onClick={() => setIsAddingVideo(!isAddingVideo)}
+          className="flex items-center gap-2"
+        >
+          {isAddingVideo ? 'Cancel' : 'Add Video'}
+          {isAddingVideo ? <ChevronUp className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+        </Button>
+      </div>
+
+      {isAddingVideo && (
+        <Card className="mb-2">
+          <CardContent className="pt-6">
+            <div className="flex gap-4">
+              <Input
+                type="text"
+                placeholder="Enter YouTube video link"
+                value={newVideoLink}
+                onChange={(e) => setNewVideoLink(e.target.value)}
+                className="flex-grow"
+              />
+              <Button onClick={handleAddVideo} disabled={!newVideoLink}>
+                Add New Video
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+
     <div className="grid gap-4 md:gap-8 lg:grid-cols-2 xl:grid-cols-3">
       <Card
         className="xl:col-span-2"
