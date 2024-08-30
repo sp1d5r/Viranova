@@ -46,7 +46,7 @@ const tabConfig: TabConfig[] = [
 type ProcessingStage = {
   id: string;
   label: string;
-  status: 'pending' | 'processing' | 'completed';
+  status: 'not-started' | 'pending' | 'processing' | 'completed';
   endpoint: ShortRequestEndpoints;
   tabConfig: TabConfig;
 };
@@ -66,7 +66,7 @@ export const Shorts: React.FC = () => {
   const [stages, setStages] = useState<ProcessingStage[]>([
     { id: 'edit_transcript', label: 'Edit Transcript', endpoint: 'v1/temporal-segmentation', status: 'pending', tabConfig: tabConfig[1] },
     { id: 'generate_audio', label: 'Generate Audio', endpoint: 'v1/generate-test-audio', status: 'pending', tabConfig: tabConfig[1] },
-    { id: 'crop_clip', label: 'Cropping Clip', endpoint: 'v1/create-cropped-video', status: 'pending', tabConfig: tabConfig[2] },
+    { id: 'crop_clip', label: 'Regenerate Video', endpoint: 'v1/create-cropped-video', status: 'pending', tabConfig: tabConfig[2] },
     { id: 'visual_interest', label: 'Getting Visual Interest', endpoint: 'v1/create-cropped-video', status: 'pending', tabConfig: tabConfig[2] },
     { id: 'camera_cuts', label: 'Determining Camera Cuts', endpoint: 'v1/temporal-segmentation', status: 'pending', tabConfig: tabConfig[2] },
     { id: 'bounding_boxes', label: 'Find Bounding Boxes', endpoint: 'v1/get-bounding-boxes', status: 'pending', tabConfig: tabConfig[2] },
@@ -80,21 +80,21 @@ export const Shorts: React.FC = () => {
         return prevStages.map(stage => {
           switch (stage.id) {
             case 'edit_transcript':
-              return { ...stage, status: short.lines && short.lines.length > 0  ? 'completed' : 'processing' };
+              return { ...stage, status: short.lines  ? 'completed' : 'processing' };
             case 'generate_audio':
-              return { ...stage, status: short.temp_audio_file ? 'completed' : 'processing' };
+              return { ...stage, status: short.temp_audio_file ? 'completed' : short.lines && short.lines.length > 0  ? 'processing': 'not-started' };
             case 'crop_clip':
-              return { ...stage, status: short.short_clipped_video ? 'completed' : 'processing' };
+              return { ...stage, status: short.short_clipped_video ? 'completed' : short.temp_audio_file  ? 'processing': 'not-started' };
             case 'visual_interest':
-              return { ...stage, status: short.short_video_saliency ? 'completed' : 'processing' };
+              return { ...stage, status: short.short_video_saliency ? 'completed' : short.short_clipped_video  ? 'processing': 'not-started' };
             case 'camera_cuts':
-              return { ...stage, status: short.cuts && short.cuts.length > 0 ? 'completed' : 'processing' };
+              return { ...stage, status: short.cuts ? 'completed' : short.short_video_saliency  ? 'processing': 'not-started' };
             case 'bounding_boxes':
-              return { ...stage, status: short.bounding_boxes ? 'completed' : 'processing' };
+              return { ...stage, status: short.bounding_boxes ? 'completed' : short.cuts && short.cuts.length > 0 ? 'processing': 'not-started' };
             case 'generate_a_roll':
-              return { ...stage, status: short.short_a_roll ? 'completed' : 'processing' };
+              return { ...stage, status: short.short_a_roll ? 'completed' : short.bounding_boxes  ? 'processing': 'not-started' };
             case 'generate_final_clip':
-              return { ...stage, status: short.finished_short_location ? 'completed' : 'processing' };
+              return { ...stage, status: short.finished_short_location ? 'completed' : short.short_a_roll ? 'processing': 'not-started' };
             default:
               return stage;
           }
@@ -234,7 +234,7 @@ export const Shorts: React.FC = () => {
                 <div className="flex flex-col p-2">
                   <p className="text-white text-lg font-bold">Auto Generate</p>
                   <p>You can edit each component and select auto-generate from that point onwards.</p>
-                  {stages.map((stage) => (
+                  {stages.filter((elem) => {return elem.status != 'not-started'}).map((stage) => (
                     <div key={stage.id} className="flex items-center justify-between">
                       {stage.status === 'completed' && <CheckCircle2 className="text-green-500" />}
                       {stage.status === 'processing' && <Loader2 className="animate-spin text-blue-500" />}

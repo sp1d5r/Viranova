@@ -151,6 +151,9 @@ export interface Short extends BackendServerMetadata{
   comments?: number,
   views?: number,
   shares?: number,
+  background_video_path?: string,
+  transcript_disabled?: boolean,
+  selected_box_type?: string,
 }
 
 
@@ -234,6 +237,9 @@ export function documentToShort(docData: DocumentData): Short {
     comments: docData.comments,
     views: docData.views,
     shares: docData.shares,
+    transcript_disabled: docData.transcript_disabled,
+    background_video_path: docData.background_video_path,
+    selected_box_type: docData.selected_box_type,
   };
 }
 

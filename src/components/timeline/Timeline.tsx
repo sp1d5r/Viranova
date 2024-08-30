@@ -27,7 +27,7 @@ export const Timeline: React.FC<TimelineProps> = ({ segments, currentTime, onSee
           <Tooltip>
             <TooltipTrigger asChild>
               <button
-                onClick={() => onSeek(segment.earliestStartTime)}
+                onClick={() => onSeek(segment.earliestStartTime + 1)}
                 className={`h-5 rounded-md relative border 
                             ${segment.flagged ? 'border-red-500' : 'border-emerald-500'}
                             ${segment.latestEndTime <= currentTime ? 'bg-emerald-700' : ''}

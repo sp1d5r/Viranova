@@ -44,6 +44,7 @@ import FirebaseFirestoreService from "../services/database/strategies/FirebaseFi
 import {ChannelsTracking} from "../types/collections/Channels";
 import {User} from "../types/collections/User";
 import {useUser} from "../contexts/UserProvider";
+import {useBrowserNotification} from "../contexts/BrowserNotificationProvider";
 
 interface NavItem {
   id: string;
@@ -68,6 +69,15 @@ export default function Dashboard() {
     { id: 'shorts', title: 'Shorts', icon: <Smartphone className="h-4 w-4" /> },
     { id: 'analytics', title: 'Analytics', icon: <LineChart className="h-4 w-4" /> },
   ]);
+
+  const { requestNotificationPermission, notificationPermission } = useBrowserNotification();
+
+  useEffect(() => {
+    if (authState.user && notificationPermission === 'default') {
+      requestNotificationPermission();
+    }
+  }, [authState, notificationPermission, requestNotificationPermission]);
+
 
   useEffect(() => {
     if (authState.user) {

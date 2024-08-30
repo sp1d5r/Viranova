@@ -404,7 +404,7 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
                 </TableHeader>
                 <TableBody>
                   {tiktokVideoData.map((video) => (
-                    <TableRow key={video.id}>
+                    <TableRow onClick={() => {window.open(`/shorts?short_id=${video.id}`)}} key={video.id}>
                       <TableCell>
                         <div className="font-medium">{video.description}</div>
                         <a href={video.link} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">

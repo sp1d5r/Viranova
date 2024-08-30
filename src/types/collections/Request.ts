@@ -40,6 +40,7 @@ export interface ShortRequest extends Request{
   uid: string;
   progress?: number;
   creditCost?: number;
+  status?: string;
 }
 
 

@@ -7,6 +7,7 @@ import { Badge } from "../ui/badge";
 import { Progress } from "../ui/progress";
 import { ScrollArea } from "../ui/scroll-area";
 import {debounce} from "lodash";
+import {useBrowserNotification} from "../../contexts/BrowserNotificationProvider";
 
 interface RequestsTabProps {
   shortId: string;
@@ -20,6 +21,7 @@ const formatDuration = (start: Date, end: Date) => {
 
 const RequestCard: React.FC<{ request: ShortRequest }> = ({ request }) => {
   const getStatus = () => {
+    if (request.status && request.status == "failed") return "Failed";
     if (request.serverCompletedTimestamp) return 'Completed';
     if (request.serverStartedTimestamp) return 'In Progress';
     if (request.requestSubmittedTimestamp) return 'Submitted';
@@ -30,7 +32,7 @@ const RequestCard: React.FC<{ request: ShortRequest }> = ({ request }) => {
   const status = getStatus();
 
   return (
-    <Card className="mb-4">
+    <Card className={`mb-4 ${request.status && request.status == "failed" && '!border-red-600'}`} >
       <CardHeader>
         <div className="flex justify-between items-center">
           <CardTitle className="text-lg">{request.requestEndpoint}</CardTitle>
@@ -39,6 +41,7 @@ const RequestCard: React.FC<{ request: ShortRequest }> = ({ request }) => {
         <CardDescription>Created: {request.requestCreated?.toDate().toLocaleString()}, {request.id? request.id : ''}</CardDescription>
       </CardHeader>
       <CardContent>
+        {request.status && request.status == "failed" && <p className="bg-destructive">Request Failed. Check logs below. Email me if the error isn't clear.</p>}
         <div className="mb-4">
           <Progress value={request.progress || 0} className="w-full" />
           <p className="text-sm text-right mt-1">{request.progress || 0}% Complete</p>
@@ -78,6 +81,7 @@ const RequestCard: React.FC<{ request: ShortRequest }> = ({ request }) => {
 export const RequestsTab: React.FC<RequestsTabProps> = ({ shortId, short }) => {
   const [requests, setRequests] = useState<ShortRequest[]>([]);
   const { getShortRequests } = useShortRequestManagement();
+  const { notifyRequestCompleted } = useBrowserNotification();
 
   useEffect(() => {
     const debouncedFetch = debounce(async () => {
@@ -85,6 +89,15 @@ export const RequestsTab: React.FC<RequestsTabProps> = ({ shortId, short }) => {
         const fetchedRequests = await new Promise<ShortRequest[]>((resolve, reject) =>
           getShortRequests(shortId, resolve, reject)
         );
+
+        fetchedRequests.forEach(request => {
+          const existingRequest = requests.find(r => r.id === request.id);
+          if (request.serverCompletedTimestamp &&
+            (!existingRequest || !existingRequest.serverCompletedTimestamp)) {
+            notifyRequestCompleted(request);
+          }
+        });
+
         setRequests(fetchedRequests);
       } catch (error) {
         console.error('Failed to fetch requests:', error);

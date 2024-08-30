@@ -7,7 +7,9 @@ import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { AlertCircle } from "lucide-react";
-import {Tooltip, TooltipTrigger, TooltipProvider, TooltipContent } from "../ui/tooltip";
+import { Tooltip, TooltipTrigger, TooltipProvider, TooltipContent } from "../ui/tooltip";
+import { Switch } from "../ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
 export interface ShortSettingsTabProps {
   short: Short;
@@ -17,19 +19,31 @@ export interface ShortSettingsTabProps {
 export const ShortSettingsTab: React.FC<ShortSettingsTabProps> = ({ short, shortId }) => {
   const [shortIdea, setShortIdea] = useState<string>(short.short_idea);
   const [shortIdeaExplanation, setShortIdeaExplanation] = useState(short.short_idea_explanation);
+  const [defaultLineColor, setDefaultLineColor] = useState(short.defaultLineColor || "#000000");
+  const [transcriptDisabled, setTranscriptDisabled] = useState(short.transcript_disabled || false);
+  const [selectedBoxType, setSelectedBoxType] = useState(short.selected_box_type || "standard_tiktok");
+  const [backgroundVideoPath, setBackgroundVideoPath] = useState(short.background_video_path || "");
   const [isChanged, setIsChanged] = useState(false);
   const { showNotification } = useNotification();
-  console.log(short);
+
   useEffect(() => {
     setIsChanged(
       shortIdea !== short.short_idea ||
-      shortIdeaExplanation !== short.short_idea_explanation
+      shortIdeaExplanation !== short.short_idea_explanation ||
+      defaultLineColor !== (short.defaultLineColor || "#000000") ||
+      transcriptDisabled !== (short.transcript_disabled || false) ||
+      selectedBoxType !== (short.selected_box_type || "standard_tiktok") ||
+      backgroundVideoPath !== (short.background_video_path || "")
     );
-  }, [shortIdea, shortIdeaExplanation, short.short_idea, short.short_idea_explanation]);
+  }, [shortIdea, shortIdeaExplanation, defaultLineColor, transcriptDisabled, selectedBoxType, backgroundVideoPath, short]);
 
   const reset = () => {
     setShortIdea(short.short_idea);
     setShortIdeaExplanation(short.short_idea_explanation);
+    setDefaultLineColor(short.defaultLineColor || "#000000");
+    setTranscriptDisabled(short.transcript_disabled || false);
+    setSelectedBoxType(short.selected_box_type || "standard_tiktok");
+    setBackgroundVideoPath(short.background_video_path || "");
   };
 
   const updateShortDetails = () => {
@@ -40,7 +54,11 @@ export const ShortSettingsTab: React.FC<ShortSettingsTabProps> = ({ short, short
         {
           short_idea: shortIdea,
           short_idea_explanation: shortIdeaExplanation,
-          short_idea_run_id: ''
+          short_idea_run_id: '',
+          defaultLineColor,
+          transcript_disabled: transcriptDisabled,
+          selected_box_type: selectedBoxType,
+          background_video_path: backgroundVideoPath,
         },
         () => { showNotification('Updated', 'Updated Short Information', 'success'); },
         (err) => { showNotification('Update Failed', err.message, 'error'); }
@@ -65,15 +83,29 @@ export const ShortSettingsTab: React.FC<ShortSettingsTabProps> = ({ short, short
         </Alert>
       )}
 
-      <div>
-        <label htmlFor="shortIdea" className="text-sm font-medium block mb-2">
-          Short Idea:
-        </label>
-        <Input
-          id="shortIdea"
-          value={shortIdea}
-          onChange={(e) => setShortIdea(e.target.value)}
-        />
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="shortIdea" className="text-sm font-medium block mb-2">
+            Short Idea:
+          </label>
+          <Input
+            id="shortIdea"
+            value={shortIdea}
+            onChange={(e) => setShortIdea(e.target.value)}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="defaultLineColor" className="text-sm font-medium block mb-2">
+            Default Line Color:
+          </label>
+          <Input
+            id="defaultLineColor"
+            type="color"
+            value={defaultLineColor}
+            onChange={(e) => setDefaultLineColor(e.target.value)}
+          />
+        </div>
       </div>
 
       <div>
@@ -88,6 +120,61 @@ export const ShortSettingsTab: React.FC<ShortSettingsTabProps> = ({ short, short
         />
       </div>
 
+      <div className="flex items-center space-x-2">
+        <Switch
+          id="transcriptDisabled"
+          checked={transcriptDisabled}
+          onCheckedChange={setTranscriptDisabled}
+        />
+        <label htmlFor="transcriptDisabled" className="text-sm font-medium">
+          Disable Transcript
+        </label>
+      </div>
+      <div>
+        <p className="text-sm font-medium block mb-2">
+          Selected TikTok Type:
+        </p>
+        <div className="w-full flex gap-2">
+          <Button disabled={selectedBoxType==="standard_tiktok"} className="disabled:!border-primary disabled:!bg-accent !border-accent" variant="outline" onClick={() => {setSelectedBoxType("standard_tiktok")}}>
+            Single Panel
+          </Button>
+          <Button
+            disabled={selectedBoxType==="two_boxes"}
+            className="disabled:!border-primary disabled:!bg-accent !border-accent"
+            variant="outline"
+            onClick={() => {setSelectedBoxType("two_boxes")}}
+          >
+            Two Panels
+          </Button>
+          <Button
+            disabled={selectedBoxType==="reaction_box"}
+            className="disabled:!border-primary disabled:!bg-accent !border-accent"
+            variant="outline"
+            onClick={() => {setSelectedBoxType("reaction_box")}}
+          >
+            Reaction Video
+          </Button>
+          <Button
+            disabled={selectedBoxType==="half_screen_box"}
+            className="disabled:!border-primary disabled:!bg-accent disabled:!text-primary !border-accent"
+            variant="outline"
+            onClick={() => {setSelectedBoxType("half_screen_box")}}
+          >
+            Gameplay
+          </Button>
+        </div>
+      </div>
+      <div>
+        <p className="text-sm font-medium block mb-2">
+          Gameplay Footage (Optional):
+        </p>
+        <div className="w-full flex gap-2">
+          <Button disabled={backgroundVideoPath.startsWith("background-gameplay")} className="disabled:!border-primary disabled:!bg-accent !border-accent" variant="outline" onClick={() => {setSelectedBoxType("standard_tiktok")}}>
+            CSGO Surfer
+          </Button>
+        </div>
+      </div>
+
       <div className="flex justify-between items-center">
         <div>
           <Button variant="outline" onClick={reset} className="mr-2">
@@ -96,13 +183,13 @@ export const ShortSettingsTab: React.FC<ShortSettingsTabProps> = ({ short, short
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button onClick={updateShortDetails} disabled={false}>
+                <Button onClick={updateShortDetails} disabled={!isChanged}>
                   Submit
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Only press this if you want to update the short idea you're creating.</p>
-                <p>If you manually override the short idea, feedback won't propagate to the language model in charge of generating ideas.</p>
+                <p>Only press this if you want to update the short settings.</p>
+                <p>If you manually override these settings, some automated processes may be affected.</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -113,7 +200,7 @@ export const ShortSettingsTab: React.FC<ShortSettingsTabProps> = ({ short, short
       </div>
 
       <p className="text-sm text-muted-foreground">
-        *Note: Updating short information will de-tag the short idea generation pipeline. Analytics from this video will not feed into the idea generation stage.
+        *Note: Updating short information may affect automated processes and analytics.
       </p>
     </div>
   );

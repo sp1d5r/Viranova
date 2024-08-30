@@ -14,6 +14,7 @@ import FirebaseDatabaseService from "../../services/database/strategies/Firebase
 import ChannelDetails from "./channels/DetailedChannelView";
 import { useNotification } from "../../contexts/NotificationProvider";
 import {CreditButton} from "../ui/credit-button";
+import FirebaseFirestoreService from "../../services/database/strategies/FirebaseFirestoreService";
 
 export interface DashboardChannelsProps {
   userId?: string;
@@ -52,7 +53,7 @@ export const DashboardChannels: React.FC<DashboardChannelsProps> = ({ userId }) 
   };
 
   const isValidYouTubeUrl = (url: string) => {
-    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})$/;
+    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
     return youtubeRegex.test(url);
   }
 
