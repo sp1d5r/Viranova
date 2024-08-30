@@ -18,26 +18,14 @@ export interface SegmentCardProps{
 
 export const SegmentCard: React.FC<SegmentCardProps> = ({currentSegment, segmentId, currentTime}) => {
   const {showNotification} = useNotification();
-  const [segment, setSegment] = useState<Segment>(currentSegment);
   const [shorts, setShorts] = useState<Short[]>([])
   const [fullTranscriptShown, setFullTranscript] = useState(false);
   const {authState} = useAuth();
   const { createShortRequest } = useShortRequestManagement();
 
-  useEffect(() => {
-    FirebaseFirestoreService.listenToDocument(
-      'topical_segments',
-      segmentId,
-      (document) => {
-        if (document) {
-          setSegment(documentToSegment(document));
-        }
-      }
-    )
-  }, [segment]);
 
   useEffect(() => {
-    if (segment) {
+    if (currentSegment) {
       FirebaseDatabaseService.queryDocuments(
         "shorts",
         "segment_id",
@@ -52,7 +40,7 @@ export const SegmentCard: React.FC<SegmentCardProps> = ({currentSegment, segment
         }
       )
     }
-  }, [segment]);
+  }, [currentSegment]);
 
   const handleGenerateShort = () => {
     FirebaseDatabaseService.addDocument(
@@ -60,13 +48,13 @@ export const SegmentCard: React.FC<SegmentCardProps> = ({currentSegment, segment
       {
         "segment_id": segmentId,
         "logs": [],
-        "transcript": segment.transcript,
-        "short_idea": segment.shortIdea,
-        "short_idea_explanation": segment?.shortIdeaExplanation,
-        "short_idea_run_id": segment?.shortRunId,
-        "video_id": segment?.videoId,
-        "start_index": segment.startIndex,
-        "end_index": segment.endIndex,
+        "transcript": currentSegment.transcript,
+        "short_idea": currentSegment.shortIdea,
+        "short_idea_explanation": currentSegment?.shortIdeaExplanation,
+        "short_idea_run_id": currentSegment?.shortRunId,
+        "video_id": currentSegment?.videoId,
+        "start_index": currentSegment.startIndex,
+        "end_index": currentSegment.endIndex,
         "error_count": 5,
         "previous_short_status": "Request AI Extraction",
         "short_status": "Edit Transcript",
@@ -94,21 +82,21 @@ export const SegmentCard: React.FC<SegmentCardProps> = ({currentSegment, segment
     );
   };
 
-  if (segment) {
+  if (currentSegment) {
     return <div
       className={`flex flex-col gap-2 border border-emerald-700 flex-1 min-h-36 rounded-xl p-5
-                            ${segment.flagged ? "border-danger text-danger": "text-white"}
+                            ${currentSegment.flagged ? "border-danger text-danger": "text-white"}
                             `}
       key={segmentId}
     >
-      {segment.flagged &&
+      {currentSegment.flagged &&
         <div className="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
           <span className="font-medium">Error!</span> This segment has been flagged for inappropriate content.
         </div>
       }
       <span className="flex gap-5 flex-wrap">
-                                <span className="font-bold text-2xl">{segment.segmentTitle}</span>
-        {segment.segmentStatus && <span className="bg-green-100 text-green-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300 flex gap-2 items-center">
+                                <span className="font-bold text-2xl">{currentSegment.segmentTitle}</span>
+        {currentSegment.segmentStatus && <span className="bg-green-100 text-green-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300 flex gap-2 items-center">
                                     <div role="status">
                                         <svg aria-hidden="true" className="inline w-2 h-2 text-gray-200 animate-spin dark:text-gray-600 fill-green-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
@@ -116,11 +104,11 @@ export const SegmentCard: React.FC<SegmentCardProps> = ({currentSegment, segment
                                         </svg>
                                         <span className="sr-only">Loading...</span>
                                     </div>
-          {segment.segmentStatus}
+          {currentSegment.segmentStatus}
                                 </span>}
                             </span>
       <span className={"font-light text-gray-300"}>{segmentId} </span>
-      <span className={"font-light text-gray-300"}>{segment.earliestStartTime} - {segment.latestEndTime} </span>
+      <span className={"font-light text-gray-300"}>{currentSegment.earliestStartTime} - {currentSegment.latestEndTime} </span>
       <ol className="relative border-s border-gray-200 dark:border-gray-700">
         <li className="mb-10 ms-4">
           <div className="absolute w-3 h-3 bg-gray-200 rounded-full mt-1.5 -start-1.5 border border-white dark:border-gray-900 dark:bg-gray-700"></div>
@@ -128,9 +116,9 @@ export const SegmentCard: React.FC<SegmentCardProps> = ({currentSegment, segment
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Transcript</h3>
           {
             fullTranscriptShown ?
-              <p className="mb-4 text-base font-normal text-gray-400">{segment.transcript}</p>
+              <p className="mb-4 text-base font-normal text-gray-400">{currentSegment.transcript}</p>
               :
-              <p className="mb-4 text-base font-normal text-gray-400">{segment.transcript.substring(0, 400)} ...</p>
+              <p className="mb-4 text-base font-normal text-gray-400">{currentSegment.transcript.substring(0, 400)} ...</p>
           }
           {
             fullTranscriptShown ?
@@ -148,7 +136,7 @@ export const SegmentCard: React.FC<SegmentCardProps> = ({currentSegment, segment
           }
 
         </li>
-        {segment.segmentSummary && <li className="mb-10 ms-4">
+        {currentSegment.segmentSummary && <li className="mb-10 ms-4">
           <div
             className="absolute w-3 h-3 bg-gray-200 rounded-full mt-1.5 -start-1.5 border border-white dark:border-gray-900 dark:bg-gray-700"></div>
           <time
@@ -157,10 +145,10 @@ export const SegmentCard: React.FC<SegmentCardProps> = ({currentSegment, segment
           </time>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Description</h3>
           <p
-            className="text-base font-normal text-gray-500 dark:text-gray-400">{segment.segmentSummary}</p>
+            className="text-base font-normal text-gray-500 dark:text-gray-400">{currentSegment.segmentSummary}</p>
         </li>}
 
-        {segment.flagged !== undefined && <li className="ms-4">
+        {currentSegment.flagged !== undefined && <li className="ms-4">
           <div
             className="absolute w-3 h-3 bg-gray-200 rounded-full mt-1.5 -start-1.5 border border-white dark:border-gray-900 dark:bg-gray-700"></div>
           <time
@@ -172,30 +160,30 @@ export const SegmentCard: React.FC<SegmentCardProps> = ({currentSegment, segment
           <div className={"flex gap-2 py-2 items-center flex-wrap"}>
             <p>Alerts: </p>
             <div
-              className={segment.harassment ? "border-danger border text-danger rounded" : "border-success border text-success rounded"}>
+              className={currentSegment.harassment ? "border-danger border text-danger rounded" : "border-success border text-success rounded"}>
               <p className={"px-2 py-1"}> Harassment </p></div>
             <div
-              className={segment.harassmentThreatening ? "border-danger border text-danger rounded" : "border-success border text-success rounded"}>
+              className={currentSegment.harassmentThreatening ? "border-danger border text-danger rounded" : "border-success border text-success rounded"}>
               <p className={"px-2 py-1"}> Threatening </p></div>
             <div
-              className={segment.hate ? "border-danger border text-danger rounded" : "border-success border text-success rounded"}>
+              className={currentSegment.hate ? "border-danger border text-danger rounded" : "border-success border text-success rounded"}>
               <p className={"px-2 py-1"}> Hate </p></div>
             <div
-              className={segment.sexual ? "border-danger border text-danger rounded" : "border-success border text-success rounded"}>
+              className={currentSegment.sexual ? "border-danger border text-danger rounded" : "border-success border text-success rounded"}>
               <p className={"px-2 py-1"}> Sexual </p></div>
             <div
-              className={segment.sexualMinors ? "border-danger border text-danger rounded" : "border-success border text-success rounded"}>
+              className={currentSegment.sexualMinors ? "border-danger border text-danger rounded" : "border-success border text-success rounded"}>
               <p className={"px-2 py-1"}> Sexual/Minors </p></div>
             <div
-              className={segment.selfHarm ? "border-danger border text-danger rounded" : "border-success border text-success rounded"}>
+              className={currentSegment.selfHarm ? "border-danger border text-danger rounded" : "border-success border text-success rounded"}>
               <p className={"px-2 py-1"}> Self Harm </p></div>
             <div
-              className={segment.selfHarmIntent ? "border-danger border text-danger rounded" : "border-success border text-success rounded"}>
+              className={currentSegment.selfHarmIntent ? "border-danger border text-danger rounded" : "border-success border text-success rounded"}>
               <p className={"px-2 py-1"}> Self Harm Intent </p></div>
           </div>
         </li>}
 
-        {segment.shortIdea && <li className="mb-10 ms-4">
+        {currentSegment.shortIdea && <li className="mb-10 ms-4">
           <div
             className="absolute w-3 h-3 bg-gray-200 rounded-full mt-1.5 -start-1.5 border border-white dark:border-gray-900 dark:bg-gray-700"></div>
           <time
@@ -205,11 +193,11 @@ export const SegmentCard: React.FC<SegmentCardProps> = ({currentSegment, segment
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Short Idea</h3>
           <p className="text-base font-normal text-gray-500 dark:text-gray-400 pb-2">
             <span className="font-bold">Idea: </span>
-            {segment.shortIdea}
+            {currentSegment.shortIdea}
           </p>
           <p className="text-base font-normal text-gray-500 dark:text-gray-400">
             <span className="font-bold">Justification: </span>
-            {segment.shortIdeaExplanation}
+            {currentSegment.shortIdeaExplanation}
           </p>
           <div className="flex gap-2 items-center w-full">
             <button
@@ -220,7 +208,7 @@ export const SegmentCard: React.FC<SegmentCardProps> = ({currentSegment, segment
                 <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
               </svg>
             </button>
-            <ReviewLangchainLogs runId={segment.shortRunId} />
+            <ReviewLangchainLogs runId={currentSegment.shortRunId} />
           </div>
         </li>}
 
@@ -245,11 +233,11 @@ export const SegmentCard: React.FC<SegmentCardProps> = ({currentSegment, segment
               </span>
               <p className="text-base font-normal text-gray-400 pb-2">
                 <span className="font-bold">Idea: </span>
-                {segment.shortIdea}
+                {currentSegment.shortIdea}
               </p>
               <p className="text-base font-normal text-gray-400">
                 <span className="font-bold">Justification: </span>
-                {segment.shortIdeaExplanation}
+                {currentSegment.shortIdeaExplanation}
               </p>
               <p className="text-base font-normal text-gray-400">
                 <span className="font-bold">Most Recent Log: </span>

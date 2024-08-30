@@ -158,8 +158,36 @@ const FirebaseDatabaseService: DatabaseService = {
         } catch (error) {
             if (onFailure) onFailure(error as FirestoreError);
         }
-    }
+    },
 
+    listenToQuery<T>(
+      collectionPath: string,
+      queryField: string,
+      queryValue: any,
+      orderByField: string,
+      onUpdate: UpdateCallback<T[]>,
+      onError: (error: FirestoreError) => void = (err) => {console.error(err)}
+    ): Unsubscribe {
+        const q = query(
+          collection(db, collectionPath),
+          where(queryField, "==", queryValue),
+          orderBy(orderByField)
+        );
+
+        return onSnapshot(
+          q,
+          (querySnapshot) => {
+              const documents: QueryResult<T>[] = [];
+              querySnapshot.forEach((doc) => {
+                  const data = doc.data() as T;
+                  const result: QueryResult<T> = { ...data, id: doc.id };
+                  documents.push(result);
+              });
+              onUpdate(documents);
+          },
+          onError
+        );
+    },
 }
 
 export default FirebaseDatabaseService;

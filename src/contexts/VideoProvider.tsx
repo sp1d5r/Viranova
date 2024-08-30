@@ -80,7 +80,7 @@ export const useVideoData = (videoId: string | null) => {
       fetchVideo(videoId);
       fetchTranscriptsAndSegments(videoId);
 
-      const unsubscribe = FirebaseDatabaseService.listenToDocument<UserVideo>(
+      const videoUnsubscribe = FirebaseDatabaseService.listenToDocument<UserVideo>(
         "videos",
         videoId,
         (document) => {
@@ -97,11 +97,33 @@ export const useVideoData = (videoId: string | null) => {
         }
       );
 
+      const segmentsUnsubscribe = FirebaseDatabaseService.listenToQuery<Segment>(
+        "topical_segments",
+        "video_id",
+        videoId,
+        "index",
+        (segmentDocs) => {
+          console.log('Received segments update:', segmentDocs);
+          if (segmentDocs){
+            const newSegments = segmentDocs.map(doc => documentToSegment(doc));
+            if (JSON.stringify(newSegments) !== JSON.stringify(segmentsRef.current)) {
+              segmentsRef.current = newSegments;
+              setSegments(newSegments);
+            }
+          }
+        },
+        (error) => {
+          console.error("Failed to listen to segments:", error);
+          showNotification("Segments Error", "Failed to listen to segments", "error", 5000);
+        }
+      );
+
       return () => {
-        unsubscribe();
+        videoUnsubscribe();
+        segmentsUnsubscribe();
       };
     }
-  }, [videoId, fetchVideo, fetchTranscriptsAndSegments]);
+  }, [videoId, fetchVideo, fetchTranscriptsAndSegments, showNotification]);
 
   return { video, transcripts, segments };
 };

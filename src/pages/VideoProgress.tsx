@@ -8,9 +8,7 @@ import Proposals from "../assets/icons/Email Open.svg";
 import Transcript from "../assets/icons/Transcript.svg"
 import Segments from "../assets/icons/Image.svg";
 import ThumbsUp from "../assets/icons/Thumbs Up.svg";
-import {Meteors} from "../components/ui/meteors";
 import {LoadingIcon} from "../components/loading/Loading";
-import ScrollableLayout from "../layouts/ScrollableLayout";
 import {Button} from "../components/ui/button";
 import {ChevronsLeft} from "lucide-react";
 

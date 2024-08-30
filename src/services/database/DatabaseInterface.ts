@@ -1,3 +1,5 @@
+import {FirestoreError} from "firebase/firestore";
+
 export type UpdateCallback<T> = (data: T | null) => void;
 export type SuccessCallback<T> = (result: T) => void;
 export type ErrorCallback<T> = (error: Error) => void;
@@ -19,6 +21,14 @@ export interface DatabaseService {
     getRandomDocument<T>(collectionPath: string, onSuccess?: SuccessCallback<T | null>, onFailure?: FailureCallback): Promise<void>;
     queryDocumentById<T>(collectionPath: string, docId: string, onSuccess?: SuccessCallback<T>, onFailure?: FailureCallback): void;
     getAllDocuments<T>(collectionPath: string, onSuccess?: SuccessCallback<T[]>, onFailure?: FailureCallback): Promise<void>;
+    listenToQuery<T>(
+      collectionPath: string,
+      queryField: string,
+      queryValue: any,
+      orderByField: string,
+      onUpdate: UpdateCallback<T[]>,
+      onError: (error: FirestoreError) => void
+    ): Unsubscribe
 }
 
 export default DatabaseService;

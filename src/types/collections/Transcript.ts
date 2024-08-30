@@ -2,6 +2,7 @@ import {DocumentData} from 'firebase/firestore';
 import {Word, documentToWord} from "./Word";
 
 export interface Transcript {
+    id?: string,
     confidence: number;
     earliestStartTime: number;
     latestEndTime: number;

@@ -51,6 +51,11 @@ function fixStringRepresentation(inputString: string): any {
     // Remove any leading/trailing whitespace
     inputString = inputString.trim();
 
+    // Handle the case where the string is wrapped in parentheses and quotes
+    if (inputString.startsWith('("') && inputString.endsWith('")')) {
+        inputString = inputString.slice(2, -2);
+    }
+
     // If it's already a valid JSON, parse it directly
     if (inputString.startsWith('[') && inputString.endsWith(']')) {
         try {
@@ -69,15 +74,16 @@ function fixStringRepresentation(inputString: string): any {
         }
     }
 
-    // If it's wrapped in quotes, remove them and try to parse
+    // If it's wrapped in quotes, remove them and try to parse as a JavaScript array literal
     if (inputString.startsWith('"') && inputString.endsWith('"')) {
         const cleanedString = inputString.slice(1, -1)
           .replace(/\\'/g, "'")
           .replace(/\\"/g, '"');
         try {
-            return JSON.parse(cleanedString);
+            // Use Function constructor to safely evaluate the string as a JavaScript array literal
+            return Function(`'use strict'; return [${cleanedString}];`)();
         } catch (error) {
-            console.error("Failed to parse cleaned JSON:", error);
+            console.error("Failed to parse cleaned string as array literal:", error);
         }
     }
 
