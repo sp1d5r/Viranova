@@ -69,7 +69,7 @@ export const Onboarding: React.FC<OnboardingProps> = () => {
   };
 
   const applyDiscountCode = async () => {
-    if (discountCode === 'JHDNCKAJNDCKJCEOJEQOFPORKWE') {
+    if (discountCode === 'JHDNCKAJNDCKJCEOJEQOFPORKWE' || discountCode === 'SC0RPCODMTEAMCODE') {
       setIsDiscountApplied(true);
       toast({
         title: "Success",

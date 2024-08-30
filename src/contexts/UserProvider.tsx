@@ -20,6 +20,15 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     if (authState.user?.uid) {
+      FirebaseFirestoreService.getDocument('users',
+        authState.user.uid,
+        (user) => {
+          setLoading(false);
+        },
+        (err) => {
+          setLoading(false);
+        })
+
       const unsubscribe = FirebaseFirestoreService.listenToDocument<User>(
         'users',
         authState.user.uid,

@@ -56,7 +56,7 @@ export default function AuthenticationPage() {
             case 'login':
                 login(formData.email, formData.password,
                   () => { window.location.href = "/dashboard" },
-                  () => { showNotification("Authentication Issue", "Failed to authenticate.", "error", 5000) }
+                  (error) => { showNotification("Authentication Issue", error.message || "Failed to authenticate.", "error", 5000) }
                 );
                 break;
             case 'register':
