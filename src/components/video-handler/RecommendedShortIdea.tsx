@@ -31,7 +31,7 @@ export const RecommendedShortIdeas: React.FC<RecommendedShortIdeasProps> = ({ se
   const filteredAndSortedSegments = segments
     .filter(segment => {
       const wordCount = segment.transcript.split(" ").length;
-      return wordCount >= 100 && wordCount <= 300;
+      return wordCount >= 100 && wordCount <= 500;
     })
     .sort((a, b) => a.earliestStartTime - b.earliestStartTime);
 
@@ -116,7 +116,7 @@ export const RecommendedShortIdeas: React.FC<RecommendedShortIdeasProps> = ({ se
     setIsModalOpen(true);
   };
 
-  const handleConfirmGeneration = () => {
+  const handleConfirmGeneration = (selectedBoxType: string, backgroundVideoPath: string) => {
     if (selectedSegment) {
       FirebaseDatabaseService.addDocument(
         "shorts",
@@ -135,7 +135,9 @@ export const RecommendedShortIdeas: React.FC<RecommendedShortIdeasProps> = ({ se
           "short_status": "Edit Transcript",
           "pending_operation": false,
           "uid": authState.user?.uid,
-          "auto_generate": true
+          "auto_generate": true,
+          "selected_box_type": selectedBoxType,
+          "background_video_path": backgroundVideoPath
         },
         (shortId) => {
           FirebaseDatabaseService.updateDocument(

@@ -120,6 +120,7 @@ export interface Short extends BackendServerMetadata{
   two_boxes?: TwoBoundingBoxes;
   reaction_box?: BoundingBoxes;
   bounding_boxes?: BoundingBoxes,
+  half_screen_box?: BoundingBoxes,
   box_type?: string[];
   cuts: number[],
   short_a_roll?: string;
@@ -159,6 +160,7 @@ export function documentToShort(docData: DocumentData): Short {
     standard_tiktok?: BoundingBoxes;
     two_boxes?: TwoBoundingBoxes;
     reaction_box?: BoundingBoxes;
+    half_screen_box?: BoundingBoxes,
   } | undefined;
   if (docData.bounding_boxes) {
     try {
@@ -166,7 +168,8 @@ export function documentToShort(docData: DocumentData): Short {
       parsedBoundingBoxes = {
         standard_tiktok: boundingBoxesData.standard_tiktok ? { boxes: boundingBoxesData.standard_tiktok } : undefined,
         two_boxes: boundingBoxesData.two_boxes ? { boxes: boundingBoxesData.two_boxes } : undefined,
-        reaction_box: boundingBoxesData.reaction_box ? { boxes: boundingBoxesData.reaction_box } : undefined
+        reaction_box: boundingBoxesData.reaction_box ? { boxes: boundingBoxesData.reaction_box } : undefined,
+        half_screen_box: boundingBoxesData.half_screen_box ? { boxes: boundingBoxesData.half_screen_box } : undefined
       };
     } catch (error) {
       console.error("Error parsing bounding boxes:", error);

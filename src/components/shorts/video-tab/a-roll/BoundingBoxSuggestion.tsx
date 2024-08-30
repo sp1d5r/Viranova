@@ -158,6 +158,9 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({ 
           if (reactionData && originalData)
             setCurrentBoxes([originalData.boxes[currentFrame], reactionData.boxes[currentFrame]])
           break;
+        case "half_screen_box":
+          boxesData = short.half_screen_box
+          break;
         case "two_boxes":
         case "two_boxes_reversed":
           boxesData = short.two_boxes;
@@ -308,7 +311,7 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({ 
           />
         </div>
         <div className="flex gap-2 my-2">
-          {["standard_tiktok", "two_boxes", "two_boxes_reversed", "picture_in_picture", "reaction_box"].map((type) => (
+          {["standard_tiktok", "two_boxes", "two_boxes_reversed", "picture_in_picture", "reaction_box", "half_screen_box"].map((type) => (
             <Button
               key={type}
               onClick={() => handleBoxTypeChange(type)}

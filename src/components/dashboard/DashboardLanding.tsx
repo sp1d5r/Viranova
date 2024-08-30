@@ -383,7 +383,7 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
             </CardDescription>
           </div>
           <Button asChild size="sm" className="ml-auto gap-1">
-            <Link to="#">
+            <Link to="/dashboard?tab=shorts">
               View All
               <ArrowUpRight className="h-4 w-4" />
             </Link>

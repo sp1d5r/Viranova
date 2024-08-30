@@ -81,9 +81,14 @@ export const DashboardShorts: React.FC = () => {
         // Sort the shorts array
         const sortedShorts = mappedShorts.sort((a, b) => {
           // If both have last_updated, compare them
-          if (a.last_updated && b.last_updated) {
-            return b.last_updated.toMillis() - a.last_updated.toMillis();
+          try{
+            if (a.last_updated && b.last_updated) {
+              return b.last_updated.toMillis() - a.last_updated.toMillis();
+            }
+          } catch {
+            return -1
           }
+
           // If only a has last_updated, it should come first
           if (a.last_updated) return -1;
           // If only b has last_updated, it should come first
