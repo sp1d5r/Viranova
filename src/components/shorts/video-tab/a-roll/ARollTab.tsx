@@ -94,7 +94,7 @@ export const ARollTabContent: React.FC<ARollTabContentProps> = ({ short, shortId
       <Terminal className="h-4 w-4" />
       <AlertTitle>Something Broken?</AlertTitle>
       <AlertDescription>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-2">
           <div>
             This feature is still in beta, email me if you need help - {' '}
             <a className="text-primary underline" href="mailto:elijahahmad03@gmail.com">elijahahmad03@gmail.com</a>.

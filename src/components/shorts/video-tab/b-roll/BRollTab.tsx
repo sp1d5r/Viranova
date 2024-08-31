@@ -188,7 +188,7 @@ const BRollTab: React.FC<BRollTabContentProps> = ({ short, shortId }) => {
         onItemSelect={handleItemSelect}
         onTracksUpdate={setTracks}
       />
-      <div className="flex w-full justify-between items-center gap-2">
+      <div className="flex flex-wrap w-full justify-between items-center gap-2">
         <Button
           onClick={handleAddTrack}
           variant="secondary"

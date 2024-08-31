@@ -134,7 +134,7 @@ export const ShortSettingsTab: React.FC<ShortSettingsTabProps> = ({ short, short
         <p className="text-sm font-medium block mb-2">
           Selected TikTok Type:
         </p>
-        <div className="w-full flex gap-2">
+        <div className="w-full flex gap-2 flex-wrap">
           <Button disabled={selectedBoxType==="standard_tiktok"} className="disabled:!border-primary disabled:!bg-accent !border-accent" variant="outline" onClick={() => {setSelectedBoxType("standard_tiktok")}}>
             Single Panel
           </Button>

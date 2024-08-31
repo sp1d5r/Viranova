@@ -145,7 +145,7 @@ export const DashboardShorts: React.FC = () => {
   };
 
   return (
-    <main className="flex flex-1 flex-col p-4 md:p-8">
+    <main className="flex flex-1 flex-col p-4 md:p-8 max-w-[100vw]">
       <h1 className="text-2xl font-bold mb-4">Shorts</h1>
       <p className="text-muted-foreground mb-4">Here's a list of your short-form videos created from longer content.</p>
 
@@ -236,11 +236,11 @@ export const DashboardShorts: React.FC = () => {
         </TableBody>
       </Table>
 
-      <div className="flex justify-between items-center mt-4">
+      <div className="flex justify-between items-center mt-4 flex-wrap">
         <p className="text-sm text-muted-foreground">
           {startIndex + 1}-{Math.min(endIndex, filteredShorts.length)} of {filteredShorts.length} row(s) shown.
         </p>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Select onValueChange={handleRowsPerPageChange} value={rowsPerPage.toString()}>
             <SelectTrigger className="w-[180px] h-9">
               <SelectValue placeholder="Rows per Page" />

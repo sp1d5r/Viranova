@@ -55,7 +55,7 @@ export const VideoTab: React.FC<VideoTabProps> = ({ short, shortId, segment }) =
 
   return (
     <div className="w-full ">
-      <CardContent>
+      <CardContent className="p-0">
         <ShadcnTabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="a-roll">A-Roll</TabsTrigger>

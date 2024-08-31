@@ -257,8 +257,8 @@ export const TranscriptEditor: React.FC<TranscriptEditorProps> = ({ short, short
           <a className="text-primary underline" href="mailto:elijahahmad03@gmail.com">elijahahmad03@gmail.com</a>.
         </AlertDescription>
       </Alert>
-      <div className="w-full flex">
-        <div className="w-1/2">
+      <div className="w-full flex flex-wrap">
+        <div className="w-full md:w-1/2">
           <h2 className="text-2xl font-bold mb-4">Edit Transcript</h2>
           <p>Press a word in the video to select it. </p>
           <div className="relative w-[270px] h-[480px] bg-gray-800 flex justify-center items-center">
@@ -290,7 +290,7 @@ export const TranscriptEditor: React.FC<TranscriptEditorProps> = ({ short, short
             )}
           </div>
         </div>
-        <div className="w-1/2">
+        <div className="w-full md:w-1/2">
           <h3 className="text-xl font-semibold mb-2">Transcription Settings</h3>
           <div className="mb-4">
             <label className="block mb-1">Line Colour:</label>

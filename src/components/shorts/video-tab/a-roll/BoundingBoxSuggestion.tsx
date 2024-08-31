@@ -310,7 +310,7 @@ export const BoundingBoxSuggestions: React.FC<BoundingBoxSuggestionsProps> = ({ 
             className="w-full my-2"
           />
         </div>
-        <div className="flex gap-2 my-2">
+        <div className="flex gap-2 my-2 flex-wrap">
           {["standard_tiktok", "two_boxes", "two_boxes_reversed", "picture_in_picture", "reaction_box", "half_screen_box"].map((type) => (
             <Button
               key={type}

@@ -18,7 +18,7 @@ export const PerformanceTab: React.FC<PerformanceTabProps> = ({ short, shortId }
 
   return (
     <div className="w-full">
-      <CardContent>
+      <CardContent className="p-0">
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as PerformanceTabTypes)}>
           <TabsList className="grid w-full grid-cols-2">
             {allTabs.map((tab) => (
@@ -28,26 +28,20 @@ export const PerformanceTab: React.FC<PerformanceTabProps> = ({ short, shortId }
             ))}
           </TabsList>
           <TabsContent value="Tasks">
-            <Card>
+            <div>
               <CardHeader>
                 <CardTitle>Tasks</CardTitle>
                 <CardDescription>Manage tasks related to this short.</CardDescription>
               </CardHeader>
-              <CardContent>
-                <TasksTab shortId={shortId} />
-              </CardContent>
-            </Card>
+              <TasksTab shortId={shortId} />
+            </div>
           </TabsContent>
           <TabsContent value="Analytics">
-            <Card>
-              <CardHeader>
-                <CardTitle>Analytics</CardTitle>
-                <CardDescription>View analytics for this short.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <AnalyticsTab shortId={shortId} />
-              </CardContent>
-            </Card>
+            <CardHeader>
+              <CardTitle>Analytics</CardTitle>
+              <CardDescription>View analytics for this short.</CardDescription>
+            </CardHeader>
+            <AnalyticsTab shortId={shortId} />
           </TabsContent>
         </Tabs>
       </CardContent>

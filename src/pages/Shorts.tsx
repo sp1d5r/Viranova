@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useState, useRef} from "react";
 import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle, CollapsibleCard} from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { ShortSettingsTab } from "../components/shorts/ShortSettingsTab";
 import { TranscriptEditorTab } from "../components/shorts/TranscriptEditorTab";
@@ -192,7 +192,7 @@ export const Shorts: React.FC = () => {
 
   return (
     <ScrollableLayout>
-      <div className="m-auto my-2 text-white px-4 md:px-0">
+      <div className="m-auto my-2 text-white px-0 md:px-4">
         <CardHeader>
           <div className="flex gap-4 items-center justify-start">
             <Button
@@ -210,134 +210,127 @@ export const Shorts: React.FC = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabType)} className="flex flex-col md:flex-row md:space-x-8">
-            <div className="flex flex-col">
-              <TabsList className="flex-shrink-0 flex flex-col h-full space-y-2 w-64 mb-4 md:mb-0">
-                {tabConfig.slice(0, -1).map((tab) => (
-                  <HoverCard>
-                    <HoverCardTrigger className="w-full">
-                      <TabsTrigger key={tab.value} value={tab.value} className="w-full justify-start">
-                        <span className="mr-2">{tab.icon}</span>
-                        <span>{tab.title}</span>
-                      </TabsTrigger>
-                    </HoverCardTrigger>
-                    <HoverCardContent>
-                      <span>{tab.description}</span>
-                    </HoverCardContent>
-                  </HoverCard>
-                ))}
-                <TabsTrigger value="requests" className="w-full justify-start">
-                  <span className="mr-2">{tabConfig[tabConfig.length - 1].icon}</span>
-                  <span>{tabConfig[tabConfig.length - 1].title}</span>
-                </TabsTrigger>
-                <div className="flex-2"></div> {/* This creates the spacer */}
-                <div className="flex flex-col p-2">
-                  <p className="text-white text-lg font-bold">Auto Generate</p>
-                  <p>You can edit each component and select auto-generate from that point onwards.</p>
-                  {stages.filter((elem) => {return elem.status != 'not-started'}).map((stage) => (
-                    <div key={stage.id} className="flex items-center justify-between">
-                      {stage.status === 'completed' && <CheckCircle2 className="text-green-500" />}
-                      {stage.status === 'processing' && <Loader2 className="animate-spin text-blue-500" />}
-                      {stage.status === 'pending' && <Circle className="text-gray-300" />}
-                      <span
-                        className={`w-full px-1 ${stage.status === 'completed' ? 'text-green-500' : stage.status === 'processing' ? 'text-blue-500' : 'text-gray-500'}`}>
-                        {stage.label}
-                      </span>
-                      <Popover>
-                        <PopoverTrigger>
-                          <Button
-                            size="icon"
-                            variant="outline"
-                          >
-                            <Sparkles size={15} />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-80 z-50">
-                          <Card className="grid gap-4 p-4">
-                            <div className="space-y-2">
-                              <h4 className="font-medium leading-none">Confirm</h4>
-                              <p className="text-sm text-muted-foreground">
-                                You're going to redo auto-generation from {stage.label}. {stage.tabConfig.description}.
-                              </p>
-                            </div>
-                            <div className="grid gap-2">
-                              <div className="grid grid-cols-2 items-center gap-4">
-                                <Label htmlFor="width">Confirm AutoGenerate</Label>
-                                <CreditButton
-                                  creditCost={20}
-                                  confirmationMessage={"You're auto-generating a video, we're expecting this to take 20 credits"}
-                                  onClick={() => {
-                                    if (short_id) {
-                                      createShortRequest(
-                                        short_id,
-                                        stage.endpoint,
-                                        20,
-                                        () => {
-                                        },
-                                        () => {
-                                        },
-                                        true
-                                      )
-                                    }
-                                  }}
-                                >
-                                  Generate
-                                </CreditButton>
-                              </div>
-                            </div>
-                          </Card>
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex-1"></div> {/* This creates the spacer */}
-              </TabsList>
-            </div>
-            <div className="flex-1 flex-grow">
+          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabType)} className="flex flex-col">
+            <TabsList className="flex flex-wrap justify-evenly gap-2 mb-4">
               {tabConfig.map((tab) => (
-                <TabsContent key={tab.value} value={tab.value} className="mt-0">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>{tab.title}</CardTitle>
-                      <CardDescription>{tab.description}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      {tab.value === "short-settings" && short_id && short && segment && (
-                        <ShortSettingsTab short={short} shortId={short_id} />
-                      )}
-                      {tab.value === "transcript-editor" && short && short_id && segment && (
-                        <TranscriptEditorTab shortId={short_id} short={short} segment={segment} />
-                      )}
-                      {tab.value === "attention-capture" && short && short_id && segment && (
-                        <VideoTab shortId={short_id} short={short} segment={segment} />
-                      )}
-                      {tab.value === "export" && short && short_id && segment && (
-                        <ExportTab shortId={short_id} short={short} />
-                      )}
-                      {tab.value === "performance" && short && short_id && segment && (
-                        <PerformanceTab shortId={short_id} short={short} />
-                      )}
-                      {tab.value === "requests" && short && short_id && (
-                        <RequestsTab shortId={short_id} short={short} />
-                      )}
-                    </CardContent>
-                  </Card>
-                  <div className="flex justify-between mt-4">
-                    <Button onClick={handlePreviousTab} disabled={activeTab === "short-settings"}>
-                      Previous
-                    </Button>
-                    <Button onClick={handleNextTab} disabled={activeTab === "requests"}>
-                      Next
-                    </Button>
-                  </div>
-                </TabsContent>
+                <TabsTrigger key={tab.value} value={tab.value} className="flex items-center flex-1">
+                  <span className="mr-2">{tab.icon}</span>
+                  <span className="hidden sm:inline">{tab.title}</span>
+                </TabsTrigger>
               ))}
+            </TabsList>
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="w-full md:w-1/3">
+                <CollapsibleCard defaultCollapsed={window.innerWidth >= 400}>
+                  <CardHeader>
+                    <CardTitle>Auto Generate</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="mb-4">Edit each component and select auto-generate from that point onwards.</p>
+                    {stages.filter((elem) => elem.status !== 'not-started').map((stage) => (
+                      <div key={stage.id} className="flex items-center justify-between mb-2">
+                        {stage.status === 'completed' && <CheckCircle2 className="text-green-500" />}
+                        {stage.status === 'processing' && <Loader2 className="animate-spin text-blue-500" />}
+                        {stage.status === 'pending' && <Circle className="text-gray-300" />}
+                        <span className={`flex-grow px-2 ${stage.status === 'completed' ? 'text-green-500' : stage.status === 'processing' ? 'text-blue-500' : 'text-gray-500'}`}>
+                          {stage.label}
+                        </span>
+                        <Popover>
+                          <PopoverTrigger>
+                            <Button
+                              size="icon"
+                              variant="outline"
+                            >
+                              <Sparkles size={15} />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-80 z-50">
+                            <Card className="grid gap-4 p-4">
+                              <div className="space-y-2">
+                                <h4 className="font-medium leading-none">Confirm</h4>
+                                <p className="text-sm text-muted-foreground">
+                                  You're going to redo auto-generation from {stage.label}. {stage.tabConfig.description}.
+                                </p>
+                              </div>
+                              <div className="grid gap-2">
+                                <div className="grid grid-cols-2 items-center gap-4">
+                                  <Label htmlFor="width">Confirm AutoGenerate</Label>
+                                  <CreditButton
+                                    creditCost={20}
+                                    confirmationMessage={"You're auto-generating a video, we're expecting this to take 20 credits"}
+                                    onClick={() => {
+                                      if (short_id) {
+                                        createShortRequest(
+                                          short_id,
+                                          stage.endpoint,
+                                          20,
+                                          () => {
+                                          },
+                                          () => {
+                                          },
+                                          true
+                                        )
+                                      }
+                                    }}
+                                  >
+                                    Generate
+                                  </CreditButton>
+                                </div>
+                              </div>
+                            </Card>
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                    ))}
+                  </CardContent>
+                </CollapsibleCard>
+              </div>
+
+              <div className="w-full md:w-2/3">
+                {tabConfig.map((tab) => (
+                  <TabsContent key={tab.value} value={tab.value} className="mt-0">
+                    <Card className={"sm:p-0"}>
+                      <CardHeader>
+                        <CardTitle>{tab.title}</CardTitle>
+                        <CardDescription>{tab.description}</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        {tab.value === "short-settings" && short_id && short && segment && (
+                          <ShortSettingsTab short={short} shortId={short_id} />
+                        )}
+                        {tab.value === "transcript-editor" && short && short_id && segment && (
+                          <TranscriptEditorTab shortId={short_id} short={short} segment={segment} />
+                        )}
+                        {tab.value === "attention-capture" && short && short_id && segment && (
+                          <VideoTab shortId={short_id} short={short} segment={segment} />
+                        )}
+                        {tab.value === "export" && short && short_id && segment && (
+                          <ExportTab shortId={short_id} short={short} />
+                        )}
+                        {tab.value === "performance" && short && short_id && segment && (
+                          <PerformanceTab shortId={short_id} short={short} />
+                        )}
+                        {tab.value === "requests" && short && short_id && (
+                          <RequestsTab shortId={short_id} short={short} />
+                        )}
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-between mt-4">
+              <Button onClick={handlePreviousTab} disabled={activeTab === "short-settings"}>
+                Previous
+              </Button>
+              <Button onClick={handleNextTab} disabled={activeTab === "requests"}>
+                Next
+              </Button>
             </div>
           </Tabs>
         </CardContent>
       </div>
-
       {
         short && short_id && short.auto_generate && (
           <ProcessingDialog shortId={short_id} short={short} isOpen={true} onClose={() => {}} />
