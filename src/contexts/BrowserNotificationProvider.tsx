@@ -5,7 +5,8 @@ import Logo from "../assets/logo/Logo.png"
 interface BrowserNotificationContextType {
   notifyRequestCompleted: (request: ShortRequest) => void;
   requestNotificationPermission: () => void;
-  notificationPermission: NotificationPermission;
+  notificationPermission: NotificationPermission | 'unsupported';
+  isNotificationSupported: boolean;
 }
 
 const BrowserNotificationContext = createContext<BrowserNotificationContextType | undefined>(undefined);
@@ -24,37 +25,59 @@ interface BrowserNotificationProviderProps {
 
 export const BrowserNotificationProvider: React.FC<BrowserNotificationProviderProps> = ({ children }) => {
   const [notificationPermission, setNotificationPermission] =
-    useState<NotificationPermission>('default');
+    useState<NotificationPermission | 'unsupported'>('default');
+  const [isNotificationSupported, setIsNotificationSupported] = useState(false);
 
   useEffect(() => {
-    setNotificationPermission(Notification.permission);
+    const checkNotificationSupport = () => {
+      if ('Notification' in window) {
+        setIsNotificationSupported(true);
+        setNotificationPermission(Notification.permission);
+      } else {
+        setIsNotificationSupported(false);
+        setNotificationPermission('unsupported');
+        console.warn('Notifications are not supported in this environment');
+      }
+    };
+
+    checkNotificationSupport();
   }, []);
 
   const requestNotificationPermission = useCallback(async () => {
-    if (notificationPermission !== 'granted') {
-      const permission = await Notification.requestPermission();
-      setNotificationPermission(permission);
+    if (isNotificationSupported && notificationPermission !== 'granted') {
+      try {
+        const permission = await Notification.requestPermission();
+        setNotificationPermission(permission);
+      } catch (error) {
+        console.error('Error requesting notification permission:', error);
+        setNotificationPermission('unsupported');
+      }
     }
-  }, [notificationPermission]);
+  }, [isNotificationSupported, notificationPermission]);
 
   const notifyRequestCompleted = useCallback((request: ShortRequest) => {
-    if (notificationPermission === 'granted') {
-      new Notification('Request Completed', {
-        body: `(${request.requestEndpoint}) Request ${request.id} has been completed.`,
-        icon: Logo
-      });
+    if (isNotificationSupported && notificationPermission === 'granted') {
+      try {
+        new Notification('Request Completed', {
+          body: `(${request.requestEndpoint}) Request ${request.id} has been completed.`,
+          icon: Logo
+        });
+      } catch (error) {
+        console.error('Error creating notification:', error);
+      }
     }
     // Dispatch custom event for other parts of the app
     const event = new CustomEvent('requestCompleted', { detail: request });
     window.dispatchEvent(event);
-  }, [notificationPermission]);
+  }, [isNotificationSupported, notificationPermission]);
 
   return (
     <BrowserNotificationContext.Provider
       value={{
         notifyRequestCompleted,
         requestNotificationPermission,
-        notificationPermission
+        notificationPermission,
+        isNotificationSupported
       }}
     >
       {children}
