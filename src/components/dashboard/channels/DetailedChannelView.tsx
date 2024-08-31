@@ -93,7 +93,7 @@ const ChannelDetails: React.FC<ChannelDetailsProps> = ({ channel, channelId, use
     <ScrollArea className="h-[calc(100vh-100px)] gap-2">
       <Card className="m-4 relative overflow-hidden">
         <CardHeader>
-          <div className="flex items-center space-x-4 z-10">
+          <div className="flex flex-col md:flex-row items-center space-x-4 z-10 gap-2">
             <Avatar className="w-20 h-20">
               <AvatarImage src={channel.thumbnails?.default} alt={channel.title} />
               <AvatarFallback>{channel.title?.charAt(0)}</AvatarFallback>
@@ -103,7 +103,7 @@ const ChannelDetails: React.FC<ChannelDetailsProps> = ({ channel, channelId, use
               <p className="text-sm text-muted-foreground">{channel.customUrl}</p>
             </div>
             <div className="flex-1"/>
-            <div className="flex flex-col items-end justify-center gap-2">
+            <div className="flex  flex-wrap flex-row md:flex-col items-end justify-center gap-2">
               <Button
                 variant="default"
                 size="sm"

@@ -153,87 +153,169 @@ export const DashboardChannels: React.FC<DashboardChannelsProps> = ({ userId }) 
 
   return (
     <main className="flex flex-1 flex-col gap-4 md:gap-8 max-h-[calc(100vh-100px)]">
-      <ResizablePanelGroup direction="horizontal">
-        <ResizablePanel>
-          <div className="p-4 flex flex-col gap-2">
-            <div className="flex flex-col items-center justify-between w-full">
-              {error && (
-                <Alert variant="destructive">
-                  <ExclamationTriangleIcon className="h-4 w-4" />
-                  <AlertTitle>Error</AlertTitle>
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-              {channelIdError && (
-                <Alert variant="destructive">
-                  <ExclamationTriangleIcon className="h-4 w-4" />
-                  <AlertTitle>Error</AlertTitle>
-                  <AlertDescription>{channelIdError} <a className="underline text-primary" href={"https://commentpicker.com/youtube-channel-id.php#google_vignette"}>Check here.</a></AlertDescription>
-                </Alert>
-              )}
-              <h1 className="w-full text-lg font-semibold md:text-2xl my-2">Channels</h1>
-              <Tabs defaultValue="channels" className="w-full">
-                <TabsList>
-                  <TabsTrigger value="channels">Channels</TabsTrigger>
-                  <TabsTrigger value="new-video">New Video</TabsTrigger>
-                </TabsList>
-                <TabsContent value="channels">
-                  <div className="w-full flex gap-2">
-                    <Input
-                      className="h-9"
-                      type="text"
-                      placeholder="Add a channel ID to track"
-                      value={newChannelId}
-                      onChange={(e) => setNewChannelId(e.target.value)}
-                    />
-                    <CreditButton className="h-9" onClick={handleAddChannel} disabled={isLoading} creditCost={50} confirmationMessage={"This action will cost 50 credits every month. Are you sure?"}>
-                      <GitPullRequestCreateArrow size={16}/>
-                    </CreditButton>
-                  </div>
-                  <ScrollArea className="h-[80vh] my-2">
-                    {channels.map((channel, index) => (
-                      <ChannelCard
-                        key={index}
-                        selected={selectedChannel ? selectedChannel.channelId == channel.channelId : false}
-                        clickCard={() => { setSelectedChannel(channel) }}
-                        channel={channel}
-                      />
-                    ))}
-                  </ScrollArea>
-                </TabsContent>
-                <TabsContent value="new-video">
-                  <div className="w-full flex flex-col gap-2">
-                    <Input
-                      type="text"
-                      placeholder="Enter YouTube video link"
-                      value={youtubeLink}
-                      onChange={(e) => setYoutubeLink(e.target.value)}
-                    />
-                    <Button onClick={submitYoutubeLink} disabled={!youtubeLink}>
-                      Add New Video
-                    </Button>
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </div>
+      <div className="lg:hidden">
+        <Tabs defaultValue="channels" className="w-full">
+          <div className="w-full flex items-center justify-center p-2">
+            <TabsList>
+              <TabsTrigger value="channels" className="flex-1">Channels</TabsTrigger>
+              <TabsTrigger value="details" className="flex-1">Channel Details</TabsTrigger>
+              <TabsTrigger value="new-video" className="flex-1">New Video</TabsTrigger>
+            </TabsList>
           </div>
-        </ResizablePanel>
-        <ResizableHandle withHandle />
-        <ResizablePanel>
-          {selectedChannel ? (
-            <ChannelDetails
-              channel={selectedChannel}
-              userId={userId ? userId : "N/A"}
-              channelId={selectedChannel.channelId!}
+          <TabsContent value="channels">
+            <ChannelsList
+              channels={channels}
+              setSelectedChannel={setSelectedChannel}
+              selectedChannel={selectedChannel}
+              newChannelId={newChannelId}
+              setNewChannelId={setNewChannelId}
+              handleAddChannel={handleAddChannel}
+              isLoading={isLoading}
+              error={error}
+              channelIdError={channelIdError}
             />
-          ) : (
-            <div className="w-full h-full flex flex-col justify-center items-center">
-              <QuestionMarkCircledIcon className="w-10 h-10" />
-              <p>No Channel Selected</p>
-            </div>
-          )}
-        </ResizablePanel>
-      </ResizablePanelGroup>
+          </TabsContent>
+          <TabsContent value="details">
+            {selectedChannel ? (
+              <ChannelDetails
+                channel={selectedChannel}
+                userId={userId ? userId : "N/A"}
+                channelId={selectedChannel.channelId!}
+              />
+            ) : (
+              <div className="w-full h-full flex flex-col justify-center items-center p-4">
+                <QuestionMarkCircledIcon className="w-10 h-10" />
+                <p>No Channel Selected</p>
+              </div>
+            )}
+          </TabsContent>
+          <TabsContent value="new-video">
+            <NewVideoForm
+              youtubeLink={youtubeLink}
+              setYoutubeLink={setYoutubeLink}
+              submitYoutubeLink={submitYoutubeLink}
+            />
+          </TabsContent>
+        </Tabs>
+      </div>
+      <div className="hidden lg:block">
+        <ResizablePanelGroup direction="horizontal">
+          <ResizablePanel>
+            <ChannelsList
+              channels={channels}
+              setSelectedChannel={setSelectedChannel}
+              selectedChannel={selectedChannel}
+              newChannelId={newChannelId}
+              setNewChannelId={setNewChannelId}
+              handleAddChannel={handleAddChannel}
+              isLoading={isLoading}
+              error={error}
+              channelIdError={channelIdError}
+            />
+          </ResizablePanel>
+          <ResizableHandle withHandle />
+          <ResizablePanel>
+            {selectedChannel ? (
+              <ChannelDetails
+                channel={selectedChannel}
+                userId={userId ? userId : "N/A"}
+                channelId={selectedChannel.channelId!}
+              />
+            ) : (
+              <div className="w-full h-full flex flex-col justify-center items-center">
+                <QuestionMarkCircledIcon className="w-10 h-10" />
+                <p>No Channel Selected</p>
+              </div>
+            )}
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      </div>
     </main>
   );
 }
+
+interface ChannelsListProps {
+  channels: Channel[];
+  setSelectedChannel: React.Dispatch<React.SetStateAction<Channel | undefined>>;
+  selectedChannel: Channel | undefined;
+  newChannelId: string;
+  setNewChannelId: React.Dispatch<React.SetStateAction<string>>;
+  handleAddChannel: () => Promise<void>;
+  isLoading: boolean;
+  error: string | null;
+  channelIdError: string | null;
+}
+
+const ChannelsList: React.FC<ChannelsListProps> = ({
+                                                     channels,
+                                                     setSelectedChannel,
+                                                     selectedChannel,
+                                                     newChannelId,
+                                                     setNewChannelId,
+                                                     handleAddChannel,
+                                                     isLoading,
+                                                     error,
+                                                     channelIdError
+                                                   }) => (
+  <div className=" p-4 flex flex-col gap-2">
+    <div className="flex flex-col items-center justify-between w-full">
+      {error && (
+        <Alert variant="destructive">
+          <ExclamationTriangleIcon className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      {channelIdError && (
+        <Alert variant="destructive">
+          <ExclamationTriangleIcon className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{channelIdError} <a className="underline text-primary" href="https://commentpicker.com/youtube-channel-id.php#google_vignette">Check here.</a></AlertDescription>
+        </Alert>
+      )}
+      <h1 className="w-full text-lg font-semibold md:text-2xl my-2">Channels</h1>
+      <div className="w-full flex gap-2">
+        <Input
+          className="h-9"
+          type="text"
+          placeholder="Add a channel ID to track"
+          value={newChannelId}
+          onChange={(e) => setNewChannelId(e.target.value)}
+        />
+        <CreditButton className="h-9" onClick={handleAddChannel} disabled={isLoading} creditCost={50} confirmationMessage="This action will cost 50 credits every month. Are you sure?">
+          <GitPullRequestCreateArrow size={16}/>
+        </CreditButton>
+      </div>
+      <ScrollArea className="h-[calc(100vh-200px)] my-2 w-full">
+        {channels.map((channel, index) => (
+          <ChannelCard
+            key={index}
+            selected={selectedChannel ? selectedChannel.channelId === channel.channelId : false}
+            clickCard={() => { setSelectedChannel(channel) }}
+            channel={channel}
+          />
+        ))}
+      </ScrollArea>
+    </div>
+  </div>
+);
+
+interface NewVideoFormProps {
+  youtubeLink: string;
+  setYoutubeLink: React.Dispatch<React.SetStateAction<string>>;
+  submitYoutubeLink: () => void;
+}
+
+const NewVideoForm: React.FC<NewVideoFormProps> = ({ youtubeLink, setYoutubeLink, submitYoutubeLink }) => (
+  <div className="w-full flex flex-col gap-2 p-4">
+    <Input
+      type="text"
+      placeholder="Enter YouTube video link"
+      value={youtubeLink}
+      onChange={(e) => setYoutubeLink(e.target.value)}
+    />
+    <Button onClick={submitYoutubeLink} disabled={!youtubeLink}>
+      Add New Video
+    </Button>
+  </div>
+);

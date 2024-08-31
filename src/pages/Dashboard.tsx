@@ -64,7 +64,7 @@ export default function Dashboard() {
 
   const [navItems, setNavItems] = useState<NavItem[]>([
     { id: 'dashboard', title: 'Dashboard', icon: <Home className="h-4 w-4" /> },
-    { id: 'channels', title: 'Channels', icon: <Tv className="h-4 w-4" />, badge: 6 },
+    { id: 'channels', title: 'Channels', icon: <Tv className="h-4 w-4" />, badge: 0 },
     { id: 'videos', title: 'Videos', icon: <Video className="h-4 w-4" /> },
     { id: 'shorts', title: 'Shorts', icon: <Smartphone className="h-4 w-4" /> },
     { id: 'analytics', title: 'Analytics', icon: <LineChart className="h-4 w-4" /> },

@@ -255,11 +255,11 @@ export const DashboardVideos: React.FC = () => {
 
 
   return (
-    <main className="flex flex-1 flex-col p-4 md:p-8">
+    <main className="flex flex-1 flex-col p-4 md:p-8 max-w-[100vw]">
       <h1 className="text-2xl font-bold mb-4">Videos Dashboard</h1>
       <p className="text-muted-foreground mb-4">View your manually added videos and videos from tracked channels.</p>
 
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex flex-wrap justify-between items-center mb-4">
         <div className="flex items-center gap-2">
           <Input
             placeholder="Filter videos..."
@@ -361,11 +361,11 @@ export const DashboardVideos: React.FC = () => {
         </TableBody>
       </Table>
 
-      <div className="flex justify-between items-center mt-4">
+      <div className="flex flex-wrap justify-between items-center mt-4">
         <p className="text-sm text-muted-foreground">
           {startIndex + 1}-{Math.min(endIndex, filteredVideos.length)} of {filteredVideos.length} row(s) shown.
         </p>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Select onValueChange={handleRowsPerPageChange} value={rowsPerPage.toString()}>
             <SelectTrigger className="w-[180px] h-9">
               <SelectValue placeholder="Rows per Page" />
@@ -377,6 +377,7 @@ export const DashboardVideos: React.FC = () => {
             </SelectContent>
           </Select>
           <span className="text-sm text-muted-foreground">Page {currentPage} of {totalPages}</span>
+          <div className={"sm:flex-1 md:flex-1"}/>
           <Button
             variant="outline"
             size="sm"

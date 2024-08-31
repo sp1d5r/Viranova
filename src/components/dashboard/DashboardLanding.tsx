@@ -366,7 +366,7 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
     }
   };
 
-  return <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
+  return <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8 max-w-[100vw]">
     <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -452,19 +452,16 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
       )}
     </div>
 
-    <div className="grid gap-4 md:gap-8 lg:grid-cols-2 xl:grid-cols-3">
-      <Card
-        className="xl:col-span-2"
-        x-chunk="A card showing a table of recent views on the shorts posted."
-      >
-        <CardHeader className="flex flex-row items-center">
+    <div className="grid gap-4 md:gap-8 lg:grid-cols-3">
+      <Card className="col-span-2">
+        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center">
           <div className="grid gap-2">
             <CardTitle>Short Views</CardTitle>
             <CardDescription>
               Overview of the views received on your shorts.
             </CardDescription>
           </div>
-          <Button asChild size="sm" className="ml-auto gap-1">
+          <Button asChild size="sm" className="mt-2 sm:mt-0 sm:ml-auto gap-1">
             <Link to="/dashboard?tab=shorts">
               View All
               <ArrowUpRight className="h-4 w-4" />
@@ -473,7 +470,7 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
         </CardHeader>
         <CardContent>
           <div className="rounded-md border">
-            <div className="max-h-[400px] overflow-x-scroll max-w-[85vw]">
+            <div className="max-w-[70vw] overflow-scroll max-h-[400px]">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -481,16 +478,16 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
                     <TableHead className="sticky top-0 bg-background">Likes</TableHead>
                     <TableHead className="sticky top-0 bg-background">Comments</TableHead>
                     <TableHead className="sticky top-0 bg-background">Views</TableHead>
-                    <TableHead className="sticky top-0 bg-background hidden md:table-cell">Date</TableHead>
+                    <TableHead className="sticky top-0 bg-background">Date</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {tiktokVideoData.map((video) => (
+                  {currentPageData.map((video) => (
                     <TableRow onClick={() => {window.open(`/shorts?short_id=${video.id}`)}} key={video.id}>
                       <TableCell>
                         <div className="font-medium">{video.description}</div>
-                        <a href={video.link} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                          {video.link.substring(0, 30)}...
+                        <a href={video.link} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-sm">
+                          {video.link}
                         </a>
                       </TableCell>
                       <TableCell>
@@ -502,7 +499,7 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
                       <TableCell>
                         <Badge variant="default">{video.views.toLocaleString()}</Badge>
                       </TableCell>
-                      <TableCell className="hidden md:table-cell">{video.date}</TableCell>
+                      <TableCell>{new Date(video.date).toLocaleDateString()}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -517,7 +514,7 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
               disabled={currentPage === 1}
             >
               <ChevronLeft className="h-4 w-4" />
-              Previous
+              <span className="sr-only sm:not-sr-only sm:ml-2">Previous</span>
             </Button>
             <Button
               variant="outline"
@@ -525,7 +522,7 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
             >
-              Next
+              <span className="sr-only sm:not-sr-only sm:mr-2">Next</span>
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
@@ -536,25 +533,28 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
           <CardTitle>Recent Comments</CardTitle>
           <CardDescription>Latest feedback from your TikTok audience</CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-6">
-          <div className="h-[400px] overflow-y-auto pr-4">
-            <div className="grid gap-6">
+        <CardContent>
+          <div className="h-[400px] overflow-y-auto pr-2 -mr-2">
+            <div className="grid gap-4">
               {comments.map((comment) => (
-                <div key={comment.id} className="flex items-start gap-4">
-                  <Avatar className="h-9 w-9">
+                <div key={comment.id} className="flex items-start gap-2">
+                  <Avatar className="h-8 w-8">
                     <AvatarImage src={comment.avatarThumbnail} alt={comment.uniqueId} />
-                    <AvatarFallback>{comment.uniqueId}</AvatarFallback>
+                    <AvatarFallback>{comment.uniqueId.substring(0, 2)}</AvatarFallback>
                   </Avatar>
                   <div className="grid gap-1">
-                    <div className="flex items-center">
+                    <div className="flex flex-wrap items-center gap-1">
                       <p className="text-sm font-medium leading-none">{comment.uniqueId}</p>
-                      <p className="ml-2 text-sm text-muted-foreground">Likes: {comment.likes}, Replies: {comment.replyCommentTotal}</p>
+                      <p className="text-xs text-muted-foreground">Likes: {comment.likes}, Replies: {comment.replyCommentTotal}</p>
                     </div>
                     <p className="text-sm text-muted-foreground">{comment.text}</p>
-                    <p className="text-xs text-muted-foreground">{comment.createTime.toDate().toString()}</p>
-                    <span className="text-xs text-muted-foreground">Clip:
-                      <a className="text-primary underline" href={`shorts?tab=performance&short_id=${comment.shortId}`}> {comment.shortId}</a>
-                    </span>
+                    <p className="text-xs text-muted-foreground">{new Date(comment.createTime.toDate()).toLocaleString()}</p>
+                    <span className="text-xs text-muted-foreground">
+                        Clip:
+                        <a className="text-primary underline ml-1" href={`shorts?tab=performance&short_id=${comment.shortId}`}>
+                          {comment.shortId.substring(0, 8)}...
+                        </a>
+                      </span>
                   </div>
                 </div>
               ))}
