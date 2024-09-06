@@ -100,13 +100,15 @@ export const Onboarding: React.FC<OnboardingProps> = () => {
         authState.user.uid,
         (doc) => {
           if (doc) {
-            // navigate('/dashboard')
+            navigate('/dashboard')
           } else {
           }
         },
         (error) => {
         }
       );
+    } else {
+      navigate('/authenticate')
     }
   }, [authState])
 

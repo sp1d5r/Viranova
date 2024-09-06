@@ -66,12 +66,12 @@ export const Shorts: React.FC = () => {
   const [stages, setStages] = useState<ProcessingStage[]>([
     { id: 'edit_transcript', label: 'Edit Transcript', endpoint: 'v1/temporal-segmentation', status: 'pending', tabConfig: tabConfig[1] },
     { id: 'generate_audio', label: 'Generate Audio', endpoint: 'v1/generate-test-audio', status: 'pending', tabConfig: tabConfig[1] },
-    { id: 'crop_clip', label: 'Regenerate Video', endpoint: 'v1/create-cropped-video', status: 'pending', tabConfig: tabConfig[2] },
-    { id: 'visual_interest', label: 'Getting Visual Interest', endpoint: 'v1/create-cropped-video', status: 'pending', tabConfig: tabConfig[2] },
+    { id: 'crop_clip', label: 'Regenerate Video', endpoint: 'v1/create-short-video', status: 'pending', tabConfig: tabConfig[2] },
+    { id: 'visual_interest', label: 'Getting Visual Interest', endpoint: 'v1/create-short-video', status: 'pending', tabConfig: tabConfig[2] },
     { id: 'camera_cuts', label: 'Determining Camera Cuts', endpoint: 'v1/temporal-segmentation', status: 'pending', tabConfig: tabConfig[2] },
     { id: 'bounding_boxes', label: 'Find Bounding Boxes', endpoint: 'v1/get-bounding-boxes', status: 'pending', tabConfig: tabConfig[2] },
     { id: 'generate_a_roll', label: 'Generate A-Roll', endpoint: 'v1/generate-a-roll', status: 'pending', tabConfig: tabConfig[2] },
-    { id: 'generate_final_clip', label: 'Generate Final Clip', endpoint: 'v1/create-short-video', status: 'pending', tabConfig: tabConfig[3] },
+    { id: 'generate_final_clip', label: 'Generate Final Clip', endpoint: 'v1/create-cropped-video', status: 'pending', tabConfig: tabConfig[3] },
   ]);
 
   useEffect(() => {
