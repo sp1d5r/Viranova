@@ -1,13 +1,19 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  Bell, Bolt,
+  Bell,
+  Bolt,
   CircleUser,
   Home,
   LineChart,
   Menu,
   Search,
-  Smartphone, Tv,
+  Tv,
   Video,
+  Scissors,
+  FileQuestion,
+  Newspaper,
+  Book,
+  Settings, LeafyGreen, LeafyGreenIcon
 } from "lucide-react"
 
 import { Badge } from "../components/ui/badge"
@@ -29,45 +35,63 @@ import {
 } from "../components/ui/dropdown-menu"
 import { Input } from "../components/ui/input"
 import { Sheet, SheetContent, SheetTrigger } from "../components/ui/sheet"
-import {Link, useNavigate, useSearchParams} from "react-router-dom";
-import {Logo} from "../components/logo/logo";
-import {DashboardLanding} from "../components/dashboard/DashboardLanding";
-import {DashboardChannels} from "../components/dashboard/DashboardChannels";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Logo } from "../components/logo/logo";
+import { useAuth } from "../contexts/Authentication";
+import { useNotification } from "../contexts/NotificationProvider";
+import { Popover, PopoverTrigger, PopoverContent } from "../components/ui/popover";
+import { ScrollArea } from "../components/ui/scroll-area";
+import { useUser } from "../contexts/UserProvider";
+import { useBrowserNotification } from "../contexts/BrowserNotificationProvider";
 import {DashboardVideos} from "../components/dashboard/DashboardVideos";
 import {DashboardShorts} from "../components/dashboard/DashboardShorts";
-import {useAuth} from "../contexts/Authentication";
-import {DashboardAnalytics} from "../components/dashboard/DashboardAnalytics";
-import {useNotification} from "../contexts/NotificationProvider";
-import {Popover, PopoverTrigger, PopoverContent} from "../components/ui/popover";
-import {ScrollArea} from "../components/ui/scroll-area";
-import FirebaseFirestoreService from "../services/database/strategies/FirebaseFirestoreService";
-import {ChannelsTracking} from "../types/collections/Channels";
-import {User} from "../types/collections/User";
-import {useUser} from "../contexts/UserProvider";
-import {useBrowserNotification} from "../contexts/BrowserNotificationProvider";
+import DashboardAnalytics from "../components/dashboard/DashboardAnalytics";
+import {DashboardChannels} from "../components/dashboard/DashboardChannels";
+import {DashboardLanding} from "../components/dashboard/DashboardLanding";
+import {Progress} from "../components/ui/progress";
+import {Separator} from "../components/ui/separator";
+import DashboardWYR from "../components/dashboard/DashboardWYR";
 
 interface NavItem {
   id: string;
   title: string;
   icon: React.ReactNode;
   badge?: number;
+  children?: NavItem[];
 }
-
 
 export default function Dashboard() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [selectedItem, setSelectedItem] = useState<string>('dashboard');
-  const {authState, logout} = useAuth();
-  const {userData, loading} = useUser();
-  const {showNotification, allNotifications} = useNotification();
+  const { authState, logout } = useAuth();
+  const { userData, loading } = useUser();
+  const { showNotification, allNotifications } = useNotification();
 
   const [navItems, setNavItems] = useState<NavItem[]>([
     { id: 'dashboard', title: 'Dashboard', icon: <Home className="h-4 w-4" /> },
-    { id: 'channels', title: 'Channels', icon: <Tv className="h-4 w-4" />, badge: 0 },
-    { id: 'videos', title: 'Videos', icon: <Video className="h-4 w-4" /> },
-    { id: 'shorts', title: 'Shorts', icon: <Smartphone className="h-4 w-4" /> },
+    {
+      id: 'clipping',
+      title: 'Clipping',
+      icon: <Scissors className="h-4 w-4" />,
+      children: [
+        { id: 'channels', title: 'Channels', icon: <Tv className="h-4 w-4" /> },
+        { id: 'videos', title: 'Videos', icon: <Video className="h-4 w-4" /> },
+        { id: 'clips', title: 'Clips', icon: <Scissors className="h-4 w-4" /> },
+      ]
+    },
+    {
+      id: 'original-content',
+      title: 'Original Content',
+      icon: <Book className="h-4 w-4" />,
+      children: [
+        { id: 'would-you-rather', title: 'Would You Rather', icon: <FileQuestion className="h-4 w-4" /> },
+        { id: 'news-videos', title: 'News Videos', icon: <Newspaper className="h-4 w-4" /> },
+        { id: 'short-stories', title: 'Short Stories', icon: <Book className="h-4 w-4" /> },
+      ]
+    },
     { id: 'analytics', title: 'Analytics', icon: <LineChart className="h-4 w-4" /> },
+    { id: 'settings', title: 'Settings', icon: <Settings className="h-4 w-4" /> },
   ]);
 
   const { requestNotificationPermission, notificationPermission } = useBrowserNotification();
@@ -78,40 +102,9 @@ export default function Dashboard() {
     }
   }, [authState, notificationPermission, requestNotificationPermission]);
 
-
-  useEffect(() => {
-    if (authState.user) {
-      // Get channels
-      console.log(userData);
-      console.log(loading);
-      if (!userData && !loading) {
-        navigate("/onboarding");
-        console.log("User document not found. Consider creating one or redirecting to onboarding.");
-      }
-
-      FirebaseFirestoreService.getDocument<ChannelsTracking>(
-        "channelstracking",
-        authState.user.uid,
-        (doc) => {
-          if (doc) {
-            setNavItems(
-              [
-                { id: 'dashboard', title: 'Dashboard', icon: <Home className="h-4 w-4" /> },
-                { id: 'channels', title: 'Channels', icon: <Tv className="h-4 w-4" />, badge: doc.channelsTracking.length  },
-                { id: 'videos', title: 'Videos', icon: <Video className="h-4 w-4" /> },
-                { id: 'shorts', title: 'Shorts', icon: <Smartphone className="h-4 w-4" /> },
-                { id: 'analytics', title: 'Analytics', icon: <LineChart className="h-4 w-4" /> },
-              ]
-            )
-          }
-        }
-      )
-    }
-  }, [authState, userData, loading])
-
   useEffect(() => {
     const tab = searchParams.get('tab');
-    if (tab && navItems.some(item => item.id === tab)) {
+    if (tab) {
       setSelectedItem(tab);
     }
   }, [searchParams]);
@@ -119,6 +112,45 @@ export default function Dashboard() {
   const handleTabChange = (tabId: string) => {
     setSelectedItem(tabId);
     setSearchParams({ tab: tabId });
+  };
+
+  const renderNavItems = (items: NavItem[]) => {
+    return items.map((item) => (
+      <div key={item.id}>
+        {item.children ? (
+          <div className="mb-2">
+            <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground">
+              {item.icon}
+              {item.title}
+            </div>
+            <div className="ml-4">
+              {renderNavItems(item.children)}
+            </div>
+          </div>
+        ) : (
+          <Link
+            to="#"
+            className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
+              selectedItem === item.id
+                ? 'bg-muted text-primary'
+                : 'text-muted-foreground'
+            }`}
+            onClick={(e) => {
+              e.preventDefault();
+              handleTabChange(item.id);
+            }}
+          >
+            {item.icon}
+            {item.title}
+            {item.badge && (
+              <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
+                {item.badge}
+              </Badge>
+            )}
+          </Link>
+        )}
+      </div>
+    ));
   };
 
   return (
@@ -143,7 +175,7 @@ export default function Dashboard() {
                     allNotifications.map((notification, index) => (
                       <div key={index} className="mb-2 p-2 bg-muted rounded-md">
                         <p className="font-semibold">{notification.title}</p>
-                        <p className="text-sm text-muted-foreground">{notification.message}</p>
+                        <p className="text-sm text-muted-foreforeground">{notification.message}</p>
                         <p className="text-xs text-muted-foreground mt-1">
                           {new Date(notification.timestamp).toLocaleString()}
                         </p>
@@ -158,47 +190,56 @@ export default function Dashboard() {
           </div>
           <div className="flex-1">
             <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-              {navItems.map((item) => (
-                <Link
-                  key={item.id}
-                  to="#"
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
-                    selectedItem === item.id
-                      ? 'bg-muted text-primary'
-                      : 'text-muted-foreground'
-                  }`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleTabChange(item.id);
-                  }}
-                >
-                  {item.icon}
-                  {item.title}
-                  {item.badge && (
-                    <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
-                      {item.badge}
-                    </Badge>
-                  )}
-                </Link>
-              ))}
+              {renderNavItems(navItems)}
             </nav>
           </div>
           <div className="mt-auto p-4">
-            {userData && (!userData.subscription && userData.subscription!.status != 'active') && <Card x-chunk="A card with a call to action">
-              <CardHeader className="p-2 pt-0 md:p-4">
-                <CardTitle>Upgrade to Pro</CardTitle>
-                <CardDescription>
-                  Unlock all features and get unlimited access to our support
-                  team.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-2 pt-0 md:p-4 md:pt-0">
-                <Button size="sm" className="w-full">
-                  Upgrade
-                </Button>
-              </CardContent>
-            </Card>
+
+            {authState.isAuthenticated && userData && (userData.subscription && userData.subscription.status === 'active') &&
+              <div className="flex gap-2 text-sm font-bold items-center text-primary">
+                <Card className="mt-auto w-full px-2 p-2 pt-2 md:p-4">
+                  <div className="mb-4">
+                    <h4 className="text-sm font-semibold mb-2">Credit quota</h4>
+                    <Progress value={40} className="h-2 mb-1" />
+                    <div className="flex justify-between text-sm text-gray-600">
+                      <span>{(userData?.credits?.current || 0).toLocaleString()} remaining</span>
+                      <span>{(userData?.credits?.monthlyAllocation || 10000).toLocaleString()} total</span>
+                    </div>
+                  </div>
+                  <Button className="w-full mb-4">Upgrade</Button>
+                  <div className="flex items-center justify-between">
+                    <a className="/settings">
+                      <Button variant="outline" size="icon">
+                        <Settings className="h-4 w-4" />
+                      </Button>
+                    </a>
+                    <div className="flex items-center gap-2">
+                      <LeafyGreenIcon className="w-5 h-5" />
+                      <span className="text-sm font-medium">{userData.name}</span>
+                    </div>
+                  </div>
+                </Card>
+              </div>
             }
+
+            {
+              !authState.isAuthenticated && <Card>
+                <CardHeader className="p-2 pt-0 md:p-4">
+                  <CardTitle>Upgrade to Pro</CardTitle>
+                  <CardDescription>
+                    Unlock all features and get unlimited access to our support team.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-2 pt-0 md:p-4 md:pt-0">
+                  <a className="/authenticate">
+                    <Button  size="sm" className="w-full">
+                      Upgrade
+                    </Button>
+                  </a>
+                </CardContent>
+              </Card>
+            }
+
           </div>
         </div>
       </div>
@@ -224,26 +265,7 @@ export default function Dashboard() {
                   <Logo />
                 </Link>
 
-                {navItems.map((item) => (
-                  <Link
-                    key={item.id}
-                    to="#"
-                    className={`mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 hover:text-foreground ${
-                      selectedItem === item.id
-                        ? 'bg-muted text-primary'
-                        : 'text-muted-foreground'
-                    }`}
-                    onClick={() => setSelectedItem(item.id)}
-                  >
-                    {item.icon}
-                    {item.title}
-                    {item.badge && (
-                      <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
-                        {item.badge}
-                      </Badge>
-                    )}
-                  </Link>
-                ))}
+                {renderNavItems(navItems)}
               </nav>
               <div className="mt-auto">
                 {userData && (!userData.subscription && userData.subscription!.status != 'active') && <Card>
@@ -260,6 +282,33 @@ export default function Dashboard() {
                     </Button>
                   </CardContent>
                 </Card>}
+
+                {authState.isAuthenticated && userData && (userData.subscription && userData.subscription.status === 'active') &&
+                  <div className="flex gap-2 text-sm font-bold items-center text-primary">
+                    <Card className="mt-auto w-full px-2 p-2 pt-2 md:p-4">
+                      <div className="mb-4">
+                        <h4 className="text-sm font-semibold mb-2">Credit quota</h4>
+                        <Progress value={40} className="h-2 mb-1" />
+                        <div className="flex justify-between text-sm text-gray-600">
+                          <span>{(userData?.credits?.current || 0).toLocaleString()} remaining</span>
+                          <span>{(userData?.credits?.monthlyAllocation || 10000).toLocaleString()} total</span>
+                        </div>
+                      </div>
+                      <Button className="w-full mb-4">Upgrade</Button>
+                      <div className="flex items-center justify-between">
+                        <a className="/settings">
+                          <Button variant="outline" size="icon">
+                            <Settings className="h-4 w-4" />
+                          </Button>
+                        </a>
+                        <div className="flex items-center gap-2">
+                          <LeafyGreenIcon className="w-5 h-5" />
+                          <span className="text-sm font-medium">{userData.name}</span>
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
+                }
               </div>
             </SheetContent>
           </Sheet>
@@ -274,10 +323,6 @@ export default function Dashboard() {
                 />
               </div>
             </form>
-          </div>
-          <div className="flex gap-2 text-sm font-bold items center text-primary">
-            <p className="m-0">{userData?.credits?.current || 0} / {userData?.credits?.monthlyAllocation || 0}</p>
-            <Bolt />
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -338,7 +383,15 @@ export default function Dashboard() {
         }
 
         {
+          selectedItem === 'would-you-rather' && <DashboardWYR />
+        }
+
+        {
           selectedItem === 'analytics' && <DashboardAnalytics userId={authState.user?.uid}/>
+        }
+
+        {
+          selectedItem === 'settings' && <Settings />
         }
       </div>
     </div>

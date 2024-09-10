@@ -230,9 +230,9 @@ export const Shorts: React.FC = () => {
                     {stages.filter((elem) => elem.status !== 'not-started').map((stage) => (
                       <div key={stage.id} className="flex items-center justify-between mb-2">
                         {stage.status === 'completed' && <CheckCircle2 className="text-green-500" />}
-                        {stage.status === 'processing' && <Loader2 className="animate-spin text-blue-500" />}
+                        {stage.status === 'processing' && <Loader2 className="animate-spin text-gray-300" />}
                         {stage.status === 'pending' && <Circle className="text-gray-300" />}
-                        <span className={`flex-grow px-2 ${stage.status === 'completed' ? 'text-green-500' : stage.status === 'processing' ? 'text-blue-500' : 'text-gray-500'}`}>
+                        <span className={`flex-grow px-2 ${stage.status === 'completed' ? 'text-green-500' : stage.status === 'processing' ? 'text-gray-300' : 'text-gray-500'}`}>
                           {stage.label}
                         </span>
                         <Popover>

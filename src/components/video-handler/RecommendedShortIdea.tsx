@@ -154,8 +154,7 @@ export const RecommendedShortIdeas: React.FC<RecommendedShortIdeasProps> = ({ se
                 20,
                 (requestId) => {
                   showNotification("Short Request Created", `Request ID: ${requestId}`, "success");
-                  const newWindow = window.open(`/shorts?short_id=${shortId}`, '_blank');
-                  if (newWindow) newWindow.opener = null;
+                  window.open(`/shorts?short_id=${shortId}`, '_blank', 'noopener,noreferrer');
                 },
                 (error) => {
                   showNotification("Short Request Creation Failed", `${error}`, "error");
