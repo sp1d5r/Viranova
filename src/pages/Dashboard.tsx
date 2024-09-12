@@ -13,7 +13,7 @@ import {
   FileQuestion,
   Newspaper,
   Book,
-  Settings, LeafyGreen, LeafyGreenIcon
+  Settings, LeafyGreen, LeafyGreenIcon, LibraryBig, Clapperboard, Focus
 } from "lucide-react"
 
 import { Badge } from "../components/ui/badge"
@@ -51,6 +51,8 @@ import {DashboardLanding} from "../components/dashboard/DashboardLanding";
 import {Progress} from "../components/ui/progress";
 import {Separator} from "../components/ui/separator";
 import DashboardWYR from "../components/dashboard/DashboardWYR";
+import {Collection} from "@zilliz/milvus2-sdk-node/dist/milvus/http";
+import DashboardImageGenerator from "../components/dashboard/DashboardImages";
 
 interface NavItem {
   id: string;
@@ -77,7 +79,7 @@ export default function Dashboard() {
       children: [
         { id: 'channels', title: 'Channels', icon: <Tv className="h-4 w-4" /> },
         { id: 'videos', title: 'Videos', icon: <Video className="h-4 w-4" /> },
-        { id: 'clips', title: 'Clips', icon: <Scissors className="h-4 w-4" /> },
+        { id: 'shorts', title: 'Clips', icon: <Scissors className="h-4 w-4" /> },
       ]
     },
     {
@@ -88,6 +90,15 @@ export default function Dashboard() {
         { id: 'would-you-rather', title: 'Would You Rather', icon: <FileQuestion className="h-4 w-4" /> },
         { id: 'news-videos', title: 'News Videos', icon: <Newspaper className="h-4 w-4" /> },
         { id: 'short-stories', title: 'Short Stories', icon: <Book className="h-4 w-4" /> },
+      ]
+    },
+    {
+      id: 'assets',
+      title: 'Assets',
+      icon: <LibraryBig className="h-4 w-4" />,
+      children: [
+        { id: 'asset-images', title: 'Images', icon: <Focus className="h-4 w-4" /> },
+        { id: 'asset-videos', title: 'Videos', icon: <Clapperboard className="h-4 w-4" /> },
       ]
     },
     { id: 'analytics', title: 'Analytics', icon: <LineChart className="h-4 w-4" /> },
@@ -384,6 +395,10 @@ export default function Dashboard() {
 
         {
           selectedItem === 'would-you-rather' && <DashboardWYR />
+        }
+
+        {
+          selectedItem === 'asset-images' && <DashboardImageGenerator />
         }
 
         {

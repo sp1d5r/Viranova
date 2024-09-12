@@ -1,40 +1,21 @@
 import React, { useState } from 'react';
-import {PlusCircle, Terminal} from 'lucide-react';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion"
-import { Card, CardContent } from "../ui/card"
-import {Alert, AlertDescription, AlertTitle} from "../ui/alert";
+import { Terminal } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import {Niche, VideoIdea } from "../../types/collections/Niche";
+import CreateNicheModal from "./WYR/CreateNicheModal";
+import VideoIdeaCard from "./WYR/VideoIdeaCard";
+import {Input} from "../ui/input";
+import {Button} from "../ui/button";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "../ui/select";
 
-// Types
-type Niche = {
-  id: string;
-  name: string;
-  color: string;
-};
-
-type VideoIdea = {
-  id: string;
-  title: string;
-  explanation: string;
-  nicheId: string;
-  totalViews: number;
-};
-
-type WyrVideo = {
-  id: string;
-  title: string;
-  styles: number;
-  views: number;
-  comments: number;
-  videoIdeaId: string;
-};
 
 // Mock data
-const niches: Niche[] = [
-  { id: '1', name: 'Fashion', color: 'bg-gradient-to-r from-green-400 to-blue-500' },
-  { id: '2', name: 'Basketball', color: 'bg-gradient-to-r from-orange-400 to-pink-500' },
+const initialNiches: Niche[] = [
+  { id: '1', name: 'Fashion',  leftColor: '#4ade80', rightColor: '#6366f1', },
+  { id: '2', name: 'Basketball',leftColor: '#fb923c', rightColor: '#a855f7'},
 ];
 
-const videoIdeas: VideoIdea[] = [
+const initialVideoIdeas: VideoIdea[] = [
   {
     id: '1',
     title: 'Fashion Faux Pas Fix',
@@ -56,64 +37,69 @@ const videoIdeas: VideoIdea[] = [
     nicheId: '1',
     totalViews: 400,
   },
-];
-
-const wyrVideos: WyrVideo[] = [
   {
-    id: '1',
-    title: 'Decade Style Swap - Streetwear!!',
-    styles: 3,
-    views: 300,
-    comments: 10,
-    videoIdeaId: '2',
+    id: '4',
+    title: 'Slam Dunk Challenge',
+    explanation: 'Compares different basketball dunk styles, e.g., "360 windmill or between-the-legs dunk?"',
+    nicheId: '2',
+    totalViews: 600,
   },
 ];
 
 // Components
-const NicheButton: React.FC<{ niche: Niche }> = ({ niche }) => (
-  <button className={`${niche.color} text-white font-semibold py-2 px-4 rounded-full`}>
+const NicheButton: React.FC<{ niche: Niche; isSelected: boolean; onClick: () => void }> = ({ niche, isSelected, onClick }) => (
+  <button
+    className={`font-semibold py-2 px-4 rounded-full transition-all duration-200 ${
+      isSelected
+        ? `bg-gradient-to-r from-[${niche.leftColor}] to-[${niche.rightColor}] text-white`
+        : `border-2 border-gray-300 text-gray-700 hover:border-gray-400`
+    }`}
+    style={{
+      background: isSelected
+        ? `linear-gradient(to right, ${niche.leftColor}, ${niche.rightColor})`
+        : 'transparent',
+    }}
+    onClick={onClick}
+  >
     {niche.name}
   </button>
 );
 
-const VideoIdeaCard: React.FC<{ videoIdea: VideoIdea }> = ({ videoIdea }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
 
-  return (
-    <Card className="mb-4">
-      <CardContent className="p-4">
-        <Accordion type="single" collapsible>
-          <AccordionItem value={videoIdea.id}>
-            <AccordionTrigger onClick={() => setIsExpanded(!isExpanded)}>
-              <div className="flex justify-between w-full">
-                <span>{videoIdea.title}</span>
-                <span>Total Views: {videoIdea.totalViews}</span>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <p className="text-sm text-gray-600 mb-2">{videoIdea.explanation}</p>
-              {isExpanded && (
-                <div>
-                  <h4 className="font-semibold mt-2 mb-1">WYR Videos:</h4>
-                  {wyrVideos
-                    .filter((video) => video.videoIdeaId === videoIdea.id)
-                    .map((video) => (
-                      <div key={video.id} className="text-sm">
-                        <p>{video.title}</p>
-                        <p>Styles: {video.styles} | Views: {video.views} | Comments: {video.comments}</p>
-                      </div>
-                    ))}
-                </div>
-              )}
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      </CardContent>
-    </Card>
-  );
-};
 
 const DashboardWYR: React.FC = () => {
+  const [niches, setNiches] = useState(initialNiches);
+  const [videoIdeas, setVideoIdeas] = useState(initialVideoIdeas);
+  const [selectedNiche, setSelectedNiche] = useState<Niche | null>(null);
+  const [newIdeaPrompt, setNewIdeaPrompt] = useState('');
+  const [ideaCount, setIdeaCount] = useState('1');
+
+  const handleNicheSelect = (niche: Niche) => {
+    setSelectedNiche(selectedNiche?.id === niche.id ? null : niche);
+  };
+
+  const handleCreateNiche = (newNiche: Niche) => {
+    setNiches([...niches, newNiche]);
+  };
+
+  const handleGenerateIdeas = () => {
+    if (selectedNiche) {
+      const count = parseInt(ideaCount);
+      const newIdeas: VideoIdea[] = Array.from({ length: count }, (_, index) => ({
+        id: String(videoIdeas.length + index + 1),
+        title: `New Idea ${index + 1} for ${selectedNiche.name}`,
+        explanation: newIdeaPrompt || `Generated based on ${selectedNiche.name}`,
+        nicheId: selectedNiche.id,
+        totalViews: 0,
+      }));
+      setVideoIdeas([...videoIdeas, ...newIdeas]);
+      setNewIdeaPrompt('');
+    }
+  };
+
+  const filteredVideoIdeas = selectedNiche
+    ? videoIdeas.filter((idea) => idea.nicheId === selectedNiche.id)
+    : videoIdeas;
   return (
     <div className="p-4 md:p-8 max-w-[100vw]">
       <Alert className="my-2">
@@ -129,22 +115,47 @@ const DashboardWYR: React.FC = () => {
       <div className="mb-6">
         <h2 className="text-xl font-semibold mb-2">Niche</h2>
         <div className="flex space-x-2">
-          <button className="border border-gray-300 rounded-full p-2">
-            <PlusCircle className="h-6 w-6" />
-          </button>
+          <CreateNicheModal onCreateNiche={handleCreateNiche} />
           {niches.map((niche) => (
-            <NicheButton key={niche.id} niche={niche} />
+            <NicheButton
+              key={niche.id}
+              niche={niche}
+              isSelected={selectedNiche?.id === niche.id}
+              onClick={() => handleNicheSelect(niche)}
+            />
           ))}
         </div>
       </div>
 
       <div>
         <h2 className="text-xl font-semibold mb-2">Video Ideas</h2>
-        {videoIdeas.map((idea) => (
-          <VideoIdeaCard key={idea.id} videoIdea={idea} />
+        {selectedNiche && (
+          <div className="flex space-x-2 mb-4">
+            <Input
+              type="text"
+              placeholder="Enter prompt for new idea (optional)"
+              value={newIdeaPrompt}
+              onChange={(e) => setNewIdeaPrompt(e.target.value)}
+              className="flex-grow"
+            />
+            <Select value={ideaCount} onValueChange={setIdeaCount}>
+              <SelectTrigger className="w-[100px]">
+                <SelectValue placeholder="# of ideas" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">1 idea</SelectItem>
+                <SelectItem value="3">3 ideas</SelectItem>
+                <SelectItem value="5">5 ideas</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button onClick={handleGenerateIdeas}>Generate Ideas</Button>
+          </div>
+        )}
+        {selectedNiche && filteredVideoIdeas.map((idea) => (
+          <VideoIdeaCard key={idea.id} videoIdea={idea} niche={selectedNiche} />
         ))}
-      </div>
     </div>
+  </div>
   );
 };
 
