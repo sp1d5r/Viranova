@@ -283,8 +283,8 @@ const DashboardImageGenerator: React.FC = () => {
             {userImages.map((image, index) => (
               <div key={image.id} className="relative">
                 {image.status === 'processing' || image.status === 'pending' ? (
-                  <div className="w-full h-full bg-gray-700 rounded-lg flex items-center justify-center">
-                    <Loader className="animate-spin h-8 w-8 text-white" />
+                  <div className="w-full aspect-square bg-gray-700 rounded-lg flex items-center justify-center">
+                    <Loader className="animate-spin animate-bounce h-8 w-8 text-white" />
                   </div>
                 ) : (
                   <EnhancedImage
