@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Slider } from "../ui/slider"
 import { Button } from "../ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
@@ -8,6 +8,21 @@ import {Filter, Search, Upload, X} from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "../ui/dialog"
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "../ui/tabs";
+import FirebaseDatabaseService from "../../services/database/strategies/FirebaseFirestoreService";
+import {useNotification} from "../../contexts/NotificationProvider";
+import {useAuth} from "../../contexts/Authentication";
+import {EnhancedImage} from "../image-loader/ImageLoader";
+
+interface Image {
+  id: string;
+  prompt: string;
+  setup: string;
+  num_generations: number;
+  status: 'processing' | 'pending' | 'completed' | 'error'
+  created_at: Date;
+  image_paths?: string[];
+  uid: string;
+}
 
 interface SelectedImage {
   src: string;
@@ -36,21 +51,78 @@ const DashboardImageGenerator: React.FC = () => {
   const [newTag, setNewTag] = useState<string>('');
   const [tagColor, setTagColor] = useState<string>('#000000');
   const [activeTab, setActiveTab] = useState<string>("ai-generate");
+  const [setup, setSetup] = useState<string>('square');
+  const [numGenerations, setNumGenerations] = useState<number>(1);
+  const [isGenerating, setIsGenerating] = useState<boolean>(false);
+  const {showNotification} = useNotification();
+  const {authState} = useAuth();
+  const [userImages, setUserImages] = useState<Image[]>([]);
 
-  // Placeholder for generated images
-  const generatedImages: string[] = [
-    'https://placehold.co/400x400',
-    'https://placehold.co/400x400',
-    'https://placehold.co/400x400',
-    'https://placehold.co/400x400',
-    'https://placehold.co/400x400',
-  ];
+  useEffect(() => {
+    if (authState.user) {
+      fetchUserImages();
+    }
+  }, [authState.user]);
 
-  const handleImageClick = (index: number): void => {
+  const fetchUserImages = () => {
+    if (authState.user) {
+      FirebaseDatabaseService.queryDocuments<Image>(
+        'images',
+        'uid',
+        authState.user.uid,
+        'created_at',
+        (images) => {
+          setUserImages(images);
+        },
+        (error) => {
+          console.error('Error fetching images:', error);
+          showNotification('Error', 'Failed to fetch images', 'error');
+        }
+      );
+    }
+  };
+
+  const handleGenerate = async () => {
+    if (authState.user) {
+      setIsGenerating(true);
+      try {
+        FirebaseDatabaseService.addDocument(
+          'images',
+          {
+            prompt,
+            setup,
+            num_generations: numGenerations,
+            status: 'pending',
+            created_at: new Date(),
+            uid: authState.user.uid
+          },
+          () => {
+            // Reset form
+            setPrompt('');
+            setSetup('square');
+            setNumGenerations(1);
+            showNotification('Image Generation Requested', 'Successfully requested image generation', 'info');
+            fetchUserImages(); // Refresh the image list
+          },
+          (error) => {
+            showNotification('Image Generation Failed', error.message, 'error');
+          }
+        );
+      } catch (error) {
+        console.error('Error generating images:', error);
+      } finally {
+        setIsGenerating(false);
+      }
+    } else {
+      showNotification('Image Generation Failed', 'Not authenticated yet.', 'error');
+    }
+  };
+
+  const handleImageClick = (image: Image): void => {
     setSelectedImage({
-      src: generatedImages[index],
-      prompt: "Previous prompt for this image", // Replace with actual previous prompt
-      index
+      src: image.image_paths ? image.image_paths[0] : 'https://placehold.co/400x400',
+      prompt: image.prompt,
+      index: userImages.findIndex(img => img.id === image.id)
     });
   };
 
@@ -69,16 +141,20 @@ const DashboardImageGenerator: React.FC = () => {
 
   const ImageModal: React.FC<ImageModalProps> = ({ image, onClose }) => (
     <Dialog open={!!image} onOpenChange={() => onClose()}>
-      <DialogContent className="max-w-4xl">
+      <DialogContent className="w-full">
         <DialogHeader>
-          <DialogTitle>Full Size Image</DialogTitle>
+          <DialogTitle className="text-white">Full Size Image</DialogTitle>
           <DialogClose />
         </DialogHeader>
         {image && (
-          <div className="mt-4 flex gap-2 text-white">
-            <img src={image.src} alt="Full size" className="w-full h-auto" />
+          <div className="mt-4 flex gap-2 text-white flex-wrap">
+            <EnhancedImage
+              src={image.src ? image.src : 'https://placehold.co/400x400'}
+              className="h-auto"
+              alt="Full size"
+            />
             <div className="mt-4 flex flex-col gap-2">
-              <p className="mt-4 text-sm">Previous Prompt: {image.prompt}</p>
+              <p className="mt-4 text-sm">Prompt: {image.prompt}</p>
               <h4 className="font-semibold mb-2">Tags</h4>
               <div className="flex flex-wrap gap-2 mb-2">
                 {tags[image.index]?.map((tag, idx) => (
@@ -109,54 +185,6 @@ const DashboardImageGenerator: React.FC = () => {
       </DialogContent>
     </Dialog>
   );
-  const AIGenerateContent = () => (
-    <>
-      <div className="flex items-center space-x-4 mb-6 my-2">
-        <Input
-          type="text"
-          placeholder="Enter your prompt here..."
-          value={prompt}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPrompt(e.target.value)}
-          className="flex-grow bg-gray-800 text-white"
-        />
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline">
-              <Filter className="h-4 w-4 mr-2" />
-              Filters
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-80 bg-gray-800 border-gray-700">
-            {/* ... (filter content remains the same) ... */}
-          </PopoverContent>
-        </Popover>
-        <Button>
-          <Search className="h-4 w-4 mr-2" />
-          Generate
-        </Button>
-      </div>
-
-      <div className="grid grid-cols-3 gap-4">
-        {generatedImages.map((src, index) => (
-          <div key={index} className="relative">
-            <img
-              src={src}
-              alt={`Generated image ${index + 1}`}
-              className="w-full h-auto rounded-lg cursor-pointer"
-              onClick={() => handleImageClick(index)}
-            />
-            <div className="absolute top-2 left-2 flex flex-wrap gap-1">
-              {tags[index]?.map((tag, idx) => (
-                <span key={idx} style={{ backgroundColor: tag.color }} className="px-2 py-1 rounded text-white text-xs">
-                  {tag.text}
-                </span>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </>
-  );
 
   const UploadContent = () => (
     <div className="mt-4">
@@ -184,7 +212,74 @@ const DashboardImageGenerator: React.FC = () => {
           <TabsTrigger value="upload">Upload</TabsTrigger>
         </TabsList>
         <TabsContent value="ai-generate">
-          <AIGenerateContent />
+          <div className="flex items-center space-x-4 mb-6 my-2">
+            <Input
+              type="text"
+              placeholder="Enter your prompt here..."
+              value={prompt}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPrompt(e.target.value)}
+              className="flex-grow bg-gray-800 text-white"
+            />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline">
+                  <Filter className="h-4 w-4 mr-2" />
+                  Filters
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 bg-gray-800 border-gray-700">
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-semibold mb-2">Image Size</h3>
+                    <div className="flex space-x-2 mb-2">
+                      <Button size="sm" variant={setup === 'portrait' ? 'default' : 'outline'} onClick={() => setSetup('portrait')}>Portrait</Button>
+                      <Button size="sm" variant={setup === 'square' ? 'default' : 'outline'} onClick={() => setSetup('square')}>Square</Button>
+                      <Button size="sm" variant={setup === 'landscape' ? 'default' : 'outline'} onClick={() => setSetup('landscape')}>Landscape</Button>
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold mb-2">Number of Generations</h3>
+                    <Input
+                      type="number"
+                      value={numGenerations}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNumGenerations(parseInt(e.target.value))}
+                      min={1}
+                      max={10}
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+            <Button onClick={handleGenerate} disabled={isGenerating}>
+              <Search className="h-4 w-4 mr-2" />
+              {isGenerating ? 'Generating...' : 'Generate'}
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            {userImages.map((image, index) => (
+              <div key={image.id} className="relative">
+                <EnhancedImage
+                  src={image.image_paths ? image.image_paths[0] : 'https://placehold.co/400x400'}
+                  alt={`Generated image ${index + 1}`}
+                  className="w-full h-auto rounded-lg cursor-pointer"
+                  onClick={() => handleImageClick(image)}
+                />
+                <div className="absolute top-2 left-2 flex flex-wrap gap-1">
+                  {tags[index]?.map((tag, idx) => (
+                    <span key={idx} style={{ backgroundColor: tag.color }} className="px-2 py-1 rounded text-white text-xs">
+                      {tag.text}
+                    </span>
+                  ))}
+                </div>
+                <div className="absolute bottom-2 left-2 right-2 bg-black bg-opacity-50 p-2 rounded">
+                  <p className="text-xs truncate">{image.prompt}</p>
+                  <p className="text-xs">{image.status}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </TabsContent>
         <TabsContent value="upload">
           <UploadContent />
