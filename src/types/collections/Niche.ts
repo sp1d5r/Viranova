@@ -1,16 +1,25 @@
 export interface Niche {
-  id: string;
+  id?: string;
   name: string;
   leftColor: string;
   rightColor: string;
+  createdAt: Date;
+  uid: string;
+  // Temporary data points
+  prompt?: string;
+  numberOfIdeas?: number;
+  status?: string;
 }
 
 export interface VideoIdea {
-  id: string;
-  title: string;
-  explanation: string;
-  nicheId: string;
-  totalViews: number;
+  id?: string,
+  createdAt: Date,
+  explanation: string,
+  nicheId: string,
+  requestId: string,
+  status: string;
+  theme: string;
+  totalViews?: number
 }
 
 export interface WyrVideo {

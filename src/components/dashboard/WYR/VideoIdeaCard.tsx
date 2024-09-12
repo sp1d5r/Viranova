@@ -2,8 +2,10 @@ import React, {useState} from "react";
 import {Niche, VideoIdea, WyrVideo} from "../../../types/collections/Niche";
 import {Card, CardContent} from "../../ui/card";
 import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from "../../ui/accordion";
-import {Sparkles} from "lucide-react";
+import {Sparkles, TrashIcon} from "lucide-react";
 import {Button} from "../../ui/button";
+import FirebaseFirestoreService from "../../../services/database/strategies/FirebaseFirestoreService";
+import {useNotification} from "../../../contexts/NotificationProvider";
 
 
 
@@ -21,6 +23,7 @@ const wyrVideos: WyrVideo[] = [
 
 const VideoIdeaCard: React.FC<{ videoIdea: VideoIdea, niche: Niche }> = ({ videoIdea, niche }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const {showNotification} = useNotification();
 
   return (
     <div
@@ -31,18 +34,31 @@ const VideoIdeaCard: React.FC<{ videoIdea: VideoIdea, niche: Niche }> = ({ video
     >
       <CardContent className={`p-2 bg-background rounded-xl`}>
         <Accordion type="single" collapsible>
-          <AccordionItem value={videoIdea.id}>
+          <AccordionItem value={videoIdea.id!}>
             <AccordionTrigger onClick={() => setIsExpanded(!isExpanded)}>
               <div className="hover!no-underline flex justify-between items-center w-full px-2">
                 <div className="text-left">
-                  <span>{videoIdea.title}</span>
+                  <span>{videoIdea.theme}</span>
                   <p className="text-sm text-gray-600 mb-2 !no-underline">{videoIdea.explanation}</p>
                 </div>
-                <div className="flex gap-2 items-center">
-                  <span>Total Views: {videoIdea.totalViews}</span>
-                  <Button variant="outline" size="icon">
-                    <Sparkles />
-                  </Button>
+                <div className="flex flex-col gap-2 items-center">
+                  <span>Total Views: {videoIdea.totalViews || 0}</span>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="icon">
+                      <Sparkles />
+                    </Button>
+                    <Button variant="outline" size="icon" onClick={() => {
+                      FirebaseFirestoreService.deleteDocument(
+                        "wyr-themes",
+                        videoIdea.id!,
+                        () => {
+                          showNotification("Deleted video idea", "Successfully deleted video idea", "success")
+                        }
+                      )
+                    }}>
+                      <TrashIcon />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </AccordionTrigger>

@@ -1,6 +1,6 @@
 import {Timestamp} from "firebase/firestore";
 
-type RequestOperand = 'video' | 'topical_segment' | 'short';
+type RequestOperand = 'video' | 'topical_segment' | 'short' | 'wyr';
 
 interface MessageRequests {
   message: string;
@@ -42,6 +42,22 @@ export interface ShortRequest extends Request{
   creditCost?: number;
   status?: string;
 }
+
+
+export type WouldYouRatherEndpoints = "v1/generate-video-ideas";
+
+export interface WouldYouRatherRequest extends Request {
+  id?: string;
+  requestEndpoint: WouldYouRatherEndpoints,
+  requestOperand: 'wyr';
+  nicheId: string;
+  ideaId?: string;
+  uid: string;
+  progress?: number;
+  creditCost?: number;
+  status?: string;
+}
+
 
 
 // Doubt i'll need this but let's leave video and segment as is...

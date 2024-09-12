@@ -4,7 +4,7 @@ import { Button } from "../ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
 import { Switch } from "../ui/switch"
 import { Input } from "../ui/input"
-import {Filter, Search, Upload, X} from 'lucide-react'
+import {Filter, Loader, Search, Upload, X} from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "../ui/dialog"
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "../ui/tabs";
@@ -199,6 +199,28 @@ const DashboardImageGenerator: React.FC = () => {
     </div>
   );
 
+  const getStatusColor = (status: string): string => {
+    switch (status) {
+      case 'completed':
+        return 'bg-green-500';
+      case 'processing':
+        return 'bg-yellow-500';
+      case 'pending':
+        return 'bg-blue-500';
+      case 'error':
+        return 'bg-red-500';
+      default:
+        return 'bg-gray-500';
+    }
+  };
+
+  const StatusIndicator: React.FC<{ status: string }> = ({ status }) => (
+    <div className={`absolute top-2 right-2 flex items-center ${getStatusColor(status)} text-white text-xs font-bold px-2 py-1 rounded-full`}>
+      {status === 'processing' && <Loader className="animate-spin mr-1 h-3 w-3" />}
+      {status.charAt(0).toUpperCase() + status.slice(1)}
+    </div>
+  );
+
   return (
     <div className="text-white p-6 rounded-lg">
       <div className="flex gap-2 items-center mb-4">
@@ -251,31 +273,37 @@ const DashboardImageGenerator: React.FC = () => {
                 </div>
               </PopoverContent>
             </Popover>
-            <Button onClick={handleGenerate} disabled={isGenerating}>
+            <Button onClick={handleGenerate} disabled={userImages.filter(image => image.status == "processing").length > 0}>
               <Search className="h-4 w-4 mr-2" />
-              {isGenerating ? 'Generating...' : 'Generate'}
+              {userImages.filter(image => image.status == "processing").length > 0 ? 'Generating...' : 'Generate'}
             </Button>
           </div>
 
           <div className="grid grid-cols-3 gap-4">
             {userImages.map((image, index) => (
               <div key={image.id} className="relative">
-                <EnhancedImage
-                  src={image.image_paths ? image.image_paths[0] : 'https://placehold.co/400x400'}
-                  alt={`Generated image ${index + 1}`}
-                  className="w-full h-auto rounded-lg cursor-pointer"
-                  onClick={() => handleImageClick(image)}
-                />
+                {image.status === 'processing' || image.status === 'pending' ? (
+                  <div className="w-full h-full bg-gray-700 rounded-lg flex items-center justify-center">
+                    <Loader className="animate-spin h-8 w-8 text-white" />
+                  </div>
+                ) : (
+                  <EnhancedImage
+                    src={image.image_paths ? image.image_paths[0] : 'https://placehold.co/400x400'}
+                    alt={`Generated image ${index + 1}`}
+                    className="w-full aspect-square object-cover rounded-lg cursor-pointer"
+                    onClick={() => handleImageClick(image)}
+                  />
+                )}
+                <StatusIndicator status={image.status} />
                 <div className="absolute top-2 left-2 flex flex-wrap gap-1">
                   {tags[index]?.map((tag, idx) => (
                     <span key={idx} style={{ backgroundColor: tag.color }} className="px-2 py-1 rounded text-white text-xs">
-                      {tag.text}
-                    </span>
+                {tag.text}
+              </span>
                   ))}
                 </div>
                 <div className="absolute bottom-2 left-2 right-2 bg-black bg-opacity-50 p-2 rounded">
                   <p className="text-xs truncate">{image.prompt}</p>
-                  <p className="text-xs">{image.status}</p>
                 </div>
               </div>
             ))}

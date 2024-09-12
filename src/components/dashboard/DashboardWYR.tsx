@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { Terminal } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import {Niche, VideoIdea } from "../../types/collections/Niche";
@@ -7,44 +7,10 @@ import VideoIdeaCard from "./WYR/VideoIdeaCard";
 import {Input} from "../ui/input";
 import {Button} from "../ui/button";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "../ui/select";
-
-
-// Mock data
-const initialNiches: Niche[] = [
-  { id: '1', name: 'Fashion',  leftColor: '#4ade80', rightColor: '#6366f1', },
-  { id: '2', name: 'Basketball',leftColor: '#fb923c', rightColor: '#a855f7'},
-];
-
-const initialVideoIdeas: VideoIdea[] = [
-  {
-    id: '1',
-    title: 'Fashion Faux Pas Fix',
-    explanation: 'Focuses on correcting fashion mistakes, e.g., "Fix a too-tight dress or a mismatched color outfit?"',
-    nicheId: '1',
-    totalViews: 500,
-  },
-  {
-    id: '2',
-    title: 'Decade Style Swap',
-    explanation: 'Explores swapping styles from different decades, e.g., "1970s boho or 1990s grunge?"',
-    nicheId: '1',
-    totalViews: 300,
-  },
-  {
-    id: '3',
-    title: 'Runway Showdown',
-    explanation: 'Presents choices between different runway looks, e.g., "Couture gown or avant-garde outfit?"',
-    nicheId: '1',
-    totalViews: 400,
-  },
-  {
-    id: '4',
-    title: 'Slam Dunk Challenge',
-    explanation: 'Compares different basketball dunk styles, e.g., "360 windmill or between-the-legs dunk?"',
-    nicheId: '2',
-    totalViews: 600,
-  },
-];
+import FirebaseFirestoreService from "../../services/database/strategies/FirebaseFirestoreService";
+import {useAuth} from "../../contexts/Authentication";
+import {useNotification} from "../../contexts/NotificationProvider";
+import {useWouldYouRatherRequestManagement} from "../../contexts/WYRRequestProvider";
 
 // Components
 const NicheButton: React.FC<{ niche: Niche; isSelected: boolean; onClick: () => void }> = ({ niche, isSelected, onClick }) => (
@@ -68,31 +34,95 @@ const NicheButton: React.FC<{ niche: Niche; isSelected: boolean; onClick: () => 
 
 
 const DashboardWYR: React.FC = () => {
-  const [niches, setNiches] = useState(initialNiches);
-  const [videoIdeas, setVideoIdeas] = useState(initialVideoIdeas);
+  const [niches, setNiches] = useState<Niche[]>([]);
+  const [videoIdeas, setVideoIdeas] = useState<VideoIdea[]>([]);
   const [selectedNiche, setSelectedNiche] = useState<Niche | null>(null);
   const [newIdeaPrompt, setNewIdeaPrompt] = useState('');
   const [ideaCount, setIdeaCount] = useState('1');
+  const {authState} = useAuth();
+  const {showNotification} = useNotification();
+  const { createWouldYouRatherRequest, getWouldYouRatherRequests, getUserWouldYouRatherRequests } = useWouldYouRatherRequestManagement();
+
+  useEffect(() => {
+    if (authState.user){
+      FirebaseFirestoreService.listenToQuery<Niche>(
+        'niches',
+        'uid',
+        authState.user.uid,
+        "createdAt",
+        (collectedNiches) => {
+          console.log(collectedNiches)
+          if (collectedNiches) {
+            setNiches(collectedNiches);
+          }
+        },
+        (error) => {
+          console.log(error);
+          showNotification('Failed', 'Unable to collect niches', 'error');
+        }
+      )
+    }
+  }, [authState.user])
+
+  useEffect(() => {
+    if (selectedNiche && selectedNiche.id) {
+      FirebaseFirestoreService.listenToQuery<VideoIdea>(
+        'wyr-themes',
+        'nicheId',
+        selectedNiche.id,
+        "createdAt",
+        (collectedVideoIdeas) => {
+          console.log(collectedVideoIdeas)
+          if (collectedVideoIdeas) {
+            setVideoIdeas(collectedVideoIdeas);
+          }
+        },
+        (error) => {
+          console.log(error);
+          showNotification('Failed', 'Unable to collect niches', 'error');
+        }
+      )
+    }
+  }, [selectedNiche]);
 
   const handleNicheSelect = (niche: Niche) => {
     setSelectedNiche(selectedNiche?.id === niche.id ? null : niche);
   };
 
   const handleCreateNiche = (newNiche: Niche) => {
+    if (authState.user) {
+      FirebaseFirestoreService.addDocument(
+        'niches',
+        {
+          ...newNiche,
+        }
+      )
+    }
     setNiches([...niches, newNiche]);
   };
 
   const handleGenerateIdeas = () => {
-    if (selectedNiche) {
+    if (selectedNiche && selectedNiche.id) {
       const count = parseInt(ideaCount);
-      const newIdeas: VideoIdea[] = Array.from({ length: count }, (_, index) => ({
-        id: String(videoIdeas.length + index + 1),
-        title: `New Idea ${index + 1} for ${selectedNiche.name}`,
-        explanation: newIdeaPrompt || `Generated based on ${selectedNiche.name}`,
-        nicheId: selectedNiche.id,
-        totalViews: 0,
-      }));
-      setVideoIdeas([...videoIdeas, ...newIdeas]);
+
+      FirebaseFirestoreService.updateDocument<Niche>(
+        "niches",
+        selectedNiche.id,
+        {
+          prompt: newIdeaPrompt,
+          numberOfIdeas: count,
+          status: 'pending',
+        }
+      )
+
+      createWouldYouRatherRequest(
+        selectedNiche.id,
+        'v1/generate-video-ideas',
+        0,
+        () => {
+          showNotification('Requested Idea Generation', 'Successfully requested generations', 'info')
+        }
+      )
       setNewIdeaPrompt('');
     }
   };

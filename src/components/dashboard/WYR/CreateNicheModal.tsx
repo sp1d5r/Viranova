@@ -5,6 +5,7 @@ import { Input } from "../../ui/input";
 import { Button } from "../../ui/button";
 import { Niche } from "../../../types/collections/Niche";
 import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
+import {useAuth} from "../../../contexts/Authentication";
 
 const tailwindColors = {
   slate: ['#f8fafc', '#f1f5f9', '#e2e8f0', '#cbd5e1', '#94a3b8', '#64748b', '#475569', '#334155', '#1e293b', '#0f172a'],
@@ -94,13 +95,24 @@ const ColorPicker: React.FC<{
 };
 
 const CreateNicheModal: React.FC<{ onCreateNiche: (niche: Niche) => void }> = ({ onCreateNiche }) => {
-  const [newNiche, setNewNiche] = useState({ name: '', leftColor: '#3b82f6', rightColor: '#22c55e' });
+  const [newNiche, setNewNiche] = useState<Niche>({ name: '', leftColor: '#3b82f6', rightColor: '#22c55e', createdAt: new Date(), uid: "" });
   const closeRef = useRef<HTMLButtonElement>(null);
+  const {authState} = useAuth();
 
   const handleCreate = () => {
-    if (newNiche.name && newNiche.leftColor && newNiche.rightColor) {
-      onCreateNiche({ ...newNiche, id: Date.now().toString() });
-      setNewNiche({ name: '', leftColor: newNiche.leftColor, rightColor: newNiche.rightColor });
+    if (newNiche.name && newNiche.leftColor && newNiche.rightColor && authState.user) {
+      setNewNiche({
+        name: '',
+        leftColor: newNiche.leftColor,
+        rightColor: newNiche.rightColor,
+        createdAt: new Date(),
+        uid: authState.user.uid
+      });
+      onCreateNiche({
+        ...newNiche,
+        createdAt: new Date(),
+        uid: authState.user.uid
+      });
       closeRef.current?.click(); // Programmatically close the dialog
     }
   };
