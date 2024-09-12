@@ -20,7 +20,7 @@ interface UserInfo {
   primaryColor: string,
   secondaryColor: string,
 }
-export const Settings: React.FC<SettingsProps> = () => {
+export const SettingsPage: React.FC<SettingsProps> = () => {
   const { authState } = useAuth();
   const { toast } = useToast();
   const [userInfo, setUserInfo] = useState<UserInfo>({

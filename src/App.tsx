@@ -9,7 +9,7 @@ import {VideoSegments} from "./pages/VideoSegments";
 import {SegmentationHandlingPage} from "./pages/SegmentationHandlingPage";
 import {VideoMatchingPage} from "./pages/VideoMatchingPage";
 import {NotFound} from "./pages/NotFound";
-import {Settings} from "./pages/Settings";
+import {SettingsPage} from "./pages/Settings";
 import {SegmentVideoMatching} from "./components/segment-video-matching/SegmentVideoMatching";
 import {Shorts} from "./pages/Shorts";
 import TermsOfServicePages from "./pages/TermsOfServicePage";
@@ -34,7 +34,7 @@ function App() {
 
           {/* User Pages */}
           <Route path={"/authenticate"} element={<AuthenticationPage />} />
-          <Route path={"/settings"} element={<Settings />} />
+          <Route path={"/settings"} element={<SettingsPage />} />
 
           {/* Self Supervised Learning */}
           <Route path={"/segmentation"} element={<SegmentationHandlingPage />} />

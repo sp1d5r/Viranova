@@ -53,6 +53,8 @@ import {Separator} from "../components/ui/separator";
 import DashboardWYR from "../components/dashboard/DashboardWYR";
 import {Collection} from "@zilliz/milvus2-sdk-node/dist/milvus/http";
 import DashboardImageGenerator from "../components/dashboard/DashboardImages";
+import {SettingsPage} from "./Settings";
+import DashboardAssetVideo from "../components/dashboard/DashboardAssetsVideo";
 
 interface NavItem {
   id: string;
@@ -402,11 +404,15 @@ export default function Dashboard() {
         }
 
         {
+          selectedItem === 'asset-videos' && <DashboardAssetVideo />
+        }
+
+        {
           selectedItem === 'analytics' && <DashboardAnalytics userId={authState.user?.uid}/>
         }
 
         {
-          selectedItem === 'settings' && <Settings />
+          selectedItem === 'settings' && <SettingsPage />
         }
       </div>
     </div>
