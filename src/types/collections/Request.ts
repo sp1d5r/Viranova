@@ -44,7 +44,7 @@ export interface ShortRequest extends Request{
 }
 
 
-export type WouldYouRatherEndpoints = "v1/generate-video-ideas";
+export type WouldYouRatherEndpoints = "v1/generate-video-ideas" | "v1/new-wyr-video";
 
 export interface WouldYouRatherRequest extends Request {
   id?: string;

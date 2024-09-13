@@ -1,3 +1,5 @@
+import {Timestamp} from "firebase/firestore";
+
 export interface Niche {
   id?: string;
   name: string;
@@ -22,11 +24,21 @@ export interface VideoIdea {
   totalViews?: number
 }
 
+export interface OptionSet {
+  transcript: string,
+  option1: string,
+  option1_percentage: number,
+  option2: string,
+}
+
 export interface WyrVideo {
-  id: string;
-  title: string;
-  styles: number;
-  views: number;
-  comments: number;
-  videoIdeaId: string;
+  id?: string;
+  createdAt: Timestamp,
+  explanation: string,
+  ideaId: string,
+  nicheId: string,
+  optionSets: OptionSet[],
+  theme: string,
+  uid: string,
+  updatedAt: Date,
 }
