@@ -10,7 +10,9 @@ import {Button} from "../../ui/button";
 import FirebaseFirestoreService from "../../../services/database/strategies/FirebaseFirestoreService";
 import {useAuth} from "../../../contexts/Authentication";
 import {useNotification} from "../../../contexts/NotificationProvider";
-import {Loader2} from "lucide-react";
+import {Loader2, MinusCircle, Trash} from "lucide-react";
+import {ResubscribeTask} from "../../../types/collections/Task";
+import {Timestamp} from "firebase/firestore";
 
 interface ChannelDetailsProps {
   channel: Channel;
@@ -23,6 +25,29 @@ const ChannelDetails: React.FC<ChannelDetailsProps> = ({ channel, channelId, use
   const {authState} = useAuth();
   const { showNotification } = useNotification();
   const { removeChannelFromTrack, isLoading, error } = useAddChannelToTrack(userId? userId : "N/A");
+  const [resubTasks, setResubTasks] = useState<ResubscribeTask[]>([]);
+
+  useEffect(() => {
+    getResubTasks()
+  }, [channelId]);
+
+  const getResubTasks = () => {
+    FirebaseFirestoreService.complexQuery<ResubscribeTask>(
+      'tasks',
+      [
+        { field: 'operation', operator: '==', value: 'Re-Subscribe' },
+        { field: 'channelId', operator: '==', value: channelId },
+      ],
+      [{ field: 'scheduledTime', direction: 'asc' }],
+      (results) => {
+        console.log(results);
+        setResubTasks(results);
+      },
+      (error) => {
+        console.error('Query error:', error);
+      }
+    );
+  }
 
   useEffect(() => {
     getRecentChannelVideos(channel.channelId, 50).then((vids) => {
@@ -89,6 +114,43 @@ const ChannelDetails: React.FC<ChannelDetailsProps> = ({ channel, channelId, use
     else return "Unknown..."
   }
 
+  const createRescheduleAnalyticsTask = () => {
+    var scheduledTime = new Date();
+    scheduledTime.setMinutes(scheduledTime.getMinutes()+2);
+    const newTask = {
+      operation: 'Re-Subscribe',
+      channelId: channelId,
+      status: 'Pending',
+      createdAt: Timestamp.fromDate(new Date()),
+      scheduledTime: Timestamp.fromDate(scheduledTime), // Schedule for 1 minute from now, adjust as needed
+      userId: userId
+    };
+
+    FirebaseFirestoreService.addDocument(
+      'tasks',
+      newTask,
+      (taskId) => {
+        showNotification(
+          "Channel Resubscribed",
+          `Successfully created a new task to resub to channel ${channel.title}`,
+          "success",
+          5000
+        );
+        getResubTasks(); // Refresh the task list
+      },
+      (error) => {
+        showNotification(
+          "Error",
+          "Failed to create task for rescheduling analytics. Please try again.",
+          "error",
+          5000
+        );
+        console.error("Error creating task:", error);
+      }
+    );
+  };
+
+
   return (
     <ScrollArea className="h-[calc(100vh-100px)] gap-2">
       <Card className="m-4 relative overflow-hidden">
@@ -108,23 +170,10 @@ const ChannelDetails: React.FC<ChannelDetailsProps> = ({ channel, channelId, use
                 variant="default"
                 size="sm"
                 onClick={() => {
-                  FirebaseFirestoreService.updateDocument(
-                    "channels",
-                    channelId,
-                    {
-                      'status': 'New Channel',
-                      'previous_status': 'New Channel Requested'
-                    },
-                    () => {
-                      console.log('Updating Channel')
-                    },
-                    (error) => {
-                      console.error(error.message);
-                    }
-                  )
+                  createRescheduleAnalyticsTask()
                 }}
               >
-                Auto-Download
+                Resubscribe to Channel
               </Button>
               <Button
                 variant="destructive"
@@ -192,6 +241,40 @@ const ChannelDetails: React.FC<ChannelDetailsProps> = ({ channel, channelId, use
               <p>{channel.channelId}</p>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card className="m-4">
+        <CardHeader>
+          <CardTitle>Resubscribe Tasks</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {resubTasks.length > 0 ? (
+            <ul className="space-y-2">
+              {resubTasks.map((task, index) => (
+                <li key={index} className="outline outline-white/30 outline-1 flex justify-between items-center p-2 rounded-md">
+                  <div>
+                    <p><strong>Scheduled Time:</strong> {task.scheduledTime.toDate().toString()}</p>
+                    <p><strong>Status:</strong> {task.status}</p>
+                  </div>
+                  <Button size="icon" variant={"ghost"} onClick={() => {
+                    FirebaseFirestoreService.deleteDocument(
+                      'tasks',
+                      task.id!,
+                      () => {
+                        showNotification("Deleted Task", "Successfully deleted task", "success")
+                        window.location.reload();
+                      }
+                    )
+                  }}>
+                    <MinusCircle />
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No resubscribe tasks scheduled.</p>
+          )}
         </CardContent>
       </Card>
 

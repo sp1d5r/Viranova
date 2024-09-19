@@ -1,4 +1,8 @@
-import {FirestoreError} from "firebase/firestore";
+import {
+    FirestoreError,
+    WhereFilterOp,
+    OrderByDirection
+} from "firebase/firestore";
 
 export type UpdateCallback<T> = (data: T | null) => void;
 export type SuccessCallback<T> = (result: T) => void;
@@ -10,6 +14,11 @@ interface Identifiable {
     id?: string;
 }
 
+type FilterCondition = {
+    field: string;
+    operator: WhereFilterOp;
+    value: any;
+};
 export interface DatabaseService {
     addDocument(collectionPath: string, data: any, onSuccess?:SuccessCallback<string>, onFailure?: FailureCallback): Promise<void>;
     getDocument<T>(collectionPath: string, docId: string, onSuccess?:SuccessCallback<T | null>, onFailure?: FailureCallback): Promise<void>;
@@ -28,7 +37,14 @@ export interface DatabaseService {
       orderByField: string,
       onUpdate: UpdateCallback<T[]>,
       onError: (error: FirestoreError) => void
-    ): Unsubscribe
+    ): Unsubscribe;
+    complexQuery<T>(
+      collectionPath: string,
+      filters: FilterCondition[],
+      orderByFields: { field: string; direction?: OrderByDirection }[],
+      onSuccess?: SuccessCallback<T[]>,
+      onFailure?: FailureCallback
+    ): Promise<void>
 }
 
 export default DatabaseService;

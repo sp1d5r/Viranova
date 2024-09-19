@@ -1,7 +1,7 @@
 import {Timestamp} from "firebase/firestore";
 
 type TaskStatus = 'Pending' | 'Running' | 'Complete' | 'Failed';
-type TaskOperation = 'Analytics' | 'Download';
+type TaskOperation = 'Analytics' | 'Download' | 'Re-Subscribe';
 
 interface BaseTask {
   id?: string; // Unique identifier for the task
@@ -26,6 +26,12 @@ export interface DownloadTask extends BaseTask {
   channelId: string; // YouTube channel ID
   downloadUrl?: string; // URL where the video was downloaded to
   fileSize?: number; // Size of the downloaded video in bytes
+}
+
+
+export interface ResubscribeTask extends BaseTask {
+  operation: 'Re-Subscribe';
+  channelId: string;
 }
 
 export type Task = AnalyticsTask | DownloadTask;

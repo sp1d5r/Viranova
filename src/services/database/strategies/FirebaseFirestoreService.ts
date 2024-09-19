@@ -15,11 +15,19 @@ import {
     onSnapshot,
     Unsubscribe,
     setDoc,
-    WithFieldValue
+    WithFieldValue,
+    WhereFilterOp,
+    OrderByDirection
 } from 'firebase/firestore';
 import app from "../../../config/firebaseConfig";
 import {DatabaseService, FailureCallback, SuccessCallback, UpdateCallback} from '../DatabaseInterface';
 const db = getFirestore(app);
+
+type FilterCondition = {
+    field: string;
+    operator: WhereFilterOp;
+    value: any;
+};
 
 type QueryResult<T> = T & { id: string };
 
@@ -188,6 +196,44 @@ const FirebaseDatabaseService: DatabaseService = {
           onError
         );
     },
+
+    async complexQuery<T>(
+      collectionPath: string,
+      filters: FilterCondition[],
+      orderByFields: { field: string; direction?: OrderByDirection }[] = [],
+      onSuccess?: SuccessCallback<T[]>,
+      onFailure?: FailureCallback
+    ): Promise<void> {
+        try {
+            const collectionRef = collection(db, collectionPath);
+
+            // Start building the query
+            let q = query(collectionRef);
+
+            // Apply all filter conditions
+            filters.forEach(filter => {
+                q = query(q, where(filter.field, filter.operator, filter.value));
+            });
+
+            // Apply all orderBy clauses
+            orderByFields.forEach(orderByField => {
+                q = query(q, orderBy(orderByField.field, orderByField.direction));
+            });
+
+            const querySnapshot = await getDocs(q);
+            const documents: QueryResult<T>[] = [];
+            querySnapshot.forEach((doc) => {
+                const data = doc.data() as T;
+                const result: QueryResult<T> = { ...data, id: doc.id };
+                documents.push(result);
+            });
+
+            if (onSuccess) onSuccess(documents);
+        } catch (error) {
+            if (onFailure) onFailure(error as FirestoreError);
+        }
+    }
+
 }
 
 export default FirebaseDatabaseService;
