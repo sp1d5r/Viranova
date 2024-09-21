@@ -15,6 +15,7 @@ import ChannelDetails from "./channels/DetailedChannelView";
 import { useNotification } from "../../contexts/NotificationProvider";
 import {CreditButton} from "../ui/credit-button";
 import FirebaseFirestoreService from "../../services/database/strategies/FirebaseFirestoreService";
+import { getVideoInfo } from "../../services/youtube";
 
 export interface DashboardChannelsProps {
   userId?: string;
@@ -30,7 +31,8 @@ export const DashboardChannels: React.FC<DashboardChannelsProps> = ({ userId }) 
   const [channelIdError, setChannelIdError] = useState<string | null>(null);
   const { showNotification } = useNotification();
   const { authState } = useAuth();
-
+  const [isAddingVideo, setIsAddingVideo] = useState(false);
+  const [newVideoLink, setNewVideoLink] = useState('');
 
   const isValidChannelId = (channelId: string): boolean => {
     // YouTube channel IDs are typically 24 characters long
@@ -57,44 +59,70 @@ export const DashboardChannels: React.FC<DashboardChannelsProps> = ({ userId }) 
     return youtubeRegex.test(url);
   }
 
-  const submitYoutubeLink = () => {
-    if (youtubeLink) {
-      if (isValidYouTubeUrl(youtubeLink)) {
-        FirebaseDatabaseService.addDocument("videos", {
-            uid: authState.user!.uid,
-            processingProgress: 0,
-            status: "Link Provided",
-            previousStatus: "Started...",
-            uploadTimestamp: Date.now(),
-            progressMessage: "Performing Download",
-            queuePosition: -1,
-            link: youtubeLink,
-          },
-          (doc_id) => {
-            showNotification(
-              "Created Document!",
-              `Successfully created new document: ${doc_id}`,
-              "success",
-              10000
-            );
-            window.location.href = `/video-handler?video_id=${doc_id}`
-          },
-          () => {
-            showNotification(
-              "Error Document Creation",
-              'Failed to create document... Try again another time maybe?',
-              "error",
-              10000
-            );
+  const extractVideoId = (url: string): string => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : "";
+  };
+
+  const handleAddVideo = async () => {
+    if (newVideoLink) {
+      if (isValidYouTubeUrl(newVideoLink)) {
+        setIsAddingVideo(true);
+        try {
+          const videoId = extractVideoId(newVideoLink);
+          const videoInfo = await getVideoInfo(videoId);
+          
+          if (videoInfo) {
+            FirebaseFirestoreService.addDocument("videos", {
+              ...videoInfo,
+              uid: authState.user!.uid,
+              processingProgress: 0,
+              status: "Link Provided",
+              previousStatus: "Started...",
+              uploadTimestamp: Date.now(),
+              progressMessage: "Performing Download",
+              queuePosition: -1,
+              link: newVideoLink,
+            },
+            (doc_id) => {
+              showNotification(
+                "Video Added!",
+                `Successfully added new video: ${doc_id}`,
+                "success",
+                10000
+              );
+              setNewVideoLink('');
+              setIsAddingVideo(false);
+              window.location.href = `/video-handler?video_id=${doc_id}`
+              // Assuming fetchVideos is defined elsewhere in your component
+              // fetchVideos();  // Refresh the video list
+            },
+            (error) => {
+              showNotification(
+                "Error Adding Video",
+                'Failed to add video. Please try again later.',
+                "error",
+                10000
+              );
+              console.error("Error adding video:", error);
+            });
+          } else {
+            showNotification("Error", "Failed to fetch video information", "error");
           }
-        )
+        } catch (error) {
+          console.error("Error adding video:", error);
+          showNotification("Error", "An error occurred while adding the video", "error");
+        } finally {
+          setIsAddingVideo(false);
+        }
       } else {
         showNotification("Invalid Link", "Please provide a valid YouTube link.", "error");
       }
     } else {
       showNotification("No Link", "You need to add a YouTube link", "error");
     }
-  }
+  };
 
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
@@ -191,9 +219,10 @@ export const DashboardChannels: React.FC<DashboardChannelsProps> = ({ userId }) 
           </TabsContent>
           <TabsContent value="new-video">
             <NewVideoForm
-              youtubeLink={youtubeLink}
-              setYoutubeLink={setYoutubeLink}
-              submitYoutubeLink={submitYoutubeLink}
+              newVideoLink={newVideoLink}
+              setNewVideoLink={setNewVideoLink}
+              handleAddVideo={handleAddVideo}
+              isAddingVideo={isAddingVideo}
             />
           </TabsContent>
         </Tabs>
@@ -301,21 +330,22 @@ const ChannelsList: React.FC<ChannelsListProps> = ({
 );
 
 interface NewVideoFormProps {
-  youtubeLink: string;
-  setYoutubeLink: React.Dispatch<React.SetStateAction<string>>;
-  submitYoutubeLink: () => void;
+  newVideoLink: string;
+  setNewVideoLink: React.Dispatch<React.SetStateAction<string>>;
+  handleAddVideo: () => Promise<void>;
+  isAddingVideo: boolean;
 }
 
-const NewVideoForm: React.FC<NewVideoFormProps> = ({ youtubeLink, setYoutubeLink, submitYoutubeLink }) => (
+const NewVideoForm: React.FC<NewVideoFormProps> = ({ newVideoLink, setNewVideoLink, handleAddVideo, isAddingVideo }) => (
   <div className="w-full flex flex-col gap-2 p-4">
     <Input
       type="text"
       placeholder="Enter YouTube video link"
-      value={youtubeLink}
-      onChange={(e) => setYoutubeLink(e.target.value)}
+      value={newVideoLink}
+      onChange={(e) => setNewVideoLink(e.target.value)}
     />
-    <Button onClick={submitYoutubeLink} disabled={!youtubeLink}>
-      Add New Video
+    <Button onClick={handleAddVideo} disabled={!newVideoLink || isAddingVideo}>
+      {isAddingVideo ? "Adding Video..." : "Add New Video"}
     </Button>
   </div>
 );

@@ -22,6 +22,10 @@ export const VideoSegments: React.FC<VideoSegmentsProps> = ({ videoId: propsVide
 
   const { video, segments } = useVideoData(videoId);
 
+  useEffect(() => {
+    console.log('Segments in VideoSegments component:', segments);
+  }, [segments]);
+
   const handleSeek = useCallback((time: number) => {
     if (seekTimeoutRef.current) {
       clearTimeout(seekTimeoutRef.current);

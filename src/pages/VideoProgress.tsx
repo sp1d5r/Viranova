@@ -70,7 +70,7 @@ export const VideoProgress: React.FC<VideoProgressProps> = ({}) => {
                 {
                     video.status === "Uploaded" ? <img className={"animate-spin"} src={Transcript} alt={"Uploaded video"} /> :
                       video.status === "Link Provided" ? <img className={"animate-spin"} src={Transcript} alt={"Uploaded video"} /> :
-                        video.status === "Transcribing" ? <img className={"animate-spin"} src={Transcript} alt={"Uploaded video"} /> :
+                        video.status === "Transcribe" ? <img className={"animate-spin"} src={Transcript} alt={"Uploaded video"} /> :
                           video.status === "Diarizing" ? <img className={"animate-spin"} src={Transcript} alt={"Uploaded video"} /> :
                             video.status === "Segmenting" ? <img className={"animate-bounce"} src={Segments} alt={"Uploaded video"} /> :
                               video.status === "Summarizing Segments" ? <img className={"animate-bounce"} src={Proposals} alt={"Summarising Segments"} /> :
@@ -79,7 +79,7 @@ export const VideoProgress: React.FC<VideoProgressProps> = ({}) => {
                 }
                 {
                     video.status === "Uploaded" ? <p className={"text-white font-bold text-subsubtitle"}> Video Uploaded! </p> :
-                    video.status === "Transcribing" ? <p className={"text-white font-bold text-subsubtitle"}> Transcribing the Video </p> :
+                    video.status === "Transcribe" ? <p className={"text-white font-bold text-subsubtitle"}> Transcribing the Video </p> :
                     video.status === "Link Provided" ? <p className={"text-white font-bold text-subsubtitle"}> Downloading Youtube </p> :
                     // video.status === "Diarizing" ? <p className={"text-white font-bold text-subsubtitle"}> Video Uploaded! </p> :
                     video.status === "Segmenting" ? <p className={"text-white font-bold text-subsubtitle"}> Segmenting Video </p> :

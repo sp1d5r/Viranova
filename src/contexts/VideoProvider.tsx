@@ -76,14 +76,18 @@ export const useVideoData = (videoId: string | null) => {
 
   useEffect(() => {
     if (videoId && videoId !== lastVideoIdRef.current) {
+      console.log('Setting up listeners for videoId:', videoId);
+    
       lastVideoIdRef.current = videoId;
       fetchVideo(videoId);
       fetchTranscriptsAndSegments(videoId);
-
+      
+      console.log('Fetching video and transcripts for videoId:', videoId);
       const videoUnsubscribe = FirebaseDatabaseService.listenToDocument<UserVideo>(
         "videos",
         videoId,
         (document) => {
+          console.log('here')
           if (document) {
             const newVideo = documentToUserVideo(document);
             if (JSON.stringify(newVideo) !== JSON.stringify(videoRef.current)) {
@@ -97,18 +101,29 @@ export const useVideoData = (videoId: string | null) => {
         }
       );
 
-      const segmentsUnsubscribe = FirebaseDatabaseService.listenToQuery<Segment>(
+      console.log('subecerfijevnkjgnv', videoId);
+
+      FirebaseDatabaseService.listenToQuery<Segment>(
         "topical_segments",
         "video_id",
         videoId,
         "index",
         (segmentDocs) => {
-          console.log('Received segments update:', segmentDocs);
-          if (segmentDocs){
-            const newSegments = segmentDocs.map(doc => documentToSegment(doc));
-            if (JSON.stringify(newSegments) !== JSON.stringify(segmentsRef.current)) {
-              segmentsRef.current = newSegments;
-              setSegments(newSegments);
+          console.log('segmentDocs');
+          if (segmentDocs) {
+            console.log('Segments listener callback triggered, received docs:', segmentDocs.length);
+            if (segmentDocs.length > 0) {
+              const newSegments = segmentDocs.map(doc => documentToSegment(doc));
+              console.log('Mapped new segments:', newSegments);
+              if (JSON.stringify(newSegments) !== JSON.stringify(segmentsRef.current)) {
+                console.log('Segments changed, updating state');
+                segmentsRef.current = newSegments;
+                setSegments(newSegments);
+              } else {
+                console.log('Segments unchanged, not updating state');
+              }
+            } else {
+              console.log('No segments found for this video');
             }
           }
         },
@@ -120,7 +135,6 @@ export const useVideoData = (videoId: string | null) => {
 
       return () => {
         videoUnsubscribe();
-        segmentsUnsubscribe();
       };
     }
   }, [videoId, fetchVideo, fetchTranscriptsAndSegments, showNotification]);

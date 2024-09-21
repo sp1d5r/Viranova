@@ -1,7 +1,7 @@
 import {DocumentData} from 'firebase/firestore';
 import {BackendServerMetadata, ServerStatus} from "./BackendServerMetadata";
 
-type UserVideoStatus = "Uploaded" | "Link Provided" | "Transcribing" | "Diarizing" | "Segmenting" | "Summarizing Segments" | "Clip Transcripts" | "Preprocessing Complete" | "Create TikTok Ideas"
+type UserVideoStatus = "Uploaded" | "Link Provided" | "Transcribe" | "Diarizing" | "Segmenting" | "Summarizing Segments" | "Clip Transcripts" | "Preprocessing Complete" | "Create TikTok Ideas"
 
 export interface UserVideo extends BackendServerMetadata{
     videoPath: string;

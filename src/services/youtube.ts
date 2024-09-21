@@ -1,10 +1,70 @@
 import axios from 'axios';
-import {Video} from "../types/Video";
 import {Video as YoutubeVideo} from "../types/youtube/YoutubeVideo";
 import { parse, toSeconds } from 'iso8601-duration';
 
 const MIN_DURATION_SECONDS = 100
 const MAX_DURATION_SECONDS = 5400;
+
+
+const getVideoInfo = async (videoId: string): Promise<YoutubeVideo | undefined> => {
+    const apiKey = process.env.REACT_APP_GOOGLE_API_KEY;
+    const url = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=snippet,contentDetails,statistics,topicDetails,status&key=${apiKey}`;
+
+    try {
+        const response = await axios.get(url);
+        const videoData = response.data.items[0];
+        const snippet = videoData.snippet;
+        const contentDetails = videoData.contentDetails;
+        const statistics = videoData.statistics;
+
+        const videoInfo: YoutubeVideo = {
+            videoId: videoId,
+            videoTitle: snippet.title,
+            videoDescription: snippet.description,
+            videoUrl: `https://www.youtube.com/watch?v=${videoId}`,
+            thumbnailUrl: snippet.thumbnails.default.url,
+            channelId: snippet.channelId,
+            channelTitle: snippet.channelTitle,
+            publishedAt: snippet.publishedAt,
+            duration: contentDetails.duration,
+            viewCount: parseInt(statistics.viewCount || '0'),
+            likeCount: parseInt(statistics.likeCount || '0'),
+            commentCount: parseInt(statistics.commentCount || '0'),
+            tags: snippet.tags || [],
+            categoryId: snippet.categoryId,
+            defaultLanguage: snippet.defaultLanguage || 'en',
+            defaultAudioLanguage: snippet.defaultAudioLanguage,
+            isLiveBroadcast: snippet.liveBroadcastContent !== 'none',
+            liveBroadcastContent: snippet.liveBroadcastContent,
+            dimension: contentDetails.dimension,
+            definition: contentDetails.definition,
+            caption: contentDetails.caption === 'true',
+            licensedContent: contentDetails.licensedContent || false,
+            projection: contentDetails.projection,
+            topicCategories: videoData.topicDetails?.topicCategories || [],
+            statistics: {
+                viewCount: parseInt(statistics.viewCount || '0'),
+                likeCount: parseInt(statistics.likeCount || '0'),
+                dislikeCount: parseInt(statistics.dislikeCount || '0'),
+                favoriteCount: parseInt(statistics.favoriteCount || '0'),
+                commentCount: parseInt(statistics.commentCount || '0'),
+            },
+            thumbnails: {
+                default: snippet.thumbnails.default,
+                medium: snippet.thumbnails.medium,
+                high: snippet.thumbnails.high,
+                standard: snippet.thumbnails.standard,
+                maxres: snippet.thumbnails.maxres,
+            },
+        };
+
+        return videoInfo;
+    } catch (error) {
+        console.error('Error fetching video data:', error);
+        throw error;
+    }
+};
+
 
 const getRecentChannelVideos = async (channelId: string, maxResults: number = 30): Promise<YoutubeVideo[]> => {
     const apiKey = process.env.REACT_APP_GOOGLE_API_KEY;
@@ -66,32 +126,5 @@ const getRecentChannelVideos = async (channelId: string, maxResults: number = 30
     }
 };
 
-const getVideoInfo = async (videoId: string) : Promise<Video | undefined> => {
-    const url = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=snippet&key=${process.env.REACT_APP_GOOGLE_API_KEY}`;
-
-    try {
-        const response = await axios.get(url);
-        console.log(response);
-        console.log(videoId);
-        const videoData = response.data.items[0].snippet;
-
-        const videoInfo: Video = {
-            videoId: videoId,
-            videoTitle: videoData.title,
-            videoDescription: videoData.description.slice(0,200),
-            videoUrl: `https://www.youtube.com/watch?v=${videoId}`,
-            thumbnailUrl: videoData.thumbnails.high.url
-        };
-
-        return videoInfo;
-    } catch (error) {
-        console.error('Error fetching video data:', error);
-    }
-};
-
-// const convertVectorToVideo = async (vectorVideo: VectorVideo) :Promise<Video| undefined> => {
-//     const video = await getVideoInfo(vectorVideo.video_id);
-//     return video
-// }
 
 export {getVideoInfo, getRecentChannelVideos}

@@ -65,16 +65,16 @@ export const SegmentVideoMatching :React.FC<SegmentVideoMatchingProps> = () => {
     }
   }, [shortVideoId]);
 
-  useEffect(() => {
-    if (similarOriginalVideoIds.length > 0){
-      Promise.all(similarOriginalVideoIds.map((elem) => {return getVideoInfo(elem.video_id)})).then(
-        (result) => {
-          const videoResults = result.filter((elem): elem is Video => elem !== undefined);
-          setOriginalVideos(videoResults);
-        }
-      )
-    }
-  }, [similarOriginalVideoIds]);
+  // useEffect(() => {
+  //   if (similarOriginalVideoIds.length > 0){
+  //     Promise.all(similarOriginalVideoIds.map((elem) => {return getVideoInfo(elem.video_id)})).then(
+  //       (result) => {
+  //         const videoResults = result.filter((elem): elem is Video => elem !== undefined);
+  //         setOriginalVideos(videoResults);
+  //       }
+  //     )
+  //   }
+  // }, [similarOriginalVideoIds]);
 
 
   return <div className="max-w-screen-xl  m-auto my-5 flex flex-col gap-2 p-4">

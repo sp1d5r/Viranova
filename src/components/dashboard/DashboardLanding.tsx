@@ -40,6 +40,7 @@ import {toNumber} from "lodash";
 import {useAuth} from "../../contexts/Authentication";
 import {Comment, documentToComment} from "../../types/collections/Comments";
 import {Input} from "../ui/input";
+import { getVideoInfo } from '../../services/youtube';
 
 export interface DashboardLandingProps {
 
@@ -262,38 +263,57 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
     return youtubeRegex.test(url);
   }
 
-  const handleAddVideo = () => {
+  const extractVideoId = (url: string): string => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : "";
+  };
+
+  const handleAddVideo = async () => {
     if (newVideoLink) {
       if (isValidYouTubeUrl(newVideoLink)) {
-        FirebaseFirestoreService.addDocument("videos", {
-            uid: authState.user!.uid,
-            processingProgress: 0,
-            status: "Link Provided",
-            previousStatus: "Started...",
-            uploadTimestamp: Date.now(),
-            progressMessage: "Performing Download",
-            queuePosition: -1,
-            link: newVideoLink,
-          },
-          (doc_id) => {
-            showNotification(
-              "Video Added!",
-              `Successfully added new video: ${doc_id}`,
-              "success",
-              10000
-            );
-            setNewVideoLink('');
-            setIsAddingVideo(false);
-            window.location.href = `/video-handler?video_id=${doc_id}`
-          },
-          () => {
-            showNotification(
-              "Error Adding Video",
-              'Failed to add video... Please try again later.',
-              "error",
-              10000
-            );
-          });
+        try {
+          const videoId = extractVideoId(newVideoLink);
+          const videoInfo = await getVideoInfo(videoId);
+          
+          if (videoInfo) {
+            FirebaseFirestoreService.addDocument("videos", {
+              ...videoInfo,
+              uid: authState.user!.uid,
+              processingProgress: 0,
+              status: "Link Provided",
+              previousStatus: "Started...",
+              uploadTimestamp: Date.now(),
+              progressMessage: "Performing Download",
+              queuePosition: -1,
+              link: newVideoLink,
+            },
+            (doc_id) => {
+              showNotification(
+                "Video Added!",
+                `Successfully added new video: ${doc_id}`,
+                "success",
+                10000
+              );
+              setNewVideoLink('');
+              setIsAddingVideo(false);
+              window.location.href = `/video-handler?video_id=${doc_id}`
+            },
+            () => {
+              showNotification(
+                "Error Adding Video",
+                'Failed to add video... Please try again later.',
+                "error",
+                10000
+              );
+            });
+          } else {
+            showNotification("Error", "Failed to fetch video information", "error");
+          }
+        } catch (error) {
+          console.error("Error adding video:", error);
+          showNotification("Error", "An error occurred while adding the video", "error");
+        } 
       } else {
         showNotification("Invalid Link", "Please provide a valid YouTube link.", "error");
       }
