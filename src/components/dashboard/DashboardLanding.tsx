@@ -105,70 +105,6 @@ const dummyData: TikTokVideo[] = [
 
 const ITEMS_PER_PAGE = 5;
 
-interface UserComment {
-  id: string;
-  user: {
-    name: string;
-    avatar: string;
-    username: string;
-  };
-  comment: string;
-  timestamp: string;
-};
-
-const dummyComments: UserComment[] = [
-  {
-    id: '1',
-    user: {
-      name: 'Olivia Martin',
-      avatar: '/avatars/01.png',
-      username: '@olivia_m',
-    },
-    comment: 'This video is fire! 🔥 Keep up the great content!',
-    timestamp: '2 hours ago',
-  },
-  {
-    id: '2',
-    user: {
-      name: 'Jackson Lee',
-      avatar: '/avatars/02.png',
-      username: '@jackson_l',
-    },
-    comment: 'How did you do that transition? It\'s so smooth!',
-    timestamp: '3 hours ago',
-  },
-  {
-    id: '3',
-    user: {
-      name: 'Isabella Nguyen',
-      avatar: '/avatars/03.png',
-      username: '@bella_n',
-    },
-    comment: 'Your editing skills are on point! 👌',
-    timestamp: '5 hours ago',
-  },
-  {
-    id: '4',
-    user: {
-      name: 'William Kim',
-      avatar: '/avatars/04.png',
-      username: '@will_k',
-    },
-    comment: 'This trend is everywhere! You nailed it though!',
-    timestamp: '1 day ago',
-  },
-  {
-    id: '5',
-    user: {
-      name: 'Sofia Davis',
-      avatar: '/avatars/05.png',
-      username: '@sofia_d',
-    },
-    comment: 'Can you do a tutorial on how you made this? It\'s awesome!',
-    timestamp: '1 day ago',
-  },
-];
-
 interface AnalyticsSummary {
   totalViews: number;
   totalLikes: number;
@@ -367,7 +303,7 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
   };
 
   return <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8 max-w-[100vw]">
-    <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
+    <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4" data-id="dashboard-analytics">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Total Views</CardTitle>
@@ -452,7 +388,7 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
       )}
     </div>
 
-    <div className="grid gap-4 md:gap-8 lg:grid-cols-3">
+    <div className="grid gap-4 md:gap-8 lg:grid-cols-3" data-id="dashboard-shorts">
       <Card className="col-span-2">
         <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center">
           <div className="grid gap-2">
@@ -528,7 +464,7 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
           </div>
         </CardContent>
       </Card>
-      <Card>
+      <Card data-id="dashboard-comments">
         <CardHeader>
           <CardTitle>Recent Comments</CardTitle>
           <CardDescription>Latest feedback from your TikTok audience</CardDescription>

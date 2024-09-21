@@ -274,7 +274,7 @@ const ChannelsList: React.FC<ChannelsListProps> = ({
         </Alert>
       )}
       <h1 className="w-full text-lg font-semibold md:text-2xl my-2">Channels</h1>
-      <div className="w-full flex gap-2">
+      <div className="w-full flex gap-2" data-id="channel-id-adder">
         <Input
           className="h-9"
           type="text"
