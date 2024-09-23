@@ -3,7 +3,8 @@ import {BackendServerMetadata, ServerStatus} from "./BackendServerMetadata";
 
 type UserVideoStatus = "Uploaded" | "Link Provided" | "Transcribe" | "Diarizing" | "Segmenting" | "Summarizing Segments" | "Clip Transcripts" | "Preprocessing Complete" | "Create TikTok Ideas"
 
-export interface UserVideo extends BackendServerMetadata{
+export interface UserVideo extends BackendServerMetadata {
+    // Existing fields
     videoPath: string;
     originalFileName: string;
     uploadTimestamp: number;
@@ -15,6 +16,54 @@ export interface UserVideo extends BackendServerMetadata{
     queuePosition: number;
     id?: string;
     channelId?: string;
+
+    error?: boolean;
+    errorMessage?: string;
+
+    // New fields from Video interface
+    videoId?: string;
+    videoTitle?: string;
+    videoDescription?: string;
+    videoUrl?: string;
+    thumbnailUrl?: string;
+    channelTitle?: string;
+    publishedAt?: string;
+    duration?: string;
+    viewCount?: number;
+    likeCount?: number;
+    commentCount?: number;
+    tags?: string[];
+    categoryId?: string;
+    defaultLanguage?: string;
+    defaultAudioLanguage?: string;
+    isLiveBroadcast?: boolean;
+    liveBroadcastContent?: 'live' | 'upcoming' | 'none';
+    dimension?: '2d' | '3d';
+    definition?: 'hd' | 'sd';
+    caption?: boolean;
+    licensedContent?: boolean;
+    projection?: 'rectangular' | '360';
+    topicCategories?: string[];
+    statistics?: {
+        viewCount: number;
+        likeCount: number;
+        dislikeCount: number;
+        favoriteCount: number;
+        commentCount: number;
+    };
+    thumbnails?: {
+        default: ThumbnailInfo;
+        medium: ThumbnailInfo;
+        high: ThumbnailInfo;
+        standard?: ThumbnailInfo;
+        maxres?: ThumbnailInfo;
+    };
+}
+
+interface ThumbnailInfo {
+    url: string;
+    width: number;
+    height: number;
 }
 
 export function documentToUserVideo(docData: DocumentData): UserVideo {
@@ -30,7 +79,34 @@ export function documentToUserVideo(docData: DocumentData): UserVideo {
         queuePosition: docData.queuePosition,
         id: docData.id,
         backend_status: docData.backend_status,
-        channelId: docData.channelId
+        channelId: docData.channelId,
+        videoId: docData.videoId,
+        videoTitle: docData.videoTitle,
+        videoDescription: docData.videoDescription,
+        videoUrl: docData.videoUrl,
+        thumbnailUrl: docData.thumbnailUrl,
+        channelTitle: docData.channelTitle,
+        publishedAt: docData.publishedAt,
+        duration: docData.duration,
+        viewCount: docData.viewCount,
+        likeCount: docData.likeCount,
+        commentCount: docData.commentCount,
+        tags: docData.tags,
+        categoryId: docData.categoryId,
+        defaultLanguage: docData.defaultLanguage,
+        defaultAudioLanguage: docData.defaultAudioLanguage,
+        isLiveBroadcast: docData.isLiveBroadcast,
+        liveBroadcastContent: docData.liveBroadcastContent,
+        dimension: docData.dimension,
+        definition: docData.definition,
+        caption: docData.caption,
+        licensedContent: docData.licensedContent,
+        projection: docData.projection,
+        topicCategories: docData.topicCategories,
+        statistics: docData.statistics,
+        thumbnails: docData.thumbnails,
+        error: docData.error,
+        errorMessage: docData.errorMessage
     };
 }
 

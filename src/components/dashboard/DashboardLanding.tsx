@@ -299,7 +299,8 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
               setIsAddingVideo(false);
               window.location.href = `/video-handler?video_id=${doc_id}`
             },
-            () => {
+            (err) => {
+              console.log(err);
               showNotification(
                 "Error Adding Video",
                 'Failed to add video... Please try again later.',

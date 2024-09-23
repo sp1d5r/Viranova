@@ -36,6 +36,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { VideoRow } from "./videos/VideoRow";
 import { Channel, ChannelsTracking } from '../../types/collections/Channels';
 import {useNotification} from "../../contexts/NotificationProvider";
+import { VideoCard } from './videos/VideoCard';
 
 export const DashboardVideos: React.FC = () => {
   const [videos, setVideos] = useState<UserVideo[]>([]);
@@ -76,9 +77,10 @@ export const DashboardVideos: React.FC = () => {
         const channelVideos = await fetchChannelVideos();
         fetchedVideos = [...fetchedVideos, ...channelVideos];
       }
-
-      fetchedVideos.sort((a, b) => b.uploadTimestamp - a.uploadTimestamp);
-      setVideos(fetchedVideos);
+      
+      const uniqueVideos = Array.from(new Map(fetchedVideos.map(v => [v.id, v])).values());
+      uniqueVideos.sort((a, b) => b.uploadTimestamp - a.uploadTimestamp);
+      setVideos(uniqueVideos);
     } catch (error) {
       console.error("Error fetching videos:", error);
     } finally {
@@ -87,7 +89,17 @@ export const DashboardVideos: React.FC = () => {
   }, [authState.user, viewMode]);
 
   useEffect(() => {
-    fetchVideos();
+    FirebaseFirestoreService.listenToQuery('/videos',
+      'uid',
+      authState.user!.uid,
+      'uid',
+      (docs) => {
+        fetchVideos();
+      },
+      (error) => {
+        console.log(error.message);
+      }
+    );
   }, [fetchVideos]);
 
   const fetchManualVideos = (): Promise<UserVideo[]> => {
@@ -357,34 +369,17 @@ export const DashboardVideos: React.FC = () => {
         </div>
       )}
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Video ID</TableHead>
-            <TableHead>Title</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Progress</TableHead>
-            <TableHead>Upload Date</TableHead>
-            <TableHead></TableHead>
-            <TableHead></TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {currentVideos.filter((elem) => !!elem.originalFileName).map((video) => (
-            <React.Fragment key={video.id}>
-              {video.id && (
-                <VideoRow
-                  key={video.id}
-                  videoId={video.id}
-                  isExpanded={expandedRows.has(video.id)}
-                  onToggle={() => toggleRowExpansion(video.id!)}
-                  source={video.channelId ? 'Channel' : 'Manual'}
-                />
-              )}
-            </React.Fragment>
-          ))}
-        </TableBody>
-      </Table>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {currentVideos.map((video) => (
+          <VideoCard
+            key={video.id}
+            video={video}
+            isExpanded={expandedRows.has(video.id!)}
+            onToggle={() => toggleRowExpansion(video.id!)}
+            source={video.channelId ? 'Channel' : 'Manual'}
+          />
+        ))}
+      </div>
 
       <div className="flex flex-wrap justify-between items-center mt-4">
         <p className="text-sm text-muted-foreground">
