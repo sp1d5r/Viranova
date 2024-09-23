@@ -23,8 +23,10 @@ import {Popover, PopoverTrigger} from "../components/ui/popover";
 import {PopoverContent} from "@radix-ui/react-popover";
 import {HoverCard, HoverCardContent, HoverCardTrigger} from "../components/ui/hover-card";
 import {useShortRequestManagement} from "../contexts/ShortRequestProvider";
-import {ShortRequestEndpoints} from "../types/collections/Request";
+import {ShortRequest, ShortRequestEndpoints} from "../types/collections/Request";
 import {CreditButton} from "../components/ui/credit-button";
+import { debounce } from "lodash";
+import { useBrowserNotification } from "../contexts/BrowserNotificationProvider";
 
 export type TabType = "short-settings" | "transcript-editor" | "attention-capture" | "export" | "performance" | "requests";
 
@@ -43,13 +45,16 @@ const tabConfig: TabConfig[] = [
   { value: "requests", title: "Requests", description: "Manage requests for this short", icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg> },
 ];
 
-type ProcessingStage = {
+export interface ProcessingStage {
   id: string;
   label: string;
-  status: 'not-started' | 'pending' | 'processing' | 'completed';
-  endpoint: ShortRequestEndpoints;
+  creationEndpoint: ShortRequestEndpoints;
+  endpoints: ShortRequestEndpoints[];
+  requests: ShortRequest[];
+  status: 'not-started' | 'in-progress' | 'completed' | 'outdated';
+  lastUpdated: Timestamp | null;
   tabConfig: TabConfig;
-};
+}
 
 
 export const Shorts: React.FC = () => {
@@ -61,47 +66,105 @@ export const Shorts: React.FC = () => {
   const { showNotification } = useNotification();
   const initialTab = (searchParams.get("tab") as TabType) || "short-settings";
   const [activeTab, setActiveTab] = useState<TabType>(initialTab);
-  const { createShortRequest } = useShortRequestManagement();
+  const { createShortRequest, getShortRequests } = useShortRequestManagement();
 
   const [stages, setStages] = useState<ProcessingStage[]>([
-    { id: 'edit_transcript', label: 'Edit Transcript', endpoint: 'v1/temporal-segmentation', status: 'pending', tabConfig: tabConfig[1] },
-    { id: 'generate_audio', label: 'Generate Audio', endpoint: 'v1/generate-test-audio', status: 'pending', tabConfig: tabConfig[1] },
-    { id: 'crop_clip', label: 'Regenerate Video', endpoint: 'v1/create-short-video', status: 'pending', tabConfig: tabConfig[2] },
-    { id: 'visual_interest', label: 'Getting Visual Interest', endpoint: 'v1/create-short-video', status: 'pending', tabConfig: tabConfig[2] },
-    { id: 'camera_cuts', label: 'Determining Camera Cuts', endpoint: 'v1/temporal-segmentation', status: 'pending', tabConfig: tabConfig[2] },
-    { id: 'bounding_boxes', label: 'Find Bounding Boxes', endpoint: 'v1/get-bounding-boxes', status: 'pending', tabConfig: tabConfig[2] },
-    { id: 'generate_a_roll', label: 'Generate A-Roll', endpoint: 'v1/generate-a-roll', status: 'pending', tabConfig: tabConfig[2] },
-    { id: 'generate_final_clip', label: 'Generate Final Clip', endpoint: 'v1/create-cropped-video', status: 'pending', tabConfig: tabConfig[3] },
+    { id: 'edit_transcript', label: 'Edit Transcript', endpoints: ['v1/temporal-segmentation', 'v2/temporal-segmentation'], requests: [], status: 'not-started', lastUpdated: null, creationEndpoint: 'v1/temporal-segmentation', tabConfig: tabConfig[1] },
+    { id: 'generate_audio', label: 'Generate Audio', endpoints: ['v1/manual-override-transcript', 'v1/generate-test-audio', 'v1/generate-intro'], requests: [], status: 'not-started', lastUpdated: null, creationEndpoint: 'v1/generate-test-audio', tabConfig: tabConfig[1] },
+    { id: 'crop_clip', label: 'Cropping Clip', endpoints: ['v1/create-short-video'], requests: [], status: 'not-started', lastUpdated: null, creationEndpoint: 'v1/create-short-video', tabConfig: tabConfig[2] },
+    { id: 'visual_interest', label: 'Getting Visual Interest', endpoints: ['v1/get_saliency_for_short'], requests: [], status: 'not-started', lastUpdated: null, creationEndpoint: 'v1/create-short-video', tabConfig: tabConfig[2] },
+    { id: 'camera_cuts', label: 'Determining Camera Cuts', endpoints: ['v1/determine-boundaries'], requests: [], status: 'not-started', lastUpdated: null, creationEndpoint: 'v1/determine-boundaries', tabConfig: tabConfig[2] },
+    { id: 'bounding_boxes', label: 'Find Bounding Boxes', endpoints: ['v1/get-bounding-boxes'], requests: [], status: 'not-started', lastUpdated: null, creationEndpoint: 'v1/get-bounding-boxes', tabConfig: tabConfig[2] },
+    { id: 'generate_a_roll', label: 'Generate A-Roll', endpoints: ['v1/generate-a-roll'], requests: [], status: 'not-started', lastUpdated: null, creationEndpoint: 'v1/generate-a-roll', tabConfig: tabConfig[2] },
+    { id: 'generate_final_clip', label: 'Generate Final Clip', endpoints: ['v1/create-cropped-video'], requests: [], status: 'not-started', lastUpdated: null, creationEndpoint: 'v1/create-cropped-video', tabConfig: tabConfig[3] },
   ]);
 
+  const [requests, setRequests] = useState<ShortRequest[]>([]);
+  const { notifyRequestCompleted } = useBrowserNotification();
+
+  const isStageOutdated = useCallback((stageIndex: number) => {
+    if (stageIndex === 0) return false;
+    const currentStage = stages[stageIndex];
+    const previousStage = stages[stageIndex - 1];
+    return currentStage.lastUpdated && previousStage.lastUpdated && 
+           currentStage.lastUpdated < previousStage.lastUpdated;
+  }, [stages]);
+
+  const updateStagesWithRequests = useCallback((fetchedRequests: ShortRequest[]) => {
+    setStages(prevStages => {
+      let lastCompletedTimestamp: Timestamp | null = null;
+  
+      return prevStages.map((stage, index) => {
+        const stageRequests = fetchedRequests.filter(request => 
+          stage.endpoints.includes(request.requestEndpoint)
+        );
+        
+        let status: ProcessingStage['status'] = 'not-started';
+        let lastUpdated: Timestamp | null = null;
+  
+        if (stageRequests.length > 0) {
+          const latestRequest = stageRequests.reduce((latest, current) => {
+            const latestTimestamp = latest.serverCompletedTimestamp || latest.serverStartedTimestamp || latest.requestCreated;
+            const currentTimestamp = current.serverCompletedTimestamp || current.serverStartedTimestamp || current.requestCreated;
+            return latestTimestamp && currentTimestamp && currentTimestamp > latestTimestamp ? current : latest;
+          });
+  
+          if (latestRequest.serverCompletedTimestamp) {
+            status = 'completed';
+            lastUpdated = latestRequest.serverCompletedTimestamp;
+          } else if (latestRequest.serverStartedTimestamp) {
+            status = 'in-progress';
+            lastUpdated = latestRequest.serverStartedTimestamp;
+          } else if (latestRequest.requestCreated) {
+            lastUpdated = latestRequest.requestCreated;
+          }
+        }
+  
+        // Check if the current stage is outdated
+        if (lastCompletedTimestamp && lastUpdated && lastCompletedTimestamp > lastUpdated) {
+          status = 'outdated';
+        }
+  
+        // Update lastCompletedTimestamp if this stage is completed
+        if (status === 'completed' && lastUpdated) {
+          lastCompletedTimestamp = lastUpdated;
+        }
+  
+        return { ...stage, requests: stageRequests, status, lastUpdated };
+      });
+    });
+  }, []);
+
   useEffect(() => {
-    if (short){
-      setStages(prevStages => {
-        return prevStages.map(stage => {
-          switch (stage.id) {
-            case 'edit_transcript':
-              return { ...stage, status: short.lines  ? 'completed' : 'processing' };
-            case 'generate_audio':
-              return { ...stage, status: short.temp_audio_file ? 'completed' : short.lines && short.lines.length > 0  ? 'processing': 'not-started' };
-            case 'crop_clip':
-              return { ...stage, status: short.short_clipped_video ? 'completed' : short.temp_audio_file  ? 'processing': 'not-started' };
-            case 'visual_interest':
-              return { ...stage, status: short.short_video_saliency ? 'completed' : short.short_clipped_video  ? 'processing': 'not-started' };
-            case 'camera_cuts':
-              return { ...stage, status: short.cuts ? 'completed' : short.short_video_saliency  ? 'processing': 'not-started' };
-            case 'bounding_boxes':
-              return { ...stage, status: short.bounding_boxes ? 'completed' : short.cuts && short.cuts.length > 0 ? 'processing': 'not-started' };
-            case 'generate_a_roll':
-              return { ...stage, status: short.short_a_roll ? 'completed' : short.bounding_boxes  ? 'processing': 'not-started' };
-            case 'generate_final_clip':
-              return { ...stage, status: short.finished_short_location ? 'completed' : short.short_a_roll ? 'processing': 'not-started' };
-            default:
-              return stage;
+    const debouncedFetch = debounce(async () => {
+      if (!short_id) return;
+      try {
+        const fetchedRequests = await new Promise<ShortRequest[]>((resolve, reject) =>
+          getShortRequests(short_id, resolve, reject)
+        );
+
+        fetchedRequests.forEach(request => {
+          const existingRequest = requests.find(r => r.id === request.id);
+          if (request.serverCompletedTimestamp &&
+            (!existingRequest || !existingRequest.serverCompletedTimestamp)) {
+            notifyRequestCompleted(request);
           }
         });
-      });
-    }
-  }, [short]);
+
+        setRequests(fetchedRequests);
+        updateStagesWithRequests(fetchedRequests);
+      } catch (error) {
+        console.error('Failed to fetch requests:', error);
+      }
+    }, 300);
+
+    debouncedFetch();
+
+    return () => {
+      debouncedFetch.cancel();
+    };
+  }, [short_id, getShortRequests, notifyRequestCompleted, updateStagesWithRequests]);
+
 
   useEffect(() => {
     let unsubscribeShort: (() => void) | undefined;
@@ -230,9 +293,9 @@ export const Shorts: React.FC = () => {
                     {stages.filter((elem) => elem.status !== 'not-started').map((stage) => (
                       <div key={stage.id} className="flex items-center justify-between mb-2">
                         {stage.status === 'completed' && <CheckCircle2 className="text-green-500" />}
-                        {stage.status === 'processing' && <Loader2 className="animate-spin text-gray-300" />}
-                        {stage.status === 'pending' && <Circle className="text-gray-300" />}
-                        <span className={`flex-grow px-2 ${stage.status === 'completed' ? 'text-green-500' : stage.status === 'processing' ? 'text-gray-300' : 'text-gray-500'}`}>
+                        {stage.status === 'in-progress' && <Loader2 className="animate-spin text-gray-300" />}
+                        {stage.status === 'not-started' && <Circle className="text-gray-300" />}
+                        <span className={`flex-grow px-2 ${stage.status === 'completed' ? 'text-green-500' : stage.status === 'in-progress' ? 'text-gray-300' : 'text-gray-500'}`}>
                           {stage.label}
                         </span>
                         <Popover>
@@ -262,7 +325,7 @@ export const Shorts: React.FC = () => {
                                       if (short_id) {
                                         createShortRequest(
                                           short_id,
-                                          stage.endpoint,
+                                          stage.creationEndpoint,
                                           20,
                                           () => {
                                           },
@@ -333,7 +396,14 @@ export const Shorts: React.FC = () => {
       </div>
       {
         short && short_id && short.auto_generate && (
-          <ProcessingDialog shortId={short_id} short={short} isOpen={true} onClose={() => {}} />
+          <ProcessingDialog 
+            shortId={short_id} 
+            short={short} 
+            isOpen={true} 
+            onClose={() => {}} 
+            stages={stages}
+            requests={requests}
+        />
         )
       }
 
