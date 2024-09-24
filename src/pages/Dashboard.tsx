@@ -62,6 +62,7 @@ import {
 } from "../components/ui/sheet"
 import Tour, { ReactourStep } from 'reactour';
 import { cn } from '../utils/cn';
+import DashboardCatalog from '../components/dashboard/DashboardCatalog';
 
 interface NavItem {
   id: string;
@@ -110,6 +111,11 @@ export default function Dashboard() {
         { id: 'news-videos', title: 'News Videos', icon: <Newspaper className="h-4 w-4" /> },
         { id: 'short-stories', title: 'Short Stories', icon: <Book className="h-4 w-4" /> },
       ]
+    },
+    {
+      id: 'catalog',
+      title: 'Data Catalog',
+      icon: <Book className="h-4 w-4" />,
     },
     {
       id: 'assets',
@@ -486,6 +492,10 @@ export default function Dashboard() {
 
           {
             selectedItem === 'asset-videos' && <DashboardAssetVideo />
+          }
+
+          {
+            selectedItem === 'catalog' && <DashboardCatalog />
           }
 
           {

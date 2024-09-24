@@ -243,6 +243,15 @@ export const ExportTab: React.FC<ExportTabProps> = ({ short, shortId }) => {
         {short.finished_short_location && (
           <>
             <div className="space-y-2">
+              <Label>Preview</Label>
+              <VideoPlayer path={short.finished_short_location} loadingText={"Loading Finished Product"}/>
+            </div>
+
+            <Button>
+              Upload to TikTok
+            </Button>
+
+            <div className="space-y-2">
               <Label htmlFor="tiktok-link">Enter TikTok link after posting</Label>
               <div className="flex gap-2">
                 <Input
@@ -300,11 +309,6 @@ export const ExportTab: React.FC<ExportTabProps> = ({ short, shortId }) => {
                 </AlertDialog>
               </div>
             )}
-
-            <div className="space-y-2">
-              <Label>Preview</Label>
-              <VideoPlayer path={short.finished_short_location} loadingText={"Loading Finished Product"}/>
-            </div>
           </>
         )}
       </CardContent>
