@@ -17,7 +17,7 @@ import { Timestamp } from "firebase/firestore";
 import ScrollableLayout from "../layouts/ScrollableLayout";
 import {RequestsTab} from "../components/shorts/RequestsTab";
 import {ProcessingDialog} from "../components/shorts/processing-dialog/ProcessingDialog";
-import {CheckCircle2, ChevronLeft, Circle, Loader2, Sparkles} from "lucide-react";
+import {CheckCircle2, ChevronLeft, Circle, Loader2, Sparkles, TriangleAlert} from "lucide-react";
 import {Label} from "../components/ui/label";
 import {Popover, PopoverTrigger} from "../components/ui/popover";
 import {PopoverContent} from "@radix-ui/react-popover";
@@ -295,6 +295,7 @@ export const Shorts: React.FC = () => {
                         {stage.status === 'completed' && <CheckCircle2 className="text-green-500" />}
                         {stage.status === 'in-progress' && <Loader2 className="animate-spin text-gray-300" />}
                         {stage.status === 'not-started' && <Circle className="text-gray-300" />}
+                        {stage.status === 'outdated' && <TriangleAlert className="text-yellow-300" />}
                         <span className={`flex-grow px-2 ${stage.status === 'completed' ? 'text-green-500' : stage.status === 'in-progress' ? 'text-gray-300' : 'text-gray-500'}`}>
                           {stage.label}
                         </span>

@@ -493,7 +493,7 @@ export default function Dashboard() {
           }
 
           {
-            selectedItem === 'settings' && <SettingsPage />
+            selectedItem === 'settings' && <SettingsPage fullScreen={false} />
           }
         </div>
       </div>

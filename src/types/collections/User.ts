@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase/firestore";
+
 export interface User {
   name: string,
   age: string,
@@ -8,6 +10,9 @@ export interface User {
   primaryColor: string,
   secondaryColor: string,
   brandTheme: string[],
+  tiktokConnected?: boolean,
+  tiktokAccessCode?: string,
+  tiktokLastAccessed?: Timestamp,
   clippingFor: 'self',
   subscription?: {
     status: 'active' | 'inactive' | 'canceled',

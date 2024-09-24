@@ -18,6 +18,7 @@ import Dashboard from "./pages/Dashboard";
 import {Onboarding} from "./pages/Onboarding";
 import {OnboardingSuccess} from "./pages/OnboardingSuccess";
 import WyrVideoPage from "./pages/WyrVideoPage";
+import TiktokAuthenticated from './pages/TiktokAuthenticated';
 
 
 function App() {
@@ -55,6 +56,9 @@ function App() {
           <Route path={"/onboarding"} element={<Onboarding />} />
           <Route path="/onboarding-success" element={<OnboardingSuccess />} />
           <Route path="/wyr-videos/:id" element={<WyrVideoPage />} />
+
+          {/* Tiktok */}
+          <Route path="/dashbaord" element={<TiktokAuthenticated />} />
 
 
           <Route path={"*"} element={<NotFound />} />
