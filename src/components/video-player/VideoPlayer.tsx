@@ -8,6 +8,8 @@ export interface VideoPlayerProps {
   loadingText?: string;
   setCurrentTime?: (time: number) => void;
   seekTo?: number;
+  controls?: boolean;
+  autoPlay?: boolean;
 }
 
 export const VideoPlayer: React.FC<VideoPlayerProps> = ({
@@ -15,7 +17,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                                                           path,
                                                           loadingText = "Loading Video ...",
                                                           setCurrentTime,
-                                                          seekTo
+                                                          seekTo,
+                                                          controls = true,
+                                                          autoPlay = false
                                                         }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | undefined>(undefined);
@@ -91,7 +95,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   return (
     <div className={className}>
       {source && (
-        <video className="w-full h-full aspect-video" controls ref={videoRef}>
+        <video className="w-full h-full aspect-video" controls={controls} autoPlay={autoPlay} ref={videoRef}>
           <source src={source} type="video/mp4" />
           Your browser does not support the video tag.
         </video>

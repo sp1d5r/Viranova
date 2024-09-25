@@ -1,18 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
@@ -25,14 +11,22 @@ import {
   ChevronUp,
   Filter,
   Loader2,
-  X
+  X,
+  Eye,
+  Heart,
+  MessageCircle,
+  Share2,
+  Scissors,
+  RefreshCw,
 } from "lucide-react";
 import { useAuth } from "../../contexts/Authentication";
 import { Short, documentToShort } from "../../types/collections/Shorts";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import FirebaseFirestoreService from "../../services/database/strategies/FirebaseFirestoreService";
-import {toNumber} from "lodash";
-import {Progress} from "../ui/progress";
+import { Progress } from "../ui/progress";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { VideoPlayer } from '../video-player/VideoPlayer';
 
 const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
   const getStatusColor = (status: string) => {
@@ -62,11 +56,11 @@ const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
 
 export const DashboardShorts: React.FC = () => {
   const [shorts, setShorts] = useState<Short[]>([]);
-  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [cardsPerPage, setCardsPerPage] = useState(12);
   const { authState } = useAuth();
 
   useEffect(() => {
@@ -77,26 +71,14 @@ export const DashboardShorts: React.FC = () => {
       'uid',
       (documents) => {
         const mappedShorts = documents.map(doc => documentToShort(doc));
-
-        // Sort the shorts array
         const sortedShorts = mappedShorts.sort((a, b) => {
-          // If both have last_updated, compare them
-          try{
-            if (a.last_updated && b.last_updated) {
-              return b.last_updated.toMillis() - a.last_updated.toMillis();
-            }
-          } catch {
-            return -1
+          if (a.last_updated && b.last_updated) {
+            return b.last_updated.toMillis() - a.last_updated.toMillis();
           }
-
-          // If only a has last_updated, it should come first
           if (a.last_updated) return -1;
-          // If only b has last_updated, it should come first
           if (b.last_updated) return 1;
-          // If neither has last_updated, maintain their original order
           return 0;
         });
-
         setShorts(sortedShorts);
       },
       (error) => {
@@ -105,14 +87,16 @@ export const DashboardShorts: React.FC = () => {
     );
   }, [authState]);
 
-  const toggleRowExpansion = (id: string) => {
-    const newExpandedRows = new Set(expandedRows);
-    if (newExpandedRows.has(id)) {
-      newExpandedRows.delete(id);
-    } else {
-      newExpandedRows.add(id);
-    }
-    setExpandedRows(newExpandedRows);
+  const toggleCardExpansion = (id: string) => {
+    setExpandedCards(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
   };
 
   const filteredShorts = shorts.filter(short => {
@@ -130,18 +114,23 @@ export const DashboardShorts: React.FC = () => {
 
   const getUniqueStatuses = () => Array.from(new Set(shorts.map(short => short.short_status)));
 
-  const totalPages = Math.ceil(filteredShorts.length / rowsPerPage);
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const endIndex = startIndex + rowsPerPage;
+  const totalPages = Math.ceil(filteredShorts.length / cardsPerPage);
+  const startIndex = (currentPage - 1) * cardsPerPage;
+  const endIndex = startIndex + cardsPerPage;
   const currentShorts = filteredShorts.slice(startIndex, endIndex);
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
   };
 
-  const handleRowsPerPageChange = (value: string) => {
-    setRowsPerPage(Number(value));
+  const handleCardsPerPageChange = (value: string) => {
+    setCardsPerPage(Number(value));
     setCurrentPage(1);
+  };
+
+  const handleRegenerateShort = (shortId: string) => {
+    console.log('Regenerating short:', shortId);
+    // Implement regeneration logic here
   };
 
   return (
@@ -188,67 +177,117 @@ export const DashboardShorts: React.FC = () => {
         </div>
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Short ID</TableHead>
-            <TableHead>Short Idea</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Progress</TableHead>
-            <TableHead>Last Updated</TableHead>
-            <TableHead></TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {currentShorts.map((short) => (
-            <React.Fragment key={short.id}>
-              <TableRow className="cursor-pointer" onClick={() => toggleRowExpansion(short.id)}>
-                <TableCell>{short.id}</TableCell>
-                <TableCell>{short.short_idea}</TableCell>
-                <TableCell>
-                  <StatusBadge status={short.short_status} />
-                </TableCell>
-                <TableCell>
-                  <Progress value={short.update_progress}/>
-                </TableCell>
-                <TableCell>{short.last_updated ? short.last_updated.toDate().toLocaleDateString() : ''}</TableCell>
-                <TableCell>
-                  {expandedRows.has(short.id) ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                </TableCell>
-              </TableRow>
-              {expandedRows.has(short.id) && (
-                <TableRow>
-                  <TableCell colSpan={6} className="bg-muted/50">
-                    <div className="p-4">
-                      <h3 className="font-semibold mb-2">Additional Details:</h3>
-                      <p>Video ID: {short.video_id}</p>
-                      <p>Segment ID: {short.segment_id}</p>
-                      <p>Short Idea Explanation: {short.short_idea_explanation}</p>
-                      <p>Progress Message: {short.progress_message}</p>
-                      <p>TikTok Link: {short.tiktok_link || 'N/A'}</p>
-                      <a className="text-primary underline" href={`/shorts?short_id=${short.id}`}>Open Editor</a>
-                    </div>
-                  </TableCell>
-                </TableRow>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {currentShorts.map((short) => (
+          <Card key={short.id} className="relative w-full !p-2 shadow-md z-0">
+            <div className="absolute top-0 left-0 w-full h-full -z-10 rounded-md overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-black/50 to-black"></div>
+              {short.finished_short_location ? (
+                <VideoPlayer
+                  path={short.finished_short_location}
+                  className="w-full h-full object-cover"
+                  loadingText="Loading preview..."
+                  autoPlay={false}
+                  controls={false}
+                />
+              ) : (
+                <div className="w-full h-full bg-gray-200 flex items-center justify-center bg-gradient-to-br from-primary to-accent">
+                  <p className="text-black text-lg font-bold pb-16">No preview available</p>
+                </div>
               )}
-            </React.Fragment>
-          ))}
-        </TableBody>
-      </Table>
+              </div>
+            <CardHeader className="p-2 pt-48 overflow-hidden">
+              <CardTitle className="text-lg flex justify-between items-center z-5">
+                <span className="truncate">{short.short_idea || "Untitled Short"}</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => toggleCardExpansion(short.id)}
+                >
+                  {expandedCards.has(short.id) ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-2">
+              <div className="flex justify-between items-center mb-2">
+                <StatusBadge status={short.short_status} />
+                <div className="flex gap-2">
+                  <Badge variant="outline" className="flex items-center gap-1">
+                    <Eye size={12} />
+                    {short.views || 0}
+                  </Badge>
+                  <Badge variant="outline" className="flex items-center gap-1">
+                    <Heart size={12} />
+                    {short.likes || 0}
+                  </Badge>
+                </div>
+              </div>
+              <Progress value={short.update_progress} className="mb-2" />
+              <div className="mt-2 space-y-2">
+                  <p className="text-xs text-muted-foreground truncate">
+                    Idea: {short.short_idea_explanation}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Duration: {((short.end_index - short.start_index) / short.fps).toFixed(2)}s
+                  </p>
+                </div>
+              {expandedCards.has(short.id) && (
+                <div className="mt-2 space-y-2">
+                  <div className="flex justify-between items-center">
+                    <Badge variant="outline" className="flex items-center gap-1">
+                      <MessageCircle size={12} />
+                      {short.comments || 0}
+                    </Badge>
+                    <Badge variant="outline" className="flex items-center gap-1">
+                      <Share2 size={12} />
+                      {short.shares || 0}
+                    </Badge>
+                  </div>
+                  {short.tiktok_link && (
+                    <a href={short.tiktok_link} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 hover:underline">
+                      View on TikTok
+                    </a>
+                  )}
+                  <div className="flex justify-between mt-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleRegenerateShort(short.id)}
+                      className="text-xs"
+                    >
+                      <RefreshCw size={14} className="mr-1" />
+                      Regenerate
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open(`/shorts?short_id=${short.id}`, '_blank')}
+                      className="text-xs"
+                    >
+                      <Scissors size={14} className="mr-1" />
+                      Edit Short
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
       <div className="flex justify-between items-center mt-4 flex-wrap">
         <p className="text-sm text-muted-foreground">
-          {startIndex + 1}-{Math.min(endIndex, filteredShorts.length)} of {filteredShorts.length} row(s) shown.
+          {startIndex + 1}-{Math.min(endIndex, filteredShorts.length)} of {filteredShorts.length} short(s) shown.
         </p>
         <div className="flex items-center gap-2 flex-wrap">
-          <Select onValueChange={handleRowsPerPageChange} value={rowsPerPage.toString()}>
+          <Select onValueChange={handleCardsPerPageChange} value={cardsPerPage.toString()}>
             <SelectTrigger className="w-[180px] h-9">
-              <SelectValue placeholder="Rows per Page" />
+              <SelectValue placeholder="Cards per Page" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="10">10 rows</SelectItem>
-              <SelectItem value="15">15 rows</SelectItem>
-              <SelectItem value="20">20 rows</SelectItem>
+              <SelectItem value="12">12 cards</SelectItem>
+              <SelectItem value="24">24 cards</SelectItem>
+              <SelectItem value="36">36 cards</SelectItem>
             </SelectContent>
           </Select>
           <span className="text-sm text-muted-foreground">Page {currentPage} of {totalPages}</span>

@@ -60,7 +60,6 @@ export const ChannelNode: React.FC<ChannelNodeProps> = ({ data, id, xPos, yPos, 
                       position: { x: xPos + 400, y: yPos + (index - userVideos.length / 2) * 200 },
                       data: {
                         ...video,
-                        id: `video-${data.channelId}-${video.id}`,
                         x: xPos + 400,
                         y: yPos + (index - userVideos.length / 2) * 300,
                       } as VideoNodeData,
