@@ -8,6 +8,7 @@ import {Progress} from "../../ui/progress";
 import {VideoSegments} from "../../../pages/VideoSegments";
 import {Button} from "../../ui/button";
 import {useNotification} from "../../../contexts/NotificationProvider";
+import { Timestamp } from "firebase/firestore";
 
 const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
   const getStatusColor = (status: string) => {
@@ -81,7 +82,7 @@ export const VideoRow: React.FC<{ videoId: string; isExpanded: boolean; onToggle
           <StatusBadge status={video.status} />
         </TableCell>
         <TableCell>{video.processingProgress && video.processingProgress.toFixed(2)}% <Progress value={video.processingProgress}/></TableCell>
-        <TableCell>{new Date(video.uploadTimestamp).toLocaleDateString()}</TableCell>
+        <TableCell>{new Date(video.uploadTimestamp instanceof Timestamp ? video.uploadTimestamp.toMillis() : video.uploadTimestamp).toLocaleDateString()}</TableCell>
         <TableCell className="flex gap-4 items-center">
           <Button size="icon" variant="outline" onClick={() => {
             FirebaseFirestoreService.deleteDocument(

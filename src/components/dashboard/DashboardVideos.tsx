@@ -37,6 +37,7 @@ import { VideoRow } from "./videos/VideoRow";
 import { Channel, ChannelsTracking } from '../../types/collections/Channels';
 import {useNotification} from "../../contexts/NotificationProvider";
 import { VideoCard } from './videos/VideoCard';
+import { Timestamp } from 'firebase/firestore';
 
 export const DashboardVideos: React.FC = () => {
   const [videos, setVideos] = useState<UserVideo[]>([]);
@@ -62,7 +63,7 @@ export const DashboardVideos: React.FC = () => {
   }, []);
 
   const fetchVideos = useCallback(async () => {
-    if (!authState.user?.uid) return;
+    if (!authState.user || !authState.user?.uid) return;
 
     setIsLoading(true);
     try {
@@ -79,7 +80,10 @@ export const DashboardVideos: React.FC = () => {
       }
       
       const uniqueVideos = Array.from(new Map(fetchedVideos.map(v => [v.id, v])).values());
-      uniqueVideos.sort((a, b) => b.uploadTimestamp - a.uploadTimestamp);
+      uniqueVideos.sort((elem1, elem2) => {
+        const timestamp1 = elem1.uploadTimestamp instanceof Timestamp ? elem1.uploadTimestamp.toMillis() : elem1.uploadTimestamp;
+        const timestamp2 = elem2.uploadTimestamp instanceof Timestamp ? elem2.uploadTimestamp.toMillis() : elem2.uploadTimestamp;
+        return timestamp1 - timestamp2});
       setVideos(uniqueVideos);
     } catch (error) {
       console.error("Error fetching videos:", error);
@@ -89,18 +93,20 @@ export const DashboardVideos: React.FC = () => {
   }, [authState.user, viewMode]);
 
   useEffect(() => {
-    FirebaseFirestoreService.listenToQuery('/videos',
-      'uid',
-      authState.user!.uid,
-      'uid',
-      (docs) => {
-        fetchVideos();
-      },
-      (error) => {
-        console.log(error.message);
-      }
-    );
-  }, [fetchVideos]);
+    if (authState.user && authState.user.uid) {
+      FirebaseFirestoreService.listenToQuery('/videos',
+        'uid',
+        authState.user!.uid,
+        'uid',
+        (docs) => {
+          fetchVideos();
+        },
+        (error) => {
+          console.log(error.message);
+        }
+      );
+    }
+  }, [fetchVideos, authState.user, authState.user?.uid]);
 
   const fetchManualVideos = (): Promise<UserVideo[]> => {
     return new Promise((resolve) => {

@@ -7,6 +7,7 @@ import {SquigglyUnderline} from "../ui/squiggly-line";
 import {ExistingShortCard} from "../cards/existing-short-card/ExistingShortCard";
 import {documentToShort, Short} from "../../types/collections/Shorts";
 import {toNumber} from "lodash";
+import { Timestamp } from 'firebase/firestore';
 
 export interface ExistingProjectsProps {
   className?: string
@@ -30,7 +31,11 @@ export const ExistingProjects: React.FC<ExistingProjectsProps> = ({className=''}
         console.log(documents);
         setRecentProjects(documents.map(doc => {
           return documentToUserVideo(doc)
-        }).sort((elem1, elem2) => {return elem2.uploadTimestamp - elem1.uploadTimestamp}));
+        }).sort((elem1, elem2) => {
+          const timestamp1 = elem1.uploadTimestamp instanceof Timestamp ? elem1.uploadTimestamp.toMillis() : elem1.uploadTimestamp;
+          const timestamp2 = elem2.uploadTimestamp instanceof Timestamp ? elem2.uploadTimestamp.toMillis() : elem2.uploadTimestamp;
+          return timestamp2 - timestamp1;
+        }));
       }
       )
   }, [authState, refresh]);

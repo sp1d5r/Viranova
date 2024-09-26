@@ -7,6 +7,7 @@ import { Button } from "../../ui/button";
 import { useNotification } from "../../../contexts/NotificationProvider";
 import FirebaseFirestoreService from "../../../services/database/strategies/FirebaseFirestoreService";
 import { VideoSegments } from "../../../pages/VideoSegments";
+import { Timestamp } from "firebase/firestore";
 
 const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
     const getStatusColor = (status: string) => {
@@ -122,7 +123,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video, isExpanded, onToggl
             {video.channelTitle}
           </a>
           <p className="text-sm text-muted-foreground mb-2">
-            Uploaded: {new Date(video.uploadTimestamp).toLocaleDateString()}
+            Uploaded: {new Date(video.uploadTimestamp instanceof Timestamp ? video.uploadTimestamp.toMillis() : video.uploadTimestamp).toLocaleDateString()}
           </p>
         </div>
         <Progress value={video.processingProgress} className="mb-2" />

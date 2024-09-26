@@ -17,16 +17,16 @@ import { Timestamp } from "firebase/firestore";
 import ScrollableLayout from "../layouts/ScrollableLayout";
 import {RequestsTab} from "../components/shorts/RequestsTab";
 import {ProcessingDialog} from "../components/shorts/processing-dialog/ProcessingDialog";
-import {CheckCircle2, ChevronLeft, Circle, Loader2, Sparkles, TriangleAlert} from "lucide-react";
+import {CheckCircle2, ChevronDown, ChevronLeft, ChevronUp, Circle, Loader2, Sparkles, TriangleAlert} from "lucide-react";
 import {Label} from "../components/ui/label";
 import {Popover, PopoverTrigger} from "../components/ui/popover";
 import {PopoverContent} from "@radix-ui/react-popover";
-import {HoverCard, HoverCardContent, HoverCardTrigger} from "../components/ui/hover-card";
 import {useShortRequestManagement} from "../contexts/ShortRequestProvider";
 import {ShortRequest, ShortRequestEndpoints} from "../types/collections/Request";
 import {CreditButton} from "../components/ui/credit-button";
 import { debounce } from "lodash";
 import { useBrowserNotification } from "../contexts/BrowserNotificationProvider";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../components/ui/collapsible";
 
 export type TabType = "short-settings" | "transcript-editor" | "attention-capture" | "export" | "performance" | "requests";
 
@@ -57,8 +57,10 @@ export interface ProcessingStage {
 }
 
 
+
 export const Shorts: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const [isOpen, setIsOpen] = useState(window.innerWidth < 400);
   const short_id = searchParams.get("short_id");
   const [short, setShort] = useState<Short | undefined>();
   const [segment, setSegment] = useState<Segment | undefined>();
@@ -283,12 +285,16 @@ export const Shorts: React.FC = () => {
               ))}
             </TabsList>
             <div className="flex flex-col md:flex-row gap-4">
-              <div className="w-full md:w-1/3">
-                <CollapsibleCard defaultCollapsed={window.innerWidth >= 400}>
-                  <CardHeader>
-                    <CardTitle>Auto Generate</CardTitle>
-                  </CardHeader>
-                  <CardContent>
+              <div className="w-full md:w-1/4">
+              <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full">
+                <CollapsibleTrigger asChild>
+                  <Button variant="ghost" className="w-full flex justify-between items-center p-4">
+                    <span>Auto Generate</span>
+                    {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="p-4">
                     <p className="mb-4">Edit each component and select auto-generate from that point onwards.</p>
                     {stages.filter((elem) => elem.status !== 'not-started').map((stage) => (
                       <div key={stage.id} className="flex items-center justify-between mb-2">
@@ -296,15 +302,16 @@ export const Shorts: React.FC = () => {
                         {stage.status === 'in-progress' && <Loader2 className="animate-spin text-gray-300" />}
                         {stage.status === 'not-started' && <Circle className="text-gray-300" />}
                         {stage.status === 'outdated' && <TriangleAlert className="text-yellow-300" />}
-                        <span className={`flex-grow px-2 ${stage.status === 'completed' ? 'text-green-500' : stage.status === 'in-progress' ? 'text-gray-300' : 'text-gray-500'}`}>
+                        <span className={`flex-grow px-2 ${
+                          stage.status === 'completed' ? 'text-green-500' : 
+                          stage.status === 'in-progress' ? 'text-gray-300' : 
+                          'text-gray-500'
+                        }`}>
                           {stage.label}
                         </span>
                         <Popover>
-                          <PopoverTrigger>
-                            <Button
-                              size="icon"
-                              variant="outline"
-                            >
+                          <PopoverTrigger asChild>
+                            <Button size="icon" variant="outline">
                               <Sparkles size={15} />
                             </Button>
                           </PopoverTrigger>
@@ -328,10 +335,8 @@ export const Shorts: React.FC = () => {
                                           short_id,
                                           stage.creationEndpoint,
                                           20,
-                                          () => {
-                                          },
-                                          () => {
-                                          },
+                                          () => {},
+                                          () => {},
                                           true
                                         )
                                       }
@@ -346,11 +351,12 @@ export const Shorts: React.FC = () => {
                         </Popover>
                       </div>
                     ))}
-                  </CardContent>
-                </CollapsibleCard>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
               </div>
 
-              <div className="w-full md:w-2/3">
+              <div className="w-full md:w-3/4">
                 {tabConfig.map((tab) => (
                   <TabsContent key={tab.value} value={tab.value} className="mt-0">
                     <Card className={"sm:p-0"}>

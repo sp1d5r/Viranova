@@ -10,6 +10,7 @@ import { documentToShort, Short } from '../../../../types/collections/Shorts';
 import FirebaseFirestoreService from '../../../../services/database/strategies/FirebaseFirestoreService';
 import { useAuth } from '../../../../contexts/Authentication';
 import { documentToSegment, Segment } from '../../../../types/collections/Segment';
+import { Timestamp } from 'firebase/firestore';
 
 const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
   const getStatusColor = (status: string) => {
@@ -246,7 +247,7 @@ export const VideoNode: React.FC<VideoNodeProps> = ({ data, id, selected }) => {
                 </a>
                 <p className="text-xs text-muted-foreground mb-1">Duration: {data.duration}</p>
                 <p className="text-xs text-muted-foreground">
-                    Uploaded: {new Date(data.uploadTimestamp).toLocaleDateString()}
+                    Uploaded: {new Date(data.uploadTimestamp instanceof Timestamp ? data.uploadTimestamp.toMillis() : data.uploadTimestamp).toLocaleDateString()}
                 </p>
                 </CardContent>
             </Card>

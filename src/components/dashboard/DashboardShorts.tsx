@@ -56,6 +56,7 @@ const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
 
 export const DashboardShorts: React.FC = () => {
   const [shorts, setShorts] = useState<Short[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -64,6 +65,7 @@ export const DashboardShorts: React.FC = () => {
   const { authState } = useAuth();
 
   useEffect(() => {
+    setIsLoading(true);
     FirebaseFirestoreService.queryDocuments(
       '/shorts',
       'uid',
@@ -80,9 +82,11 @@ export const DashboardShorts: React.FC = () => {
           return 0;
         });
         setShorts(sortedShorts);
+        setIsLoading(false);
       },
       (error) => {
         console.log(error.message)
+        setIsLoading(false);
       }
     );
   }, [authState]);
@@ -177,7 +181,13 @@ export const DashboardShorts: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      {
+        isLoading ? (
+          <div className="flex justify-center items-center h-full">
+            <Loader2 className="h-4 w-4 animate-spin" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {currentShorts.map((short) => (
           <Card key={short.id} className="relative w-full !p-2 shadow-md z-0">
             <div className="absolute top-0 left-0 w-full h-full -z-10 rounded-md overflow-hidden">
@@ -274,6 +284,8 @@ export const DashboardShorts: React.FC = () => {
           </Card>
         ))}
       </div>
+        )
+      }
 
       <div className="flex justify-between items-center mt-4 flex-wrap">
         <p className="text-sm text-muted-foreground">

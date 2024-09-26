@@ -6,6 +6,7 @@ import {FirebaseStorageService} from "../../../services/storage/strategies";
 import {LoadingIcon} from "../../loading/Loading";
 import {VideoPlayer} from "../../video-player/VideoPlayer";
 import FirebaseFirestoreService from "../../../services/database/strategies/FirebaseFirestoreService";
+import { Timestamp } from "firebase/firestore";
 export interface ExistingProjectCardProps {
     userVideo: UserVideo,
     setRefresh: React.Dispatch<React.SetStateAction<boolean>>
@@ -53,7 +54,7 @@ export const ExistingProjectCard: React.FC<ExistingProjectCardProps> = ({userVid
                     <span className="font-medium">{userVideo.progressMessage}</span> {userVideo.processingProgress}%
                 </div>
             </div>
-            <p className="mb-3 font-normal text-gray-400">{new Date(userVideo.uploadTimestamp).toString()}</p>
+            <p className="mb-3 font-normal text-gray-400">{new Date(userVideo.uploadTimestamp instanceof Timestamp ? userVideo.uploadTimestamp.toMillis() : userVideo.uploadTimestamp).toString()}</p>
             {userVideo.link && <a href={userVideo.link} className="mb-3 font-normal text-primary underline">Open link</a>}
             <p className="mb-3 font-normal text-gray-400">{userVideo.videoPath}</p>
             <div className="flex gap-2">
