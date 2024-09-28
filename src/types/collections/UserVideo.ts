@@ -113,3 +113,29 @@ export function documentToUserVideo(docData: DocumentData): UserVideo {
 export function userVideoToDocument(userVideo: UserVideo): DocumentData {
     return { ...userVideo, 'previousStatus': null };
 }
+
+export const getThumbnailUrl = (video: UserVideo) => {
+    let thumbnailUrl = 'https://via.placeholder.com/320x180.png?text=No+Thumbnail';
+
+    if (video.thumbnailUrl) {
+      thumbnailUrl = video.thumbnailUrl;
+    }
+
+    if (video.thumbnails) {
+      const thumbnails = video.thumbnails;
+
+      if (thumbnails.high.url) {
+        thumbnailUrl = thumbnails.high.url;
+      } else if (thumbnails.standard?.url) {
+        thumbnailUrl = thumbnails.standard?.url;
+      } else if (thumbnails.maxres?.url) {
+        thumbnailUrl = thumbnails.maxres?.url;
+      } else if (thumbnails.medium.url) {
+        thumbnailUrl = thumbnails.medium.url;
+      } else if (thumbnails.default.url) {
+        thumbnailUrl = thumbnails.default.url;
+      }
+    }
+
+    return thumbnailUrl;
+  };

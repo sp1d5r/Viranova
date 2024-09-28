@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
-import { UserVideo } from "../../../types/collections/UserVideo";
+import { getThumbnailUrl, UserVideo } from "../../../types/collections/UserVideo";
 import { Badge } from "../../ui/badge";
-import { Loader2, TrashIcon, ChevronDown, ChevronUp } from "lucide-react";
+import { Loader2, TrashIcon, ChevronDown, ChevronUp, RefreshCcw } from "lucide-react";
 import { Progress } from "../../ui/progress";
 import { Button } from "../../ui/button";
 import { useNotification } from "../../../contexts/NotificationProvider";
@@ -78,31 +78,6 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video, isExpanded, onToggl
     );
   };
 
-  const getThumbnailUrl = (video: UserVideo) => {
-    let thumbnailUrl = 'https://via.placeholder.com/320x180.png?text=No+Thumbnail';
-
-    if (video.thumbnailUrl) {
-      thumbnailUrl = video.thumbnailUrl;
-    }
-
-    if (video.thumbnails) {
-      const thumbnails = video.thumbnails;
-
-      if (thumbnails.high.url) {
-        thumbnailUrl = thumbnails.high.url;
-      } else if (thumbnails.standard?.url) {
-        thumbnailUrl = thumbnails.standard?.url;
-      } else if (thumbnails.maxres?.url) {
-        thumbnailUrl = thumbnails.maxres?.url;
-      } else if (thumbnails.medium.url) {
-        thumbnailUrl = thumbnails.medium.url;
-      } else if (thumbnails.default.url) {
-        thumbnailUrl = thumbnails.default.url;
-      }
-    }
-
-    return thumbnailUrl;
-  };
 
   return (
     <div className={`bg-card rounded-lg shadow-md overflow-hidden ${isExpanded ? 'col-span-full' : ''}`}>
@@ -127,15 +102,29 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video, isExpanded, onToggl
           </p>
         </div>
         <Progress value={video.processingProgress} className="mb-2" />
-        <p className="text-sm mb-2">{video.processingProgress.toFixed(2)}% complete</p>
+        <p className="text-sm mb-2">{!!video.processingProgress ? video.processingProgress.toFixed(2) : 0}% complete</p>
         <div className="flex justify-between items-center">
           <Button size="sm" variant="outline" onClick={onToggle}>
             {isExpanded ? <ChevronUp className="h-4 w-4 mr-1" /> : <ChevronDown className="h-4 w-4 mr-1" />}
             {isExpanded ? 'Less' : 'More'}
           </Button>
-          <Button size="sm" variant="destructive" onClick={handleDelete}>
-            <TrashIcon className="h-4 w-4" />
-          </Button>
+          <div className="flex gap-2">
+            <Button size="sm" variant="secondary" onClick={() => {
+              FirebaseFirestoreService.updateDocument(
+                "videos",
+                video.id!,
+                {
+                  previousStatus: 'Reloaded',
+                  processingProgress: 0,
+                }
+              )
+            }}>
+              <RefreshCcw className="h-4 w-4" />
+            </Button>
+            <Button size="sm" variant="destructive" onClick={handleDelete}>
+              <TrashIcon className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
       {isExpanded && (

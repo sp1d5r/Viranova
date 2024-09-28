@@ -1,6 +1,6 @@
 import {Timestamp} from "firebase/firestore";
 
-type RequestOperand = 'video' | 'topical_segment' | 'short' | 'wyr';
+type RequestOperand = 'video' | 'topical_segment' | 'short' | 'wyr' | 'query';
 
 interface MessageRequests {
   message: string;
@@ -52,6 +52,19 @@ export interface WouldYouRatherRequest extends Request {
   requestOperand: 'wyr';
   nicheId: string;
   ideaId?: string;
+  uid: string;
+  progress?: number;
+  creditCost?: number;
+  status?: string;
+}
+
+export type QueryRequestEndpoints = "v1/query-data-catalog";
+
+export interface QueryRequest extends Request {
+  id?: string;
+  requestEndpoint: QueryRequestEndpoints;
+  requestOperand: 'query';
+  queryId: string;
   uid: string;
   progress?: number;
   creditCost?: number;

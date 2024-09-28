@@ -32,7 +32,8 @@ import {
   Search,
   CircleUser,
   LeafyGreenIcon,
-  MapIcon
+  MapIcon,
+  SearchCheck
 } from 'lucide-react';
 import { Badge } from "../components/ui/badge"
 import { Button } from "../components/ui/button"
@@ -63,6 +64,7 @@ import {
 import Tour, { ReactourStep } from 'reactour';
 import { cn } from '../utils/cn';
 import DashboardCatalog from '../components/dashboard/DashboardCatalog';
+import DashboardQuery from '../components/dashboard/DashboardQuery';
 
 interface NavItem {
   id: string;
@@ -116,6 +118,11 @@ export default function Dashboard() {
       id: 'catalog',
       title: 'Data Catalog',
       icon: <Book className="h-4 w-4" />,
+    },
+    {
+      id: 'query',
+      title: 'Query Catalog',
+      icon: <SearchCheck className="h-4 w-4" />,
     },
     {
       id: 'assets',
@@ -497,7 +504,11 @@ export default function Dashboard() {
           {
             selectedItem === 'catalog' && <DashboardCatalog />
           }
-
+          
+          {
+            selectedItem === 'query' && <DashboardQuery />
+          }
+          
           {
             selectedItem === 'analytics' && <DashboardAnalytics userId={authState.user?.uid}/>
           }
