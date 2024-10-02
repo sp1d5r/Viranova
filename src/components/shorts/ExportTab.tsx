@@ -22,6 +22,7 @@ import {
   AlertDialogTrigger
 } from "../ui/alert-dialog";
 import {CreditButton} from "../ui/credit-button";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 
 export interface ExportTabProps {
   short: Short;
@@ -179,6 +180,20 @@ export const ExportTab: React.FC<ExportTabProps> = ({ short, shortId }) => {
       });
     };
 
+    FirebaseFirestoreService.updateDocument(
+      'shorts',
+      shortId,
+      {
+        'tasks_requested': true
+      },
+      () => {
+        console.log("Tasks requested updated");
+      },
+      () => {
+        console.log("Error updating tasks requested");
+      }
+    );
+
     if (isRescheduling) {
       deleteFutureScheduledTasks()
         .then(scheduleTask)
@@ -267,7 +282,7 @@ export const ExportTab: React.FC<ExportTabProps> = ({ short, shortId }) => {
               </div>
             </div>
 
-            {isTikTokLinkSubmitted && (
+            {isTikTokLinkSubmitted && !short.tasks_requested && (
               <div className="space-y-2">
                 <Label>Select data collection type</Label>
                 <RadioGroup value={selectedDataCollection} onValueChange={(value) => setSelectedDataCollection(value as DataCollectionType)}>
@@ -311,6 +326,33 @@ export const ExportTab: React.FC<ExportTabProps> = ({ short, shortId }) => {
             )}
           </>
         )}
+        {
+              short.tasks_requested && (
+                <Alert className="flex flex-row justify-between gap-2">
+                  <Button 
+                    variant="outline"
+                    onClick={() => {
+                      FirebaseFirestoreService.updateDocument(
+                        'shorts',
+                        shortId,
+                        {
+                          'tasks_requested': false,
+                          'tiktok_link': ''
+                        }
+                      );
+                    }}
+                  >
+                    <ReloadIcon />
+                  </Button>
+                  <div className="flex flex-col flex-1">
+                    <AlertTitle>Tasks Requested</AlertTitle>
+                    <AlertDescription>
+                      Tasks have been requested for this short. If you want to update the TikTok link, you can do so by pressing refresh.
+                    </AlertDescription>
+                  </div>
+                </Alert>
+              )
+            }
       </CardContent>
       <CardFooter className="flex justify-between">
         <Button variant="outline" onClick={handleDownload} disabled={!short.finished_short_location}>

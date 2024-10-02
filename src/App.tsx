@@ -19,6 +19,7 @@ import {Onboarding} from "./pages/Onboarding";
 import {OnboardingSuccess} from "./pages/OnboardingSuccess";
 import WyrVideoPage from "./pages/WyrVideoPage";
 import TiktokAuthenticated from './pages/TiktokAuthenticated';
+import { OnboardingCancel } from './pages/OnboardingCancel';
 
 
 function App() {
@@ -54,6 +55,7 @@ function App() {
           <Route path={"/video-temporal-segmentation"} element={<VideoSegments />} />
           <Route path={"/shorts"} element={<Shorts />} />
           <Route path={"/onboarding"} element={<Onboarding />} />
+          <Route path={"/onboarding-cancel"} element={<OnboardingCancel />} />
           <Route path="/onboarding-success" element={<OnboardingSuccess />} />
           <Route path="/wyr-videos/:id" element={<WyrVideoPage />} />
 

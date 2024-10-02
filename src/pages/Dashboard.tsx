@@ -91,6 +91,16 @@ export default function Dashboard() {
     }
   };
 
+  useEffect(() => {
+    if (loading) {
+      return;
+    }
+
+    if (!userData) {
+      window.location.href = '/onboarding';
+    }
+  }, [userData, loading]);
+
   const [navItems, setNavItems] = useState<NavItem[]>([
     { id: 'dashboard', title: 'Dashboard', icon: <Home className="h-4 w-4" /> },
     {
@@ -244,7 +254,7 @@ export default function Dashboard() {
     <div className="relative min-h-screen w-full max-h-screen">
       <div className="grid md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr] text-white h-[100vh]">
         <div className="hidden border-r bg-muted/40 md:block">
-          <div className="flex-col flex overflow-y-auto h-full">
+          <div className="flex-col flex overflow-y-auto h-[100vh]">
             <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
               <Link to="/" className="flex items-center gap-2 font-semibold">
                 <Logo />

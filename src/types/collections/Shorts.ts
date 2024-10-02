@@ -154,6 +154,7 @@ export interface Short extends BackendServerMetadata{
   background_video_path?: string,
   transcript_disabled?: boolean,
   selected_box_type?: string,
+  tasks_requested?: boolean,
 }
 
 
@@ -240,6 +241,7 @@ export function documentToShort(docData: DocumentData): Short {
     transcript_disabled: docData.transcript_disabled,
     background_video_path: docData.background_video_path,
     selected_box_type: docData.selected_box_type,
+    tasks_requested: docData.tasks_requested,
   };
 }
 
