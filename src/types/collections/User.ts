@@ -34,19 +34,25 @@ export const SUBSCRIPTION_TIERS = {
     name: 'Basic',
     price: 20, // in GBP
     credits: 1000,
+    shorts: 45,
+    channels: 2,
     stripePriceId: 'price_1Psp3JGME0Qq6U11kubUqoBO',
   },
   pro: {
     name: 'Pro',
     price: 50, // in GBP
     credits: 3000,
-    stripePriceId: 'price_YYYYYYYYYYYYYYY',
+    shorts: 45 * 3,
+    channels: 6,
+    stripePriceId: 'prod_QxLnUo8UDguJSG',
   },
   enterprise: {
     name: 'Enterprise',
     price: 100, // in GBP
     credits: 7000,
-    stripePriceId: 'price_ZZZZZZZZZZZZZZZ',
+    shorts: 45 * 7,
+    channels: 14,
+    stripePriceId: 'prod_QxLoVQpsV4dS0d',
   },
 };
 

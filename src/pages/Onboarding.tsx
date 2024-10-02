@@ -11,7 +11,7 @@ import { Badge } from "../components/ui/badge";
 import { useToast } from "../components/ui/use-toast";
 import FirebaseFirestoreService from "../services/database/strategies/FirebaseFirestoreService";
 import {BackgroundBeams} from "../components/ui/background-beams";
-import {Home, LineChart, Smartphone, Tv, Video, X} from 'lucide-react';
+import { X, CheckIcon} from 'lucide-react';
 import AnalyticsGif from '../assets/gifs/Analytics.gif';
 import ChannelTracking from '../assets/gifs/Channel Tracking.gif';
 import ShortIdeas from '../assets/gifs/Short Ideas.gif';
@@ -20,6 +20,8 @@ import VideoManagement from '../assets/gifs/Video Management.gif';
 import {User} from "../types/User";
 import { SUBSCRIPTION_TIERS, SubscriptionTier, getSubscriptionDetails } from "../types/collections/User";
 import StripePaymentService from "../services/payments/strategies/StripePaymentService";
+import { RefundPolicy } from '../components/onboarding/RefundPolicy';
+import { Checkbox } from '../components/ui/checkbox';
 
 
 export interface OnboardingProps {}
@@ -45,6 +47,9 @@ export const Onboarding: React.FC<OnboardingProps> = () => {
   const [currentThemeWord, setCurrentThemeWord] = useState('');
   const [discountCode, setDiscountCode] = useState('');
   const [isDiscountApplied, setIsDiscountApplied] = useState(false);
+  const [refundPolicyAcknowledged, setRefundPolicyAcknowledged] = useState(false);
+  const [isRefundPolicyOpen, setIsRefundPolicyOpen] = useState(false);
+
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -93,11 +98,11 @@ export const Onboarding: React.FC<OnboardingProps> = () => {
   };
 
   useEffect(() => {
-    if (authState.user) {
+    if (authState.isAuthenticated) {
       // Get channels
       FirebaseFirestoreService.getDocument<User>(
         "users",
-        authState.user.uid,
+        authState.user!.uid,
         (doc) => {
           if (doc) {
             navigate('/dashboard')
@@ -107,8 +112,6 @@ export const Onboarding: React.FC<OnboardingProps> = () => {
         (error) => {
         }
       );
-    } else {
-      navigate('/authenticate')
     }
   }, [authState])
 
@@ -117,6 +120,15 @@ export const Onboarding: React.FC<OnboardingProps> = () => {
       toast({
         title: "Error",
         description: "You must be logged in with a valid email to complete onboarding.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!refundPolicyAcknowledged) {
+      toast({
+        title: "Error",
+        description: "Please acknowledge the refund policy before subscribing.",
         variant: "destructive",
       });
       return;
@@ -180,7 +192,7 @@ export const Onboarding: React.FC<OnboardingProps> = () => {
                   tierDetails.stripePriceId,
                   customerId,
                   `${window.location.origin}/onboarding-success?userId=${authState.user!.uid}`, // Pass userId in URL
-                  `${window.location.origin}/onboarding`,
+                  `${window.location.origin}/onboarding-cancel?userId=${authState.user!.uid}`,
                   (sessionUrl) => {
                     // Redirect to Stripe Checkout
                     window.location.href = sessionUrl;
@@ -374,38 +386,53 @@ export const Onboarding: React.FC<OnboardingProps> = () => {
     </CardContent>
   );
 
-  const renderStep3 = () => (
-    <CardContent>
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Platform Information</h3>
-        <ul className="list-disc pl-5 space-y-2">
-          <li>Track your YouTube channels in the Channels tab</li>
-          <li>Videos are automatically downloaded with email notifications</li>
-          <li>Find downloaded videos in the Videos tab</li>
-          <li>Get recommended short ideas for each video</li>
-          <li>Use Autogenerate to create shorts automatically</li>
-          <li>Manage and edit shorts in the Shorts tab</li>
-          <li>Link TikTok videos to enable analytics tracking</li>
-        </ul>
-      </div>
-    </CardContent>
-  );
-
   const renderSubscriptionStep = () => (
     <CardContent>
       <div className="space-y-4">
         <h3 className="text-lg font-semibold">Choose your ViraNova Subscription</h3>
-        <RadioGroup value={selectedTier} onValueChange={(value) => setSelectedTier(value as SubscriptionTier)}>
-          {Object.entries(SUBSCRIPTION_TIERS).map(([key, tier]) => (
-            <div key={key} className="flex items-center space-x-2">
-              <RadioGroupItem value={key} id={key} />
-              <Label htmlFor={key}>
-                {tier.name} - £{tier.price}/month ({tier.credits} credits)
-              </Label>
-            </div>
-          ))}
-        </RadioGroup>
-        <div className="flex flex-col space-y-1.5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {Object.entries(SUBSCRIPTION_TIERS).map(([key, tier]) => {
+            const originalPrice = key === 'basic' ? 25 : key === 'pro' ? 65 : 135;
+            const discount = ((originalPrice - tier.price) / originalPrice * 100).toFixed(0);
+            
+            return (
+              <div
+                key={key}
+                className={`border rounded-lg p-4 cursor-pointer transition-all ${
+                  selectedTier === key
+                    ? 'border-primary bg-primary/10'
+                    : 'border-gray-200 hover:border-primary/50'
+                }`}
+                onClick={() => setSelectedTier(key as SubscriptionTier)}
+              >
+                <h4 className="text-lg font-semibold mb-2">{tier.name}</h4>
+                <div className="mb-2">
+                  <span className="text-2xl font-bold">£{tier.price}</span>
+                  <span className="text-sm font-normal">/month</span>
+                </div>
+                <div className="mb-4">
+                  <span className="text-sm line-through text-gray-500 mr-2">£{originalPrice}</span>
+                  <span className="text-sm font-semibold text-green-500">{discount}% off</span>
+                </div>
+                <ul className="text-sm space-y-2">
+                  <li className="flex items-center">
+                    <CheckIcon className="w-4 h-4 mr-2 text-green-500" />
+                    {tier.credits} credits
+                  </li>
+                  <li className="flex items-center">
+                    <CheckIcon className="w-4 h-4 mr-2 text-green-500" />
+                    Up to {tier.shorts} shorts per month
+                  </li>
+                  <li className="flex items-center">
+                    <CheckIcon className="w-4 h-4 mr-2 text-green-500" />
+                    Track up to {tier.channels} channels
+                  </li>
+                </ul>
+              </div>
+            );
+          })}
+        </div>
+        <div className="flex flex-col space-y-1.5 mt-6">
           <Label htmlFor="discountCode">Discount Code</Label>
           <div className="flex space-x-2">
             <Input
@@ -423,7 +450,30 @@ export const Onboarding: React.FC<OnboardingProps> = () => {
         {isDiscountApplied && (
           <p className="text-green-500">Discount applied: 100% off</p>
         )}
-        <Button onClick={handleSubmit}>Subscribe and Complete Setup</Button>
+        <div className="mt-6 flex items-center space-x-2">
+        <Checkbox
+          id="refundPolicy"
+          checked={refundPolicyAcknowledged}
+          onCheckedChange={(checked) => setRefundPolicyAcknowledged(checked as boolean)}
+        />
+        <label
+          htmlFor="refundPolicy"
+          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+        >
+          I have read and agree to the{" "}
+          <span
+            className="text-primary cursor-pointer underline"
+            onClick={() => setIsRefundPolicyOpen(true)}
+          >
+            refund policy
+          </span>
+        </label>
+      </div>
+        <Button onClick={handleSubmit} className="w-full">Subscribe and Complete Setup</Button>
+        <RefundPolicy
+          isOpen={isRefundPolicyOpen}
+          onClose={() => setIsRefundPolicyOpen(false)}
+        />
       </div>
     </CardContent>
   );
