@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useNotification } from "../../contexts/NotificationProvider";
-import { Bar, BarChart, CartesianGrid, Pie, PieChart, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, Pie, PieChart, ScatterChart, Scatter, Tooltip, XAxis, YAxis } from "recharts";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "../ui/chart";
 import { DatePickerWithRange } from "../ui/date-picker-with-range";
 import { MultiSelect } from "../ui/mutli-select";
 import { DateRange } from "react-day-picker";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
-import { TrendingUp } from 'lucide-react';
+import { Clock, Hash, TrendingUp } from 'lucide-react';
 
 export interface DashboardAnalyticsProps {
   userId: string | undefined;
@@ -78,6 +78,30 @@ const pieChartConfig = {
   },
 } satisfies ChartConfig
 
+
+const timeToUploadData = [
+  { hours: 2, views: 1000 },
+  { hours: 4, views: 2000 },
+  { hours: 6, views: 3500 },
+  { hours: 8, views: 2800 },
+  { hours: 12, views: 1500 },
+  { hours: 24, views: 1000 },
+];
+
+const hashtagChartConfig = {
+  avgViews: {
+    label: "Average Views",
+    color: "hsl(var(--chart-1))",
+  },
+} satisfies ChartConfig;
+
+const hashtagViewsData = [
+  { hashtag: "#coding", avgViews: 5000 },
+  { hashtag: "#webdev", avgViews: 4200 },
+  { hashtag: "#javascript", avgViews: 3800 },
+  { hashtag: "#react", avgViews: 3500 },
+  { hashtag: "#tutorial", avgViews: 3000 },
+];
 
 export const DashboardAnalytics: React.FC<DashboardAnalyticsProps> = ({userId}) => {
   const { showNotification } = useNotification();
@@ -174,7 +198,7 @@ export const DashboardAnalytics: React.FC<DashboardAnalyticsProps> = ({userId}) 
             config={chartConfig}
             className="aspect-auto h-[250px] w-full"
           >
-            <BarChart
+            <LineChart
               accessibilityLayer
               data={chartData}
               margin={{
@@ -212,8 +236,14 @@ export const DashboardAnalytics: React.FC<DashboardAnalyticsProps> = ({userId}) 
                   />
                 }
               />
-              <Bar dataKey={activeChart} fill={chartConfig[activeChart].color} />
-            </BarChart>
+              <Line
+                dataKey={activeChart}
+                type="monotone"
+                stroke={`var(--color-${activeChart})`}
+                strokeWidth={2}
+                dot={false}
+              />
+            </LineChart>
           </ChartContainer>
         </CardContent>
       </Card>
@@ -274,6 +304,78 @@ export const DashboardAnalytics: React.FC<DashboardAnalyticsProps> = ({userId}) 
             </div>
           </CardFooter>
         </Card>
+        </div>
+      </div>
+
+      <p className="text-2xl font-bold m-2 my-4">Metadata Analysis</p>
+      <div className="flex flex-wrap">
+        <div className="w-full md:w-1/2 p-2">
+          <Card className="h-full">
+            <CardHeader>
+              <CardTitle>Time to Upload vs Views</CardTitle>
+              <CardDescription>Correlation between upload time after YouTube video and Short views</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ChartContainer config={chartConfig} className="h-[300px] w-[90%] m-auto">
+                <ScatterChart margin={{ right: 20, left: 20, top: 20, bottom: 20 }}>
+                  <CartesianGrid />
+                  <XAxis type="number" dataKey="hours" name="Hours to upload Short" unit="h" />
+                  <YAxis type="number" dataKey="views" name="Views" unit=" views" />
+                  <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+                  <Legend />
+                  <Scatter name="Time to Upload vs Views" data={timeToUploadData} fill="#8884d8" />
+                </ScatterChart>
+              </ChartContainer>
+            </CardContent>
+            <CardFooter className="flex-col gap-2 text-sm">
+              <div className="flex items-center gap-2 font-medium leading-none">
+                <Clock className="h-4 w-4" /> Optimal upload time: 4-8 hours after YouTube video
+              </div>
+            </CardFooter>
+          </Card>
+        </div>
+        <div className="w-full md:w-1/2 p-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Hashtags Performance</CardTitle>
+              <CardDescription>Average views per hashtag</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ChartContainer config={hashtagChartConfig}>
+                <BarChart
+                  accessibilityLayer
+                  data={hashtagViewsData}
+                  layout="vertical"
+                  margin={{
+                    left: -20,
+                  }}
+                >
+                  <XAxis type="number" dataKey="avgViews" hide />
+                  <YAxis
+                    dataKey="hashtag"
+                    type="category"
+                    tickLine={false}
+                    tickMargin={10}
+                    axisLine={false}
+                    tickFormatter={(value) => value.slice(1)} // Remove the '#' symbol
+                  />
+                  <ChartTooltip
+                    cursor={false}
+                    content={<ChartTooltipContent />}
+                  />
+                  <Bar dataKey="avgViews" fill={hashtagChartConfig.avgViews.color} radius={5} />
+                </BarChart>
+              </ChartContainer>
+            </CardContent>
+            <CardFooter className="flex-col items-start gap-2 text-sm">
+              <div className="flex gap-2 font-medium leading-none">
+                Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+              </div>
+              <div className="leading-none text-muted-foreground">
+                Showing average views for top hashtags
+              </div>
+            </CardFooter>
+          </Card>
         </div>
       </div>
 

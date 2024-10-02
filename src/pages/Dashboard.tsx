@@ -33,7 +33,9 @@ import {
   CircleUser,
   LeafyGreenIcon,
   MapIcon,
-  SearchCheck
+  SearchCheck,
+  MessageSquare,
+  ChartNoAxesColumn
 } from 'lucide-react';
 import { Badge } from "../components/ui/badge"
 import { Button } from "../components/ui/button"
@@ -65,6 +67,7 @@ import Tour, { ReactourStep } from 'reactour';
 import { cn } from '../utils/cn';
 import DashboardCatalog from '../components/dashboard/DashboardCatalog';
 import DashboardQuery from '../components/dashboard/DashboardQuery';
+import DashboardComments from '../components/dashboard/DashboardComments';
 
 interface NavItem {
   id: string;
@@ -143,7 +146,16 @@ export default function Dashboard() {
         { id: 'asset-videos', title: 'Videos', icon: <Clapperboard className="h-4 w-4" /> },
       ]
     },
-    { id: 'analytics', title: 'Analytics', icon: <LineChart className="h-4 w-4" /> },
+    {
+      id: 'analytics',
+      title: 'Analytics',
+      icon: <ChartNoAxesColumn className="h-4 w-4" />,
+      children: [
+        { id: 'analytics-overview', title: 'Analytics Overview', icon: <LineChart className="h-4 w-4" /> },
+        { id: 'analytics-comments', title: 'Comments', icon: <MessageSquare className="h-4 w-4" /> },
+      ]
+    },
+    
     { id: 'settings', title: 'Settings', icon: <Settings className="h-4 w-4" /> },
   ]);
 
@@ -520,7 +532,11 @@ export default function Dashboard() {
           }
           
           {
-            selectedItem === 'analytics' && <DashboardAnalytics userId={authState.user?.uid}/>
+            selectedItem === 'analytics-overview' && <DashboardAnalytics userId={authState.user?.uid}/>
+          }
+
+          {
+            selectedItem === 'analytics-comments' && <DashboardComments />
           }
 
           {
