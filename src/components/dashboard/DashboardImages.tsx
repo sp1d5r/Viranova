@@ -1,78 +1,78 @@
-import React, { useState, useEffect } from 'react';
-import { Slider } from "../ui/slider"
+import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from "../ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
-import { Switch } from "../ui/switch"
 import { Input } from "../ui/input"
-import {Filter, Loader, Search, Upload, X} from 'lucide-react'
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
+import { Loader, Plus, Upload, Search } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "../ui/dialog"
-import {Tabs, TabsContent, TabsList, TabsTrigger} from "../ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import FirebaseDatabaseService from "../../services/database/strategies/FirebaseFirestoreService";
-import {useNotification} from "../../contexts/NotificationProvider";
-import {useAuth} from "../../contexts/Authentication";
-import {EnhancedImage} from "../image-loader/ImageLoader";
+import { useNotification } from "../../contexts/NotificationProvider";
+import { useAuth } from "../../contexts/Authentication";
+import { EnhancedImage } from "../image-loader/ImageLoader";
 
 interface Image {
   id: string;
-  prompt: string;
-  setup: string;
-  num_generations: number;
-  status: 'processing' | 'pending' | 'completed' | 'error'
+  name: string;
+  type: 'uploaded' | 'ai-generated';
+  status: 'processing' | 'completed' | 'error';
+  url: string;
+  folder_id?: string;
   created_at: Date;
-  image_paths?: string[];
   uid: string;
 }
 
-interface SelectedImage {
-  src: string;
-  prompt: string;
-  index: number;
+interface Folder {
+  id: string;
+  name: string;
+  created_at: Date;
+  uid: string;
 }
 
-interface Tag {
-  text: string;
-  color: string;
-}
-
-interface Tags {
-  [key: number]: Tag[];
-}
-
-interface ImageModalProps {
-  image: SelectedImage | null;
-  onClose: () => void;
-}
-
-const DashboardImageGenerator: React.FC = () => {
+const DashboardImages: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<string>("folders");
+  const [folders, setFolders] = useState<Folder[]>([]);
+  const [images, setImages] = useState<Image[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [prompt, setPrompt] = useState<string>('');
-  const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(null);
-  const [tags, setTags] = useState<Tags>({});
-  const [newTag, setNewTag] = useState<string>('');
-  const [tagColor, setTagColor] = useState<string>('#000000');
-  const [activeTab, setActiveTab] = useState<string>("ai-generate");
-  const [setup, setSetup] = useState<string>('square');
-  const [numGenerations, setNumGenerations] = useState<number>(1);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const {showNotification} = useNotification();
-  const {authState} = useAuth();
-  const [userImages, setUserImages] = useState<Image[]>([]);
+  const [isCreatingFolder, setIsCreatingFolder] = useState<boolean>(false);
+  const [newFolderName, setNewFolderName] = useState<string>('');
+  const { showNotification } = useNotification();
+  const { authState } = useAuth();
 
   useEffect(() => {
     if (authState.user) {
-      fetchUserImages();
+      fetchFolders();
+      fetchImages();
     }
   }, [authState.user]);
 
-  const fetchUserImages = () => {
+  const fetchFolders = () => {
+    if (authState.user) {
+      FirebaseDatabaseService.queryDocuments<Folder>(
+        'folders',
+        'uid',
+        authState.user.uid,
+        'created_at',
+        (fetchedFolders) => {
+          setFolders(fetchedFolders);
+        },
+        (error) => {
+          console.error('Error fetching folders:', error);
+          showNotification('Error', 'Failed to fetch folders', 'error');
+        }
+      );
+    }
+  };
+
+  const fetchImages = () => {
     if (authState.user) {
       FirebaseDatabaseService.queryDocuments<Image>(
         'images',
         'uid',
         authState.user.uid,
         'created_at',
-        (images) => {
-          setUserImages(images);
+        (fetchedImages) => {
+          setImages(fetchedImages);
         },
         (error) => {
           console.error('Error fetching images:', error);
@@ -82,244 +82,236 @@ const DashboardImageGenerator: React.FC = () => {
     }
   };
 
+  const handleCreateFolder = () => {
+    if (authState.user && newFolderName.trim()) {
+      FirebaseDatabaseService.addDocument(
+        'folders',
+        {
+          name: newFolderName.trim(),
+          created_at: new Date(),
+          uid: authState.user.uid
+        },
+        () => {
+          showNotification('Folder Created', 'Successfully created new folder', 'success');
+          setNewFolderName('');
+          setIsCreatingFolder(false);
+          fetchFolders();
+        },
+        (error) => {
+          showNotification('Folder Creation Failed', error.message, 'error');
+        }
+      );
+    }
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      setUploadedFiles(Array.from(event.target.files));
+    }
+  };
+
+  const handleDrop = useCallback((event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    if (event.dataTransfer.files) {
+      setUploadedFiles(Array.from(event.dataTransfer.files));
+    }
+  }, []);
+
+  const handleUpload = async () => {
+    if (authState.user && uploadedFiles.length > 0) {
+      try {
+        for (const file of uploadedFiles) {
+          // Here you would typically upload the file to your storage service
+          // For this example, we'll just add a record to Firestore
+          await FirebaseDatabaseService.addDocument(
+            'images',
+            {
+              name: file.name,
+              type: 'uploaded',
+              status: 'completed',
+              url: `https://example.com/uploads/${file.name}`, // Simulated upload URL
+              created_at: new Date(),
+              uid: authState.user.uid
+            },
+            () => {
+              showNotification('Image Uploaded', `Successfully uploaded ${file.name}`, 'success');
+            },
+            (error) => {
+              showNotification('Upload Failed', error.message, 'error');
+            }
+          );
+        }
+        fetchImages();
+        setUploadedFiles([]);
+      } catch (error) {
+        console.error('Error uploading images:', error);
+      }
+    } else {
+      showNotification('Upload Failed', 'Not authenticated or no files selected.', 'error');
+    }
+  };
+
   const handleGenerate = async () => {
-    if (authState.user) {
+    if (authState.user && prompt.trim()) {
       setIsGenerating(true);
       try {
-        FirebaseDatabaseService.addDocument(
+        await FirebaseDatabaseService.addDocument(
           'images',
           {
-            prompt,
-            setup,
-            num_generations: numGenerations,
-            status: 'pending',
+            name: prompt.trim(),
+            type: 'ai-generated',
+            status: 'processing',
+            url: '',
             created_at: new Date(),
             uid: authState.user.uid
           },
           () => {
-            // Reset form
-            setPrompt('');
-            setSetup('square');
-            setNumGenerations(1);
             showNotification('Image Generation Requested', 'Successfully requested image generation', 'info');
-            fetchUserImages(); // Refresh the image list
+            setPrompt('');
+            fetchImages();
           },
           (error) => {
             showNotification('Image Generation Failed', error.message, 'error');
           }
         );
       } catch (error) {
-        console.error('Error generating images:', error);
+        console.error('Error generating image:', error);
       } finally {
         setIsGenerating(false);
       }
     } else {
-      showNotification('Image Generation Failed', 'Not authenticated yet.', 'error');
+      showNotification('Image Generation Failed', 'Not authenticated or no prompt provided.', 'error');
     }
   };
 
-  const handleImageClick = (image: Image): void => {
-    setSelectedImage({
-      src: image.image_paths ? image.image_paths[0] : 'https://placehold.co/400x400',
-      prompt: image.prompt,
-      index: userImages.findIndex(img => img.id === image.id)
-    });
-  };
-
-  const handleAddTag = (): void => {
-    if (newTag && selectedImage) {
-      setTags(prevTags => ({
-        ...prevTags,
-        [selectedImage.index]: [
-          ...(prevTags[selectedImage.index] || []),
-          { text: newTag, color: tagColor }
-        ]
-      }));
-      setNewTag('');
-    }
-  };
-
-  const ImageModal: React.FC<ImageModalProps> = ({ image, onClose }) => (
-    <Dialog open={!!image} onOpenChange={() => onClose()}>
-      <DialogContent className="w-full">
-        <DialogHeader>
-          <DialogTitle className="text-white">Full Size Image</DialogTitle>
-          <DialogClose />
-        </DialogHeader>
-        {image && (
-          <div className="mt-4 flex gap-2 text-white flex-wrap">
-            <EnhancedImage
-              src={image.src ? image.src : 'https://placehold.co/400x400'}
-              className="h-auto"
-              alt="Full size"
-            />
-            <div className="mt-4 flex flex-col gap-2">
-              <p className="mt-4 text-sm">Prompt: {image.prompt}</p>
-              <h4 className="font-semibold mb-2">Tags</h4>
-              <div className="flex flex-wrap gap-2 mb-2">
-                {tags[image.index]?.map((tag, idx) => (
-                  <span key={idx} style={{ backgroundColor: tag.color }} className="px-2 py-1 rounded text-white">
-                    {tag.text}
-                  </span>
-                ))}
-              </div>
-              <div className="flex gap-2">
-                <Input
-                  type="text"
-                  placeholder="New tag"
-                  value={newTag}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewTag(e.target.value)}
-                  className="flex-grow"
-                />
-                <Input
-                  type="color"
-                  value={tagColor}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTagColor(e.target.value)}
-                  className="w-12"
-                />
-                <Button onClick={handleAddTag}>Add Tag</Button>
-              </div>
-            </div>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
-  );
-
-  const UploadContent = () => (
-    <div className="mt-4">
-      <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
-        <Upload className="mx-auto h-12 w-12 text-gray-400" />
-        <p className="mt-2 text-sm text-gray-600">Drag and drop images here, or click to select files</p>
-        <Input type="file" className="hidden" multiple accept="image/*" />
-        <Button className="mt-4" onClick={() => {}}>
-          Select Files
-        </Button>
+  const FolderGrid: React.FC = () => (
+    <div className="grid grid-cols-4 gap-4">
+      <div 
+        className="aspect-square bg-gray-800 rounded-lg flex items-center justify-center cursor-pointer hover:bg-gray-700"
+        onClick={() => setIsCreatingFolder(true)}
+      >
+        <Plus className="h-12 w-12 text-white" />
       </div>
+      {folders.map((folder) => (
+        <div key={folder.id} className="aspect-square bg-gray-800 rounded-lg p-4 flex flex-col justify-between">
+          <h3 className="text-lg font-semibold">{folder.name}</h3>
+          <p className="text-sm text-gray-400">{new Date(folder.created_at).toLocaleDateString()}</p>
+        </div>
+      ))}
     </div>
   );
 
-  const getStatusColor = (status: string): string => {
-    switch (status) {
-      case 'completed':
-        return 'bg-green-500';
-      case 'processing':
-        return 'bg-yellow-500';
-      case 'pending':
-        return 'bg-blue-500';
-      case 'error':
-        return 'bg-red-500';
-      default:
-        return 'bg-gray-500';
-    }
-  };
+  const UploadContent: React.FC = () => (
+    <div className="mt-4">
+      <div 
+        className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center"
+        onDrop={handleDrop}
+        onDragOver={(e) => e.preventDefault()}
+      >
+        <Upload className="mx-auto h-12 w-12 text-gray-400" />
+        <p className="mt-2 text-sm text-gray-600">Drag and drop images here, or click to select files</p>
+        <Input 
+          type="file" 
+          className="hidden" 
+          multiple 
+          accept="image/*" 
+          onChange={handleFileChange}
+          id="file-upload"
+        />
+        <Button className="mt-4" onClick={() => document.getElementById('file-upload')?.click()}>
+          Select Files
+        </Button>
+      </div>
+      {uploadedFiles.length > 0 && (
+        <div className="mt-4">
+          <h3 className="font-semibold mb-2">Selected Files:</h3>
+          <ul className="list-disc pl-5">
+            {uploadedFiles.map((file, index) => (
+              <li key={index}>{file.name}</li>
+            ))}
+          </ul>
+          <Button className="mt-4" onClick={handleUpload}>
+            Upload Files
+          </Button>
+        </div>
+      )}
+    </div>
+  );
 
-  const StatusIndicator: React.FC<{ status: string }> = ({ status }) => (
-    <div className={`absolute top-2 right-2 flex items-center ${getStatusColor(status)} text-white text-xs font-bold px-2 py-1 rounded-full`}>
-      {status === 'processing' && <Loader className="animate-spin mr-1 h-3 w-3" />}
-      {status.charAt(0).toUpperCase() + status.slice(1)}
+  const AIGenerateContent: React.FC = () => (
+    <div className="mt-4">
+      <div className="flex items-center space-x-4 mb-6">
+        <Input
+          type="text"
+          placeholder="Enter your prompt here..."
+          value={prompt}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPrompt(e.target.value)}
+          className="flex-grow bg-gray-800 text-white"
+        />
+        <Button onClick={handleGenerate} disabled={isGenerating}>
+          <Search className="h-4 w-4 mr-2" />
+          {isGenerating ? 'Generating...' : 'Generate'}
+        </Button>
+      </div>
+      <div className="grid grid-cols-4 gap-4">
+        {images.filter(img => img.type === 'ai-generated').map((image) => (
+          <div key={image.id} className="aspect-square bg-gray-800 rounded-lg relative">
+            {image.status === 'processing' ? (
+              <div className="w-full h-full flex items-center justify-center">
+                <Loader className="animate-spin h-8 w-8 text-white" />
+              </div>
+            ) : (
+              <EnhancedImage
+                src={image.url}
+                alt={image.name}
+                className="w-full h-full object-cover rounded-lg"
+              />
+            )}
+            <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 p-2">
+              <p className="text-sm truncate">{image.name}</p>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 
   return (
     <div className="text-white p-6 rounded-lg">
-      <div className="flex gap-2 items-center mb-4">
-        <h1 className="text-4xl font-bold">Images</h1>
-      </div>
-      <p className="mb-4">Use images in your video process, either upload images here or generate them using AI. Be sure to tag images so you can easily find images later.</p>
-
+      <h1 className="text-4xl font-bold mb-4">Images</h1>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="ai-generate">AI Generate</TabsTrigger>
-          <TabsTrigger value="upload">Upload</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="folders">Image Folders</TabsTrigger>
+          <TabsTrigger value="upload">Upload Images</TabsTrigger>
+          <TabsTrigger value="ai-generate">AI Generated Images</TabsTrigger>
         </TabsList>
-        <TabsContent value="ai-generate">
-          <div className="flex items-center space-x-4 mb-6 my-2">
-            <Input
-              type="text"
-              placeholder="Enter your prompt here..."
-              value={prompt}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPrompt(e.target.value)}
-              className="flex-grow bg-gray-800 text-white"
-            />
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline">
-                  <Filter className="h-4 w-4 mr-2" />
-                  Filters
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80 bg-gray-800 border-gray-700">
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="font-semibold mb-2">Image Size</h3>
-                    <div className="flex space-x-2 mb-2">
-                      <Button size="sm" variant={setup === 'portrait' ? 'default' : 'outline'} onClick={() => setSetup('portrait')}>Portrait</Button>
-                      <Button size="sm" variant={setup === 'square' ? 'default' : 'outline'} onClick={() => setSetup('square')}>Square</Button>
-                      <Button size="sm" variant={setup === 'landscape' ? 'default' : 'outline'} onClick={() => setSetup('landscape')}>Landscape</Button>
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold mb-2">Number of Generations</h3>
-                    <Input
-                      type="number"
-                      value={numGenerations}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNumGenerations(parseInt(e.target.value))}
-                      min={1}
-                      max={10}
-                      className="w-full"
-                    />
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
-            <Button onClick={handleGenerate} disabled={userImages.filter(image => image.status == "processing").length > 0}>
-              <Search className="h-4 w-4 mr-2" />
-              {userImages.filter(image => image.status == "processing").length > 0 ? 'Generating...' : 'Generate'}
-            </Button>
-          </div>
-
-          <div className="grid grid-cols-3 gap-4">
-            {userImages.map((image, index) => (
-              <div key={image.id} className="relative">
-                {image.status === 'processing' || image.status === 'pending' ? (
-                  <div className="w-full aspect-square bg-gray-700 rounded-lg flex items-center justify-center">
-                    <Loader className="animate-spin animate-bounce h-8 w-8 text-white" />
-                  </div>
-                ) : (
-                  <EnhancedImage
-                    src={image.image_paths ? image.image_paths[0] : 'https://placehold.co/400x400'}
-                    alt={`Generated image ${index + 1}`}
-                    className="w-full aspect-square object-cover rounded-lg cursor-pointer"
-                    onClick={() => handleImageClick(image)}
-                  />
-                )}
-                <StatusIndicator status={image.status} />
-                <div className="absolute top-2 left-2 flex flex-wrap gap-1">
-                  {tags[index]?.map((tag, idx) => (
-                    <span key={idx} style={{ backgroundColor: tag.color }} className="px-2 py-1 rounded text-white text-xs">
-                {tag.text}
-              </span>
-                  ))}
-                </div>
-                <div className="absolute bottom-2 left-2 right-2 bg-black bg-opacity-50 p-2 rounded">
-                  <p className="text-xs truncate">{image.prompt}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+        <TabsContent value="folders">
+          <FolderGrid />
         </TabsContent>
         <TabsContent value="upload">
           <UploadContent />
         </TabsContent>
+        <TabsContent value="ai-generate">
+          <AIGenerateContent />
+        </TabsContent>
       </Tabs>
 
-      <ImageModal
-        image={selectedImage}
-        onClose={() => setSelectedImage(null)}
-      />
+      <Dialog open={isCreatingFolder} onOpenChange={setIsCreatingFolder}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Folder</DialogTitle>
+          </DialogHeader>
+          <Input
+            type="text"
+            placeholder="Enter folder name"
+            value={newFolderName}
+            onChange={(e) => setNewFolderName(e.target.value)}
+          />
+          <Button onClick={handleCreateFolder}>Create</Button>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
 
-export default DashboardImageGenerator;
+export default DashboardImages;

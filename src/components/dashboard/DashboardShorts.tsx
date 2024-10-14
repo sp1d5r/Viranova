@@ -27,6 +27,8 @@ import { Progress } from "../ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { VideoPlayer } from '../video-player/VideoPlayer';
+import VideoPlayerModal from '../video-player/VideoPlayerModal';
+import { EyeOpenIcon } from '@radix-ui/react-icons';
 
 const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
   const getStatusColor = (status: string) => {
@@ -206,6 +208,13 @@ export const DashboardShorts: React.FC = () => {
                 </div>
               )}
               </div>
+              <VideoPlayerModal 
+                trigger={<EyeOpenIcon />}
+                path={short.finished_short_location}
+                className="w-full h-full object-cover"
+                loadingText="Loading preview..."
+                autoPlay={false}
+              />
             <CardHeader className="p-2 pt-48 overflow-hidden">
               <CardTitle className="text-lg flex justify-between items-center z-5">
                 <span className="truncate">{short.short_idea || "Untitled Short"}</span>

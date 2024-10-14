@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {Link} from 'react-router-dom';
-import { Bell, Menu, Settings, ChevronDown, LogOut } from 'lucide-react';
+import { Bell, Menu, Settings, ChevronDown, LogOut, Moon, Sun } from 'lucide-react';
 import { Button } from '../ui/button';
 import {
     DropdownMenu,
@@ -20,6 +20,7 @@ import {Logo} from "../logo/logo";
 import {Popover, PopoverContent, PopoverTrigger} from "../ui/popover";
 import {CardTitle} from "../ui/card";
 import {ScrollArea} from "../ui/scroll-area";
+import { useDarkMode } from '../../contexts/DarkModeProvider';
 
 interface NavLinkProps {
     href: string;
@@ -67,6 +68,7 @@ const NavMenu: React.FC<NavMenuProps> = ({ name, options })  => (
 export const NavigationBar = () => {
     const { authState, logout } = useAuth();
     const {showNotification, allNotifications} = useNotification();
+    const { darkModeState, toggleDarkMode} = useDarkMode();
 
     const handleLogout = () => {
         logout(
@@ -99,7 +101,7 @@ export const NavigationBar = () => {
     ];
 
     return (
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 text-white">
+      <header className="sticky top-0 z-50 w-full border-b dark:bg-background-dark/95 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:text-white">
           <div className="container flex h-14 items-center">
               <div className="mr-4 flex">
                   <Logo />
@@ -143,6 +145,19 @@ export const NavigationBar = () => {
                               </ScrollArea>
                           </PopoverContent>
                       </Popover>
+                      <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={toggleDarkMode}
+                          className="ml-auto h-8 w-8"
+                      >
+                          {darkModeState.darkMode ? (
+                              <Sun className="h-4 w-4" />
+                          ) : (
+                              <Moon className="h-4 w-4" />
+                          )}
+                          <span className="sr-only">Toggle dark mode</span>
+                      </Button>
                       {authState.isAuthenticated && (
                         <Button variant="outline" size="icon" className="ml-auto h-8 w-8" asChild>
                             <Link to="/settings">
@@ -168,7 +183,7 @@ export const NavigationBar = () => {
                           </Button>
                       </SheetTrigger>
                       <SheetContent side="left">
-                          <div className="py-4 h-full text-white flex flex-col justify-between">
+                          <div className="py-4 h-full dark:text-white flex flex-col justify-between">
                               <Logo />
                               <div className="flex-1" />
                               {authState.isAuthenticated ? (

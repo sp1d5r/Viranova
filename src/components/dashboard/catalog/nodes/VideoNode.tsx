@@ -3,7 +3,7 @@ import { Handle, Position } from 'reactflow';
 import { Card, CardContent } from '../../../ui/card';
 import { VideoNodeData } from '../../../../types/Catalog';
 import { Badge } from '../../../ui/badge';
-import { Layers, Layers3, Loader2 } from 'lucide-react';
+import { Layers, Layers3, Loader2, EyeIcon } from 'lucide-react';
 import { ArrowLeft, ArrowRight, XIcon } from 'lucide-react';
 import { useReactFlow } from 'reactflow';
 import { documentToShort, Short } from '../../../../types/collections/Shorts';
@@ -11,6 +11,7 @@ import FirebaseFirestoreService from '../../../../services/database/strategies/F
 import { useAuth } from '../../../../contexts/Authentication';
 import { documentToSegment, Segment } from '../../../../types/collections/Segment';
 import { Timestamp } from 'firebase/firestore';
+import VideoPlayerModal from '../../../video-player/VideoPlayerModal';
 
 const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
   const getStatusColor = (status: string) => {
@@ -265,6 +266,12 @@ export const VideoNode: React.FC<VideoNodeProps> = ({ data, id, selected }) => {
             >
                 <XIcon size={20} />
             </button>
+            <div
+                className="absolute translate-x-1/4 -right-10 bottom-1/2 transform translate-y-1/2 bg-transparent hover:bg-indigo-500 border  text-white rounded-full p-2 transition-colors duration-200"
+            >
+                <VideoPlayerModal trigger={<EyeIcon size={20}/>} path={data.videoPath}                  
+                />
+            </div>
             <button
                 className="absolute left-1/2 -translate-x-1/2 -bottom-10 transform translate-y-1/2 bg-transparent hover:bg-emerald-500 border bg-emerald-500 text-white rounded-full p-2 transition-colors duration-200"
                 onClick={toggleSegments}

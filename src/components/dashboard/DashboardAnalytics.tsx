@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNotification } from "../../contexts/NotificationProvider";
-import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, Pie, PieChart, ScatterChart, Scatter, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, Pie, PieChart, ScatterChart, Scatter, Tooltip, XAxis, YAxis, ResponsiveContainer } from "recharts";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "../ui/chart";
 import { DatePickerWithRange } from "../ui/date-picker-with-range";
@@ -8,6 +8,9 @@ import { MultiSelect } from "../ui/mutli-select";
 import { DateRange } from "react-day-picker";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { Clock, Hash, TrendingUp } from 'lucide-react';
+import { VideoAnalytics } from '../../types/collections/Analytics';
+import { CumulativeShortAnalytics, ShortAnalytics, useAnalytics } from '../../contexts/AnalyticsProvider';
+import { VideoPlayer } from '../video-player/VideoPlayer';
 
 export interface DashboardAnalyticsProps {
   userId: string | undefined;
@@ -19,23 +22,17 @@ const chartData = [
   // ... Add more data points here
 ];
 
-const recentVideos = [
-  { id: '1', title: 'How to Code in React', views: 1000 },
-  { id: '2', title: 'JavaScript Tips and Tricks', views: 800 },
-  { id: '3', title: 'Building a REST API', views: 1200 },
-];
-
 
 const chartConfig = {
-  views: {
+  playCount: {
     label: "Views",
     color: "hsl(var(--chart-1))",
   },
-  likes: {
+  diggCount: {
     label: "Likes",
     color: "hsl(var(--chart-2))",
   },
-  comments: {
+  commentCount: {
     label: "Comments",
     color: "hsl(var(--chart-3))",
   },
@@ -105,40 +102,32 @@ const hashtagViewsData = [
 
 export const DashboardAnalytics: React.FC<DashboardAnalyticsProps> = ({userId}) => {
   const { showNotification } = useNotification();
-  const [isLoading, setIsLoading] = useState(true);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [selectedVideos, setSelectedVideos] = useState<string[]>([]);
-  const [activeChart, setActiveChart] = useState<keyof typeof chartConfig>("views");
+  const [selectedShortAnalytics, setSelectedShortAnalytics] = useState<ShortAnalytics | null>(null);
 
-  const total = React.useMemo(
-    () => ({
-      views: chartData.reduce((acc, curr) => acc + curr.views, 0),
-      likes: chartData.reduce((acc, curr) => acc + curr.likes, 0),
-      comments: chartData.reduce((acc, curr) => acc + curr.comments, 0),
-    }),
-    []
-  );
+  const { 
+    shorts, 
+    selectedShortId, 
+    setSelectedShortId, 
+    getDailyAnalytics,
+    getTotalMetrics,
+    getCumulativeAnalytics,
+    getShortAnalytics,
+    isLoading, 
+    error 
+  } = useAnalytics();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!userId) {
-        return;
-      }
-      setIsLoading(true);
-      try {
-        // Fetch your data here
-        // Example: const data = await fetchAnalyticsData(userId, dateRange, selectedVideos);
-        
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Error fetching analytics data:", error);
-        showNotification("Error", "Failed to load analytics data", "error");
-        setIsLoading(false);
-      }
-    };
+  const [activeChart, setActiveChart] = useState<'playCount' | 'diggCount' | 'commentCount'>('playCount');
 
-    fetchData();
-  }, [userId, dateRange, selectedVideos, showNotification]); // Added showNotification to the dependency array
+  const chartData = useMemo(() => {
+    return getCumulativeAnalytics(activeChart);
+  }, [getCumulativeAnalytics, activeChart]);
+  
+  const total = useMemo(() => {
+    return getTotalMetrics;
+  }, [getTotalMetrics]);
+
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -146,7 +135,7 @@ export const DashboardAnalytics: React.FC<DashboardAnalyticsProps> = ({userId}) 
 
   return (
     <main className="flex flex-1 flex-col p-4 md:p-8 max-w-[100vw]">
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex flex-wrap justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Analytics Dashboard</h1>
         <div className="flex space-x-4">
         <DatePickerWithRange
@@ -186,7 +175,7 @@ export const DashboardAnalytics: React.FC<DashboardAnalyticsProps> = ({userId}) 
                     {chartConfig[chart].label}
                   </span>
                   <span className="text-lg font-bold leading-none sm:text-3xl">
-                    {total[chart].toLocaleString()}
+                    {total[chart].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                   </span>
                 </button>
               );
@@ -226,18 +215,11 @@ export const DashboardAnalytics: React.FC<DashboardAnalyticsProps> = ({userId}) 
                   <ChartTooltipContent
                     className="w-[150px]"
                     nameKey={activeChart}
-                    labelFormatter={(value) => {
-                      return new Date(value).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      });
-                    }}
                   />
                 }
               />
               <Line
-                dataKey={activeChart}
+                dataKey={`metrics.${activeChart}`}
                 type="monotone"
                 stroke={`var(--color-${activeChart})`}
                 strokeWidth={2}
@@ -250,19 +232,84 @@ export const DashboardAnalytics: React.FC<DashboardAnalyticsProps> = ({userId}) 
 
       <p className="text-2xl font-bold m-2 my-4">Most Recent Videos</p>
       <div className="flex flex-wrap">
-        <div className="w-full md:w-1/2 lg:w-2/3 p-2 h-full">
+      <div className="w-full md:w-1/2 lg:w-2/3 p-2 h-[400px]">
           <Card className="h-full overflow-auto">
             <CardHeader>
               <CardTitle>Select a Video</CardTitle>
             </CardHeader>
             <CardContent>
-              <Accordion type="single" collapsible className="w-full">
-                {recentVideos.map((video) => (
+              <Accordion 
+                type="single" 
+                collapsible 
+                className="w-full h-full overflow-y-scroll"
+                onValueChange={(value) => {
+                  if (value) {
+                    const analytics = getShortAnalytics(value);
+                    setSelectedShortAnalytics(analytics);
+                  } else {
+                    setSelectedShortAnalytics(null);
+                  }
+                }}
+              >
+                {shorts.map((video) => (
                   <AccordionItem key={video.id} value={video.id}>
-                    <AccordionTrigger>{video.title}</AccordionTrigger>
+                    <AccordionTrigger>
+                      <div className="flex items-center w-full">
+                        <div className="w-24 h-24 mr-4 overflow-hidden rounded-md">
+                          {video.finished_short_location ? (
+                            <VideoPlayer
+                              path={video.finished_short_location}
+                              className="w-full h-full object-cover"
+                              loadingText="Loading..."
+                              autoPlay={false}
+                              controls={false}
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                              <p className="text-sm text-gray-500">No preview</p>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-grow text-left">
+                          <p className="font-semibold">{video.short_idea.substring(0,100)}</p>
+                          <p className="text-sm text-muted-foreground">Views: {getShortAnalytics(video.id)?.totalViews || 0}</p>
+                        </div>
+                      </div>
+                    </AccordionTrigger>
                     <AccordionContent>
-                      <p>Views: {video.views}</p>
-                      {/* Add more video details here */}
+                      {selectedShortAnalytics && (
+                        <div className="mt-4">
+                          <h3 className="text-lg font-semibold mb-2">Analytics</h3>
+                          <div className="h-64 mb-4">
+                            <ResponsiveContainer width="100%" height="100%">
+                              <LineChart
+                                data={selectedShortAnalytics.dailyMetrics}
+                                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                              >
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="date" tickFormatter={(date) => new Date(date).toLocaleDateString()} />
+                                <YAxis />
+                                <Tooltip labelFormatter={(label) => new Date(label).toLocaleDateString()} />
+                                <Legend />
+                                <Line type="monotone" dataKey="views" stroke="#8884d8" />
+                                <Line type="monotone" dataKey="likes" stroke="#82ca9d" />
+                                <Line type="monotone" dataKey="comments" stroke="#ffc658" />
+                                <Line type="monotone" dataKey="shares" stroke="#ff7300" />
+                              </LineChart>
+                            </ResponsiveContainer>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <h4 className="font-semibold">Hashtags</h4>
+                              <p>{selectedShortAnalytics.hashtags.join(', ') || 'No hashtags'}</p>
+                            </div>
+                            <div>
+                              <h4 className="font-semibold">Music</h4>
+                              <p>{selectedShortAnalytics.music}</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </AccordionContent>
                   </AccordionItem>
                 ))}

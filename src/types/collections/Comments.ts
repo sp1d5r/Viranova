@@ -3,6 +3,11 @@ import FirebaseDatabaseService from "../../services/database/strategies/Firebase
 import FirebaseStorageService from "../../services/storage/strategies/FirebaseStorageService";
 import {BoundingBoxes, Logs, Short, TwoBoundingBoxes} from "./Shorts";
 
+interface CommentTag {
+  tag: string;
+  explanation: string;
+}
+
 export interface Comment {
   id?: string;
   avatarThumbnail: string;
@@ -15,6 +20,9 @@ export interface Comment {
   text: string;
   uid: string;
   uniqueId: string;
+  // Tag information
+  tags?: CommentTag[];
+  tagsParsed?: boolean;
 }
 
 export function documentToComment(docData: DocumentData): Comment {
@@ -30,6 +38,8 @@ export function documentToComment(docData: DocumentData): Comment {
     text: docData.text,
     uid: docData.uid,
     uniqueId: docData.uniqueId,
+    tags: docData.tagsParsed ? docData.tags as CommentTag[] : [],
+    tagsParsed: docData.tagsParsed,
   };
 }
 
