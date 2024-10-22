@@ -28,6 +28,15 @@ const ClipPathOverlay: React.FC<ClipPathOverlayProps> = ({ boxes, currentBoxType
         strokeWidth="2"
         strokeDasharray="5,5"
       />
+      <text
+      x={box[0] + 5}  // Offset from the left edge of the box
+      y={box[1] + 20} // Offset from the top of the box
+      fill="#10b981"  // Same color as the box stroke
+      fontSize="14"
+      fontFamily="sans-serif"
+    >
+      Box: {index}
+    </text>
     </g>
   );
   

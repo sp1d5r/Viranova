@@ -64,7 +64,7 @@ export type Logs = {
   time: Timestamp,
 }
 
-export type Boxes = [number, number, number, number];
+export type Boxes = [number, number, number, number]; // [x, y, w, h]
 
 export type BoundingBoxes = {
   boxes: Boxes[];
@@ -180,6 +180,8 @@ export function documentToShort(docData: DocumentData): Short {
     }
   }
 
+  console.log(docData.bounding_boxes)
+
   return {
     id: docData.id,
     start_index: docData.start_index,
@@ -253,7 +255,6 @@ export const deleteShort = (shortId: string) => {
     (data) => {
       if (data) {
         const short : Short = documentToShort(data);
-
 
         // Delete the corresponding files stored on the document
         if (short.short_clipped_video) {
