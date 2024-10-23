@@ -123,7 +123,7 @@ export const SettingsPage: React.FC<SettingsProps> = ({ fullScreen = true }) => 
       client_key: process.env.REACT_APP_TIKTOK_CLIENT_KEY || '', // Use environment variable
       response_type: 'code',
       scope: 'user.info.basic',
-      redirect_uri: 'https://www.viranova.io/dashbaord', // Update this
+      redirect_uri: 'https://www.viranova.io/tiktok-authenticated', // Update this
       state: csrfState
     });
 

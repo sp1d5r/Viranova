@@ -135,6 +135,8 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({ short,
   const { showNotification } = useNotification();
   const { createShortRequest } = useShortRequestManagement();
 
+  console.log(segment)
+
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;

@@ -48,7 +48,7 @@ function App() {
           <Route path="/wyr-videos/:id" element={<WyrVideoPage />} />
 
           {/* Tiktok */}
-          <Route path="/dashbaord" element={<TiktokAuthenticated />} />
+          <Route path="/tiktok-authenticated" element={<TiktokAuthenticated />} />
 
 
           <Route path={"*"} element={<NotFound />} />
