@@ -224,36 +224,35 @@ export default function Dashboard() {
   }, [searchParams]);
 
   const renderNavItems = (items: NavItem[]) => {
-    const filteredItems = items.filter(item => !item.hidden);
-    return filteredItems.map((item) => (
+    return items.filter(item => !item.hidden).map((item) => (
       <div key={item.id} data-id={item.id}>
         {item.children ? (
-          <div className="mb-2">
-            <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground">
+          <div className="mb-4">
+            <div className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-muted-foreground">
               {item.icon}
               {item.title}
             </div>
-            <div className="ml-4">
+            <div className="ml-4 mt-2 space-y-1">
               {renderNavItems(item.children)}
             </div>
           </div>
         ) : (
           <Link
             to="#"
-            className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
-              selectedItem === item.id
-                ? 'bg-muted text-primary'
-                : 'text-muted-foreground'
-            }`}
+            className={cn(
+              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+              "hover:bg-accent hover:text-accent-foreground",
+              selectedItem === item.id ? "bg-accent/50 text-accent-foreground" : "text-muted-foreground"
+            )}
             onClick={(e) => {
               e.preventDefault();
               handleTabChange(item.id);
             }}
           >
             {item.icon}
-            {item.title}
+            <span>{item.title}</span>
             {item.badge && (
-              <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
+              <Badge variant="secondary" className="ml-auto">
                 {item.badge}
               </Badge>
             )}
@@ -267,74 +266,89 @@ export default function Dashboard() {
     <AnalyticsProvider userId={authState.user?.uid}>
       <div className="relative min-h-screen w-full max-h-screen">
         <div className="grid md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr] text-white h-[100vh]">
-          <div className="hidden border-r bg-muted/40 md:block">
+          <div className="hidden bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:block">
             <div className="flex-col flex overflow-y-auto h-[100vh]">
-              <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
+              <div className="flex h-16 items-center border-b border-border/40 px-6">
                 <Link to="/" className="flex items-center gap-2 font-semibold">
                   <Logo />
                 </Link>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" size="icon" className="ml-auto h-8 w-8">
-                      <Bell className="h-4 w-4" />
-                      <span className="sr-only">Toggle notifications</span>
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-80">
-                    <CardTitle className="mb-2">Notifications</CardTitle>
-                    <ScrollArea className="h-[300px]">
-                      {allNotifications.length > 0 ? (
-                        allNotifications.map((notification, index) => (
-                          <div key={index} className="mb-2 p-2 bg-muted rounded-md">
-                            <p className="font-semibold">{notification.title}</p>
-                            <p className="text-sm text-muted-foreforeground">{notification.message}</p>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {new Date(notification.timestamp).toLocaleString()}
-                            </p>
-                          </div>
-                        ))
-                      ) : (
-                        <p>No notifications</p>
-                      )}
-                    </ScrollArea>
-                  </PopoverContent>
-                </Popover>
               </div>
-              <div className="flex-1">
-                <nav className="grid items-start px-2 py-2 text-sm font-medium lg:px-4">
-                  {renderNavItems(navItems)}
-                </nav>
-              </div>
-              <div className="mt-auto p-4 sticky bottom-0 bg-muted/40">
-                {authState.isAuthenticated && userData && (userData.subscription && userData.subscription.status === 'active') &&
-                  <div className="flex gap-2 text-sm font-bold items-center text-primary">
-                    <Card className="mt-auto w-full px-2 p-2 pt-2 md:p-4">
+              <nav className="grid gap-1 p-4">
+                {renderNavItems(navItems)}
+              </nav>
+              <div className="mt-auto p-4 sticky bottom-0 bg-[#18191B]">
+                {authState.isAuthenticated && userData && (userData.subscription && userData.subscription.status === 'active') && (
+                  <div className="flex flex-col gap-4">
+                    <Card className="w-full px-2 p-2 pt-2 md:p-4">
                       <div className="mb-4">
                         <h4 className="text-sm font-semibold mb-2">Credit quota</h4>
-                        <Progress value={ Math.round(100 * (userData?.credits?.current || 0) / (userData?.credits?.monthlyAllocation || 10000))} className="h-2 mb-1" />
-                        <div className="flex justify-between text-sm text-gray-600">
+                        <Progress value={Math.round(100 * (userData?.credits?.current || 0) / (userData?.credits?.monthlyAllocation || 10000))} className="h-2 mb-1" />
+                        <div className="flex justify-between text-sm text-gray-400">
                           <span>{(userData?.credits?.current || 0).toLocaleString()} remaining</span>
                           <span>{(userData?.credits?.monthlyAllocation || 10000).toLocaleString()} total</span>
                         </div>
                       </div>
-                      <Button className="hidden w-full mb-4">Upgrade</Button>
-                      <div className="flex items-center justify-between">
-                        <a className="/settings">
-                          <Button variant="outline" size="icon">
-                            <Settings className="h-4 w-4" />
-                          </Button>
-                        </a>
-                        <div className="flex items-center gap-2">
-                          <LeafyGreenIcon className="w-5 h-5" />
-                          <span className="text-sm font-medium">{userData.name}</span>
-                        </div>
-                      </div>
                     </Card>
-                  </div>
-                }
 
-                {
-                  !authState.isAuthenticated && <Card>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-[#2D2E32]">
+                          <div className="flex items-center gap-2">
+                            <CircleUser className="h-8 w-8" />
+                            <div className="flex flex-col items-start">
+                              <span className="text-sm font-medium">{userData.name}</span>
+                              <span className="text-xs text-gray-400">Project Manager</span>
+                            </div>
+                          </div>
+                          <LeafyGreenIcon className="h-4 w-4 text-gray-400" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-[200px]">
+                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <a href="/settings">
+                          <DropdownMenuItem>
+                            <Settings className="mr-2 h-4 w-4" />
+                            Settings
+                          </DropdownMenuItem>
+                        </a>
+                        <DropdownMenuItem>
+                          <MessageSquare className="mr-2 h-4 w-4" />
+                          Support
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem>
+                          <Button
+                            variant="destructive"
+                            className="w-full h-8"
+                            onClick={() => {
+                              logout(() => {
+                                showNotification(
+                                  "Signed Out",
+                                  "You've successfully signed out, it might take a second to propagate",
+                                  "success"
+                                )
+                                window.location.reload();
+                              },
+                              () => {
+                                showNotification(
+                                  "Failed to Sign Out",
+                                  "I don't think this is possible... try refreshing.",
+                                  "warning"
+                                )
+                              })
+                            }}
+                          >
+                            Logout
+                          </Button>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                )}
+
+                {!authState.isAuthenticated && (
+                  <Card>
                     <CardHeader className="p-2 pt-0 md:p-4">
                       <CardTitle>Upgrade to Pro</CardTitle>
                       <CardDescription>
@@ -342,20 +356,19 @@ export default function Dashboard() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="p-2 pt-0 md:p-4 md:pt-0">
-                      <a className="/authenticate">
-                        <Button  size="sm" className="w-full">
+                      <a href="/authenticate">
+                        <Button size="sm" className="w-full">
                           Upgrade
                         </Button>
                       </a>
                     </CardContent>
                   </Card>
-                }
-
+                )}
               </div>
             </div>
           </div>
           <div id="dashboard" className="flex flex-col" data-id="dashboard-main">
-            <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
+            <header className="flex md:hidden h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
               <Sheet>
                 <SheetTrigger asChild>
                   <Button
@@ -440,61 +453,6 @@ export default function Dashboard() {
                   </div>
                 </SheetContent>
               </Sheet>
-              <div className="w-full flex-1">
-                <form>
-                  <div className="relative">
-                    <Search className="absolute left-2.5 top-[50%] -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      type="search"
-                      placeholder="Search videos..."
-                      className="w-full appearance-none bg-background pl-8 shadow-none md:w-2/3 lg:w-1/3"
-                    />
-                  </div>
-                </form>
-              </div>
-              <Button className="ml-auto" onClick={() => setIsTourOpen(true)}>
-                <MapIcon className="h-5 w-5" />
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="icon" className="rounded-full">
-                    <CircleUser className="h-5 w-5" />
-                    <span className="sr-only">Toggle user menu</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  {authState.user?.uid ? <DropdownMenuLabel>My Account</DropdownMenuLabel> : <DropdownMenuLabel>Create an Account</DropdownMenuLabel>}
-                  {authState.user?.uid ? <></> : <DropdownMenuItem>Make a profile and join us on our journey!</DropdownMenuItem>}
-                  <DropdownMenuSeparator />
-                  {authState.user?.uid ? <a href="/settings"><DropdownMenuItem>Settings</DropdownMenuItem></a> : <DropdownMenuItem><a href="/authenticate">Login</a></DropdownMenuItem>}
-                  {authState.user?.uid ? <DropdownMenuItem>Support</DropdownMenuItem> : <DropdownMenuItem><a href="/authenticate">Register</a></DropdownMenuItem>}
-                  <DropdownMenuSeparator />
-                  {authState.user?.uid && <DropdownMenuItem>
-                    <Button
-                      variant="destructive"
-                      className="h-8"
-                      onClick={() => {
-                        logout(() => {
-                            showNotification(
-                              "Signed Out",
-                              "You've successfully signed out, it might take a second to propagate",
-                              "success"
-                            )
-                            window.location.reload();
-                          },
-                          () => {
-                            showNotification(
-                              "Failed to Sign Out",
-                              "I don't think this is possible... try refreshing.",
-                              "warning"
-                            )
-                          }
-                        )}}
-                    >Logout
-                    </Button>
-                  </DropdownMenuItem>}
-                </DropdownMenuContent>
-              </DropdownMenu>
             </header>
 
             {
