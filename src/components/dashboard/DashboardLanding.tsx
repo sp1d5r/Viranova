@@ -43,6 +43,8 @@ import {useAuth} from "../../contexts/Authentication";
 import {Comment, documentToComment} from "../../types/collections/Comments";
 import {Input} from "../ui/input";
 import { getVideoInfo } from '../../services/youtube';
+import { motion } from "framer-motion";
+import { cn } from "../../utils/cn";
 
 export interface DashboardLandingProps {
 
@@ -119,7 +121,20 @@ interface AnalyticsSummary {
   followerCountUpdated: string;
 }
 
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
 
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
+};
 
 export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
   const [shorts, setShorts] = useState<Short[]>([]);
@@ -522,33 +537,66 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
         {/* Right Sidebar Content */}
         <div className="space-y-6">
           {/* Recent Comments */}
-          <Card className="bg-[#f8f9fc] dark:bg-[#1c1c1c] border-none shadow-sm rounded-xl">
+          <Card className="border-none shadow-sm rounded-xl">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>Recent Comments</CardTitle>
-                <Button variant="ghost" className="text-gray-500">
-                  See all
+                <Button variant="ghost" className="text-gray-500 hover:text-gray-900">
+                  See more
                 </Button>
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {comments.slice(0, 5).map((comment) => (
-                  <div key={comment.id} className="flex items-start gap-2">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={comment.avatarThumbnail} alt={comment.uniqueId} />
-                      <AvatarFallback>{comment.uniqueId.substring(0, 2)}</AvatarFallback>
-                    </Avatar>
-                    <div className="grid gap-1">
-                      <p className="text-sm font-medium">{comment.uniqueId}</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-300">{comment.text}</p>
-                      <p className="text-xs text-gray-500">
-                        {new Date(comment.createTime.toDate()).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+            <CardContent className="flex flex-col gap-2">
+              {/* Header Row */}
+              <div className="bg-[#f8f9fc] rounded-lg dark:bg-[#1c1c1c] grid grid-cols-[1fr_auto_auto_auto] gap-4 px-4 py-2 text-sm text-gray-500">
+                <div>User</div>
+                <div>Likes</div>
+                <div>Replies</div>
+                <div>Date</div>
               </div>
+
+              {/* Comments List */}
+              <motion.div 
+                className="space-y-2"
+                variants={container}
+                initial="hidden"
+                animate="show"
+              >
+                {comments.slice(0, 5).map((comment) => (
+                  <motion.div
+                    key={comment.id}
+                    variants={item}
+                    className="bg-[#f8f9fc] dark:bg-[#1c1c1c]  grid grid-cols-[1fr_auto_auto_auto] items-center gap-4 px-4 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+                  >
+                    {/* User & Avatar */}
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={comment.avatarThumbnail} />
+                        <AvatarFallback>{comment.uniqueId.substring(0, 2)}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="font-medium">{comment.uniqueId}</div>
+                        <p className="text-sm text-gray-500 line-clamp-1">{comment.text}</p>
+                      </div>
+                    </div>
+
+                    {/* Likes */}
+                    <div className="text-sm font-medium">
+                      {comment.likes.toLocaleString()}
+                    </div>
+
+                    {/* Reply Count */}
+                    <div className="text-sm font-medium">
+                      {comment.replyCommentTotal.toLocaleString()}
+                    </div>
+
+                    {/* Date */}
+                    <div className="text-sm text-gray-500">
+                      {new Date(comment.createTime.toDate()).toLocaleDateString()}
+                    </div>
+                  </motion.div>
+                ))}
+              </motion.div>
             </CardContent>
           </Card>
 

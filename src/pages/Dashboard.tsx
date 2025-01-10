@@ -266,17 +266,21 @@ export default function Dashboard() {
     <AnalyticsProvider userId={authState.user?.uid}>
       <div className="relative min-h-screen w-full max-h-screen">
         <div className="grid md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr] text-white h-[100vh]">
-          <div className="hidden bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:block">
-            <div className="flex-col flex overflow-y-auto h-[100vh]">
+          <div className="hidden md:block bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-r border-border/40 sticky top-0 h-screen">
+            <div className="flex flex-col h-full">
               <div className="flex h-16 items-center border-b border-border/40 px-6">
                 <Link to="/" className="flex items-center gap-2 font-semibold">
                   <Logo />
                 </Link>
               </div>
-              <nav className="grid gap-1 p-4">
-                {renderNavItems(navItems)}
-              </nav>
-              <div className="mt-auto p-4 sticky bottom-0 bg-[#18191B]">
+              
+              <ScrollArea className="flex-1 px-4 py-4">
+                <nav className="grid gap-1">
+                  {renderNavItems(navItems)}
+                </nav>
+              </ScrollArea>
+
+              <div className="p-4 border-t border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                 {authState.isAuthenticated && userData && (userData.subscription && userData.subscription.status === 'active') && (
                   <div className="flex flex-col gap-4">
                     <Card className="w-full px-2 p-2 pt-2 md:p-4">
@@ -367,7 +371,7 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-          <div id="dashboard" className="flex flex-col" data-id="dashboard-main">
+          <div id="dashboard" className="flex flex-col overflow-auto" data-id="dashboard-main">
             <header className="flex md:hidden h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
               <Sheet>
                 <SheetTrigger asChild>
