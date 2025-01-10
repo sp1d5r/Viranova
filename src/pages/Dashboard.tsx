@@ -264,7 +264,7 @@ export default function Dashboard() {
 
   return (
     <AnalyticsProvider userId={authState.user?.uid}>
-      <div className="relative min-h-screen w-full max-h-screen p-6">
+      <div className="relative min-h-screen w-full max-h-screen md:p-6">
         <div className="grid md:grid-cols-[240px_1fr] lg:grid-cols-[280px_1fr] gap-6 text-white h-[calc(100vh-48px)]">
           <div className="hidden md:block">
             <div className="sticky top-6">
