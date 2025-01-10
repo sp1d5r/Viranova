@@ -193,7 +193,7 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
           if (short.last_updated){
             try {
               const shortDate = short.last_updated.toDate();
-              return !isNaN(shortDate.getTime()) && shortDate >= lastMonthDate;
+              return !isNaN(shortDate.getTime());
             } catch {
               return false
             }
@@ -325,238 +325,249 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
     }
   };
 
-  return <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8 max-w-[100vw]">
-    <div className="flex items-center justify-between mb-6">
-      <h1 className="text-2xl font-semibold">Dashboard</h1>
-      <div className="flex-1 max-w-2xl mx-8">
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Search..."
-            className="w-full h-10 pl-10 pr-4 rounded-lg bg-[#2D2E32] text-gray-200 placeholder-gray-400 
-                     focus:outline-none focus:ring-2 focus:ring-[#3E3F43] transition-all duration-200"
-          />
-          <svg
-            className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+  return (
+    <div className="flex flex-col gap-6 p-6">
+      {/* Top Section with Welcome/Invite Card */}
+      <Card className="w-full bg-[#f8f9fc] dark:bg-[#1c1c1c] border-none rounded-2xl overflow-hidden">
+        <CardContent className="flex items-center justify-between p-8">
+          <div>
+            <h2 className="text-2xl font-semibold mb-2">Welcome back!</h2>
+            <p className="text-gray-600 dark:text-gray-300">
+              You have {shorts.length} videos uploaded. Your total view count is {analyticsSummary.totalViews.toLocaleString()}.
+            </p>
+          </div>
+          <Button 
+            onClick={() => setIsAddingVideo(!isAddingVideo)}
+            className="bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black rounded-xl px-6"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
-        </div>
-      </div>
-      <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" className="rounded-lg">
-          <Bell className="h-5 w-5" />
-        </Button>
-        <Button variant="ghost" size="icon" className="rounded-lg">
-          <Settings className="h-5 w-5" />
-        </Button>
-      </div>
-    </div>
-
-    <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4" data-id="dashboard-analytics">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total Views</CardTitle>
-          <Eye className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{analyticsSummary.totalViews.toLocaleString()}</div>
-          <p className="text-xs text-muted-foreground">
-            {analyticsSummary.viewsChange > 0 ? '+' : ''}{analyticsSummary.viewsChange.toFixed(1)}% from last month
-          </p>
+            Add New Video
+            <Plus className="ml-2 h-4 w-4" />
+          </Button>
         </CardContent>
       </Card>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Likes</CardTitle>
-          <Heart className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{analyticsSummary.totalLikes.toLocaleString()}</div>
-          <p className="text-xs text-muted-foreground">
-            {analyticsSummary.likesChange > 0 ? '+' : ''}{analyticsSummary.likesChange.toFixed(1)}% from last month
-          </p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Comments</CardTitle>
-          <MessageCircle className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{analyticsSummary.totalComments.toLocaleString()}</div>
-          <p className="text-xs text-muted-foreground">
-            {analyticsSummary.commentsChange > 0 ? '+' : ''}{analyticsSummary.commentsChange.toFixed(1)}% from last month
-          </p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Followers</CardTitle>
-          <Users className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{analyticsSummary.followerCount.toLocaleString()}</div>
-          <p className="text-xs text-muted-foreground">
-            Last updated: {analyticsSummary.followerCountUpdated}
-          </p>
-        </CardContent>
-      </Card>
-    </div>
-    <div>
-      <div className="flex justify-between items-center mb-4">
-        <div className="px-2">
-          <h2 className="font-bold">Add New Video</h2>
-          <p className="text-sm">To add a new video press the add video button and then enter your video's link.</p>
-        </div>
-        <Button
-          onClick={() => setIsAddingVideo(!isAddingVideo)}
-          className="flex items-center gap-2"
-        >
-          {isAddingVideo ? 'Cancel' : 'Add Video'}
-          {isAddingVideo ? <ChevronUp className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-        </Button>
-      </div>
 
       {isAddingVideo && (
-        <Card className="mb-2">
-          <CardContent className="pt-6">
+        <Card className="bg-[#f8f9fc] dark:bg-[#1c1c1c] border-none rounded-2xl">
+          <CardContent className="p-6">
             <div className="flex gap-4">
               <Input
                 type="text"
                 placeholder="Enter YouTube video link"
                 value={newVideoLink}
                 onChange={(e) => setNewVideoLink(e.target.value)}
-                className="flex-grow"
+                className="flex-grow bg-white/80 dark:bg-black/20 border-none rounded-xl"
               />
-              <Button onClick={handleAddVideo} disabled={!newVideoLink}>
-                Add New Video
+              <Button 
+                onClick={handleAddVideo} 
+                disabled={!newVideoLink}
+                className="bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black rounded-xl"
+              >
+                Add Video
               </Button>
             </div>
           </CardContent>
         </Card>
       )}
-    </div>
 
-    <div className="grid gap-4 md:gap-8 lg:grid-cols-3" data-id="dashboard-shorts">
-      <Card className="col-span-2">
-        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center">
-          <div className="grid gap-2">
-            <CardTitle>Short Views</CardTitle>
-            <CardDescription>
-              Overview of the views received on your shorts.
-            </CardDescription>
-          </div>
-          <Button asChild size="sm" className="mt-2 sm:mt-0 sm:ml-auto gap-1">
-            <Link to="/dashboard?tab=shorts">
-              View All
-              <ArrowUpRight className="h-4 w-4" />
-            </Link>
+      {/* Statistics Section */}
+      <div className="grid gap-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold">Statistics</h2>
+          <Button variant="ghost" className="text-gray-500">
+            See more
           </Button>
-        </CardHeader>
-        <CardContent>
-          <div className="rounded-md border">
-            <div className="max-w-[70vw] overflow-scroll max-h-[400px]">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="sticky top-0 bg-background">Description</TableHead>
-                    <TableHead className="sticky top-0 bg-background">Likes</TableHead>
-                    <TableHead className="sticky top-0 bg-background">Comments</TableHead>
-                    <TableHead className="sticky top-0 bg-background">Views</TableHead>
-                    <TableHead className="sticky top-0 bg-background">Date</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {currentPageData.map((video) => (
-                    <TableRow onClick={() => {window.open(`/shorts?short_id=${video.id}`)}} key={video.id}>
-                      <TableCell>
-                        <div className="font-medium">{video.description}</div>
-                        <a href={video.link} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-sm">
-                          {video.link}
-                        </a>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">{video.likes.toLocaleString()}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{video.comments.toLocaleString()}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="default">{video.views.toLocaleString()}</Badge>
-                      </TableCell>
-                      <TableCell>{new Date(video.date).toLocaleDateString()}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
-          <div className="flex items-center justify-end space-x-2 py-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-            >
-              <ChevronLeft className="h-4 w-4" />
-              <span className="sr-only sm:not-sr-only sm:ml-2">Previous</span>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="bg-[#f8f9fc] dark:bg-[#1c1c1c] border-none shadow-sm rounded-xl">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Total Views</CardTitle>
+              <Eye className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{analyticsSummary.totalViews.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground">
+                {analyticsSummary.viewsChange > 0 ? '+' : ''}{analyticsSummary.viewsChange.toFixed(1)}% from last month
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-[#f8f9fc] dark:bg-[#1c1c1c] border-none shadow-sm rounded-xl">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Likes</CardTitle>
+              <Heart className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{analyticsSummary.totalLikes.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground">
+                {analyticsSummary.likesChange > 0 ? '+' : ''}{analyticsSummary.likesChange.toFixed(1)}% from last month
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-[#f8f9fc] dark:bg-[#1c1c1c] border-none shadow-sm rounded-xl">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Comments</CardTitle>
+              <MessageCircle className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{analyticsSummary.totalComments.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground">
+                {analyticsSummary.commentsChange > 0 ? '+' : ''}{analyticsSummary.commentsChange.toFixed(1)}% from last month
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-[#f8f9fc] dark:bg-[#1c1c1c] border-none shadow-sm rounded-xl">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Followers</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{analyticsSummary.followerCount.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground">Last updated: {analyticsSummary.followerCountUpdated}</p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Videos Section */}
+        <div className="lg:col-span-2">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold">Recent Videos</h2>
+            <Button variant="ghost" className="text-gray-500">
+              See all
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-            >
-              <span className="sr-only sm:not-sr-only sm:mr-2">Next</span>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
           </div>
-        </CardContent>
-      </Card>
-      <Card data-id="dashboard-comments">
-        <CardHeader>
-          <CardTitle>Recent Comments</CardTitle>
-          <CardDescription>Latest feedback from your TikTok audience</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[400px] overflow-y-auto pr-2 -mr-2">
-            <div className="grid gap-4">
-              {comments.map((comment) => (
-                <div key={comment.id} className="flex items-start gap-2">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={comment.avatarThumbnail} alt={comment.uniqueId} />
-                    <AvatarFallback>{comment.uniqueId.substring(0, 2)}</AvatarFallback>
-                  </Avatar>
-                  <div className="grid gap-1">
-                    <div className="flex flex-wrap items-center gap-1">
-                      <p className="text-sm font-medium leading-none">{comment.uniqueId}</p>
-                      <p className="text-xs text-muted-foreground">Likes: {comment.likes}, Replies: {comment.replyCommentTotal}</p>
+
+          <div className="space-y-4">
+            {currentPageData.map((video) => (
+              <Card 
+                key={video.id} 
+                className="bg-[#f8f9fc] dark:bg-[#1c1c1c] border-none shadow-sm rounded-xl"
+              >
+                <CardContent className="p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-sm break-words line-clamp-2">
+                        {video.description}
+                      </h3>
+                      <a 
+                        href={video.link} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-sm text-primary hover:underline break-all line-clamp-1"
+                      >
+                        {video.link}
+                      </a>
                     </div>
-                    <p className="text-sm text-muted-foreground">{comment.text}</p>
-                    <p className="text-xs text-muted-foreground">{new Date(comment.createTime.toDate()).toLocaleString()}</p>
-                    <span className="text-xs text-muted-foreground">
-                        Clip:
-                        <a className="text-primary underline ml-1" href={`shorts?tab=performance&short_id=${comment.shortId}`}>
-                          {comment.shortId.substring(0, 8)}...
-                        </a>
-                      </span>
+                    <span className="text-sm text-gray-500 whitespace-nowrap">
+                      {new Date(video.date).toLocaleDateString()}
+                    </span>
                   </div>
-                </div>
-              ))}
-            </div>
+                  
+                  <div className="flex flex-wrap gap-4 mt-4">
+                    <div className="flex items-center gap-2">
+                      <Eye className="h-4 w-4 text-gray-500" />
+                      <span className="text-sm font-medium">
+                        {video.views.toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Heart className="h-4 w-4 text-gray-500" />
+                      <span className="text-sm font-medium">
+                        {video.likes.toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <MessageCircle className="h-4 w-4 text-gray-500" />
+                      <span className="text-sm font-medium">
+                        {video.comments.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
-        </CardContent>
-      </Card>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="text-sm">
+                Page {currentPage} of {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {/* Right Sidebar Content */}
+        <div className="space-y-6">
+          {/* Recent Comments */}
+          <Card className="bg-[#f8f9fc] dark:bg-[#1c1c1c] border-none shadow-sm rounded-xl">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Recent Comments</CardTitle>
+                <Button variant="ghost" className="text-gray-500">
+                  See all
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {comments.slice(0, 5).map((comment) => (
+                  <div key={comment.id} className="flex items-start gap-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={comment.avatarThumbnail} alt={comment.uniqueId} />
+                      <AvatarFallback>{comment.uniqueId.substring(0, 2)}</AvatarFallback>
+                    </Avatar>
+                    <div className="grid gap-1">
+                      <p className="text-sm font-medium">{comment.uniqueId}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">{comment.text}</p>
+                      <p className="text-xs text-gray-500">
+                        {new Date(comment.createTime.toDate()).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Videos in Progress */}
+          <Card className="bg-[#f8f9fc] dark:bg-[#1c1c1c] border-none shadow-sm rounded-xl">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Videos in Progress</CardTitle>
+                <Button variant="ghost" className="text-gray-500">
+                  See more
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {/* Add your videos in progress list here */}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
-  </main>
+  );
 }
