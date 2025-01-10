@@ -264,114 +264,116 @@ export default function Dashboard() {
 
   return (
     <AnalyticsProvider userId={authState.user?.uid}>
-      <div className="relative min-h-screen w-full max-h-screen">
-        <div className="grid md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr] text-white h-[100vh]">
-          <div className="hidden md:block bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-r border-border/40 sticky top-0 h-screen">
-            <div className="flex flex-col h-full">
-              <div className="flex h-16 items-center border-b border-border/40 px-6">
-                <Link to="/" className="flex items-center gap-2 font-semibold">
-                  <Logo />
-                </Link>
-              </div>
-              
-              <ScrollArea className="flex-1 px-4 py-4">
-                <nav className="grid gap-1">
-                  {renderNavItems(navItems)}
-                </nav>
-              </ScrollArea>
+      <div className="relative min-h-screen w-full max-h-screen p-6">
+        <div className="grid md:grid-cols-[240px_1fr] lg:grid-cols-[280px_1fr] gap-6 text-white h-[calc(100vh-48px)]">
+          <div className="hidden md:block">
+            <div className="sticky top-6">
+              <div className="h-[calc(100vh-48px)] flex flex-col bg-neutral-900/50 rounded-lg">
+                <div className="flex h-16 items-center px-6 border-b border-border/40">
+                  <Link to="/" className="flex items-center gap-2 font-semibold">
+                    <Logo />
+                  </Link>
+                </div>
+                
+                <ScrollArea className="flex-1 px-4 py-4">
+                  <nav className="grid gap-1">
+                    {renderNavItems(navItems)}
+                  </nav>
+                </ScrollArea>
 
-              <div className="p-4 border-t border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                {authState.isAuthenticated && userData && (userData.subscription && userData.subscription.status === 'active') && (
-                  <div className="flex flex-col gap-4">
-                    <Card className="w-full px-2 p-2 pt-2 md:p-4">
-                      <div className="mb-4">
-                        <h4 className="text-sm font-semibold mb-2">Credit quota</h4>
-                        <Progress value={Math.round(100 * (userData?.credits?.current || 0) / (userData?.credits?.monthlyAllocation || 10000))} className="h-2 mb-1" />
-                        <div className="flex justify-between text-sm text-gray-400">
-                          <span>{(userData?.credits?.current || 0).toLocaleString()} remaining</span>
-                          <span>{(userData?.credits?.monthlyAllocation || 10000).toLocaleString()} total</span>
-                        </div>
-                      </div>
-                    </Card>
-
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-[#2D2E32]">
-                          <div className="flex items-center gap-2">
-                            <CircleUser className="h-8 w-8" />
-                            <div className="flex flex-col items-start">
-                              <span className="text-sm font-medium">{userData.name}</span>
-                              <span className="text-xs text-gray-400">Project Manager</span>
-                            </div>
+                <div className="p-4 border-t border-border/40">
+                  {authState.isAuthenticated && userData && (userData.subscription && userData.subscription.status === 'active') && (
+                    <div className="flex flex-col gap-4">
+                      <Card className="w-full px-2 p-2 pt-2 md:p-4">
+                        <div className="mb-4">
+                          <h4 className="text-sm font-semibold mb-2">Credit quota</h4>
+                          <Progress value={Math.round(100 * (userData?.credits?.current || 0) / (userData?.credits?.monthlyAllocation || 10000))} className="h-2 mb-1" />
+                          <div className="flex justify-between text-sm text-gray-400">
+                            <span>{(userData?.credits?.current || 0).toLocaleString()} remaining</span>
+                            <span>{(userData?.credits?.monthlyAllocation || 10000).toLocaleString()} total</span>
                           </div>
-                          <LeafyGreenIcon className="h-4 w-4 text-gray-400" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-[200px]">
-                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <a href="/settings">
-                          <DropdownMenuItem>
-                            <Settings className="mr-2 h-4 w-4" />
-                            Settings
-                          </DropdownMenuItem>
-                        </a>
-                        <DropdownMenuItem>
-                          <MessageSquare className="mr-2 h-4 w-4" />
-                          Support
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>
-                          <Button
-                            variant="destructive"
-                            className="w-full h-8"
-                            onClick={() => {
-                              logout(() => {
-                                showNotification(
-                                  "Signed Out",
-                                  "You've successfully signed out, it might take a second to propagate",
-                                  "success"
-                                )
-                                window.location.reload();
-                              },
-                              () => {
-                                showNotification(
-                                  "Failed to Sign Out",
-                                  "I don't think this is possible... try refreshing.",
-                                  "warning"
-                                )
-                              })
-                            }}
-                          >
-                            Logout
-                          </Button>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                )}
+                        </div>
+                      </Card>
 
-                {!authState.isAuthenticated && (
-                  <Card>
-                    <CardHeader className="p-2 pt-0 md:p-4">
-                      <CardTitle>Upgrade to Pro</CardTitle>
-                      <CardDescription>
-                        Unlock all features and get unlimited access to our support team.
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="p-2 pt-0 md:p-4 md:pt-0">
-                      <a href="/authenticate">
-                        <Button size="sm" className="w-full">
-                          Upgrade
-                        </Button>
-                      </a>
-                    </CardContent>
-                  </Card>
-                )}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-[#2D2E32]">
+                            <div className="flex items-center gap-2">
+                              <CircleUser className="h-8 w-8" />
+                              <div className="flex flex-col items-start">
+                                <span className="text-sm font-medium">{userData.name}</span>
+                                <span className="text-xs text-gray-400">Project Manager</span>
+                              </div>
+                            </div>
+                            <LeafyGreenIcon className="h-4 w-4 text-gray-400" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-[200px]">
+                          <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <a href="/settings">
+                            <DropdownMenuItem>
+                              <Settings className="mr-2 h-4 w-4" />
+                              Settings
+                            </DropdownMenuItem>
+                          </a>
+                          <DropdownMenuItem>
+                            <MessageSquare className="mr-2 h-4 w-4" />
+                            Support
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem>
+                            <Button
+                              variant="destructive"
+                              className="w-full h-8"
+                              onClick={() => {
+                                logout(() => {
+                                  showNotification(
+                                    "Signed Out",
+                                    "You've successfully signed out, it might take a second to propagate",
+                                    "success"
+                                  )
+                                  window.location.reload();
+                                },
+                                () => {
+                                  showNotification(
+                                    "Failed to Sign Out",
+                                    "I don't think this is possible... try refreshing.",
+                                    "warning"
+                                  )
+                                })
+                              }}
+                            >
+                              Logout
+                            </Button>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  )}
+
+                  {!authState.isAuthenticated && (
+                    <Card>
+                      <CardHeader className="p-2 pt-0 md:p-4">
+                        <CardTitle>Upgrade to Pro</CardTitle>
+                        <CardDescription>
+                          Unlock all features and get unlimited access to our support team.
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="p-2 pt-0 md:p-4 md:pt-0">
+                        <a href="/authenticate">
+                          <Button size="sm" className="w-full">
+                            Upgrade
+                          </Button>
+                        </a>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-          <div id="dashboard" className="flex flex-col overflow-auto" data-id="dashboard-main">
+          <div className="flex flex-col overflow-auto">
             <header className="flex md:hidden h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
               <Sheet>
                 <SheetTrigger asChild>

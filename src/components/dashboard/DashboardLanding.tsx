@@ -343,7 +343,7 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
   return (
     <div className="flex flex-col gap-6 p-6">
       {/* Top Section with Welcome/Invite Card */}
-      <Card className="w-full bg-[#f8f9fc] dark:bg-[#1c1c1c] border-none rounded-2xl overflow-hidden">
+      <Card className="w-full bg-[#f8f9fc] dark:bg-[#047857] border-none rounded-2xl overflow-hidden">
         <CardContent className="flex items-center justify-between p-8">
           <div>
             <h2 className="text-2xl font-semibold mb-2">Welcome back!</h2>
@@ -386,13 +386,6 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
 
       {/* Statistics Section */}
       <div className="grid gap-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Statistics</h2>
-          <Button variant="ghost" className="text-gray-500">
-            See more
-          </Button>
-        </div>
-        
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card className="bg-[#f8f9fc] dark:bg-[#1c1c1c] border-none shadow-sm rounded-xl">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
