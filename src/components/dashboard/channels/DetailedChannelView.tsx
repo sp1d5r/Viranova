@@ -10,10 +10,12 @@ import {Button} from "../../ui/button";
 import FirebaseFirestoreService from "../../../services/database/strategies/FirebaseFirestoreService";
 import {useAuth} from "../../../contexts/Authentication";
 import {useNotification} from "../../../contexts/NotificationProvider";
-import {Loader2, MinusCircle, Trash, X, Bell} from "lucide-react";
+import {Loader2, MinusCircle, Trash, X, Bell, Eye} from "lucide-react";
 import {ResubscribeTask} from "../../../types/collections/Task";
 import {Timestamp} from "firebase/firestore";
 import { motion } from 'framer-motion';
+import {Badge} from "../../ui/badge";
+import {Link} from "react-router-dom";
 
 interface ChannelDetailsProps {
   channel: Channel;
@@ -155,92 +157,120 @@ const ChannelDetails: React.FC<ChannelDetailsProps> = ({ channel, channelId, use
 
   return (
     <ScrollArea className="h-[calc(100vh-100px)] gap-2">
-      <Card className="m-4 relative overflow-hidden">
+      <Card className="m-4 bg-[#f8f9fc] dark:bg-[#1c1c1c] border-none rounded-xl">
         <CardHeader>
-          <div className="flex flex-col md:flex-row items-center space-x-4 z-10 gap-2">
-            <Avatar className="w-20 h-20">
-              <AvatarImage src={channel.thumbnails?.default} alt={channel.title} />
-              <AvatarFallback>{channel.title?.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <div>
-              <CardTitle>{channel.title}</CardTitle>
-              <p className="text-sm text-muted-foreground">{channel.customUrl}</p>
+          <div className="flex flex-col md:flex-row items-start gap-6">
+            {/* Left Section: Avatar and Main Info */}
+            <div className="flex items-start gap-4">
+              <Avatar className="w-24 h-24 rounded-xl">
+                <AvatarImage src={channel.thumbnails?.default} alt={channel.title} />
+                <AvatarFallback>{channel.title?.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <div className="space-y-1">
+                <CardTitle className="text-2xl">{channel.title}</CardTitle>
+                <p className="text-sm text-muted-foreground">{channel.customUrl}</p>
+                <div className="flex gap-2 mt-2">
+                  <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-800">
+                    {numberWithCommas(channel.subscriberCount)} subscribers
+                  </Badge>
+                  <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-800">
+                    {numberWithCommas(channel.videoCount)} videos
+                  </Badge>
+                </div>
+              </div>
             </div>
-            <div className="flex-1"/>
-            <div className="flex  flex-wrap flex-row md:flex-col items-end justify-center gap-2">
+
+            {/* Right Section: Actions */}
+            <div className="flex-1 flex justify-end gap-2">
               <Button
                 variant="default"
                 size="sm"
-                onClick={() => {
-                  createRescheduleAnalyticsTask()
-                }}
+                onClick={createRescheduleAnalyticsTask}
+                className="bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black rounded-xl"
               >
-                Resubscribe to Channel
+                <Bell className="mr-2 h-4 w-4" />
+                Refresh Analytics
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-xl"
+                asChild
+              >
+                <Link to={`/channel/${channel.channelId}`}>
+                  <Eye className="mr-2 h-4 w-4" />
+                  View Channel
+                </Link>
               </Button>
               <Button
                 variant="destructive"
                 size="sm"
                 onClick={handleRemoveChannel}
                 disabled={isLoading}
+                className="rounded-xl"
               >
-                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash className="mr-2 h-4 w-4" />}
                 Remove
               </Button>
-              <a href={"/something"}>
-                <Button>
-                  View Channel
-                </Button>
-              </a>
             </div>
           </div>
         </CardHeader>
+
         <CardContent>
-          <div className="space-y-4 z-10">
-            <div>
-              <h3 className="font-semibold">Description</h3>
-              <p className="text-sm">{channel.description}</p>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-8">
+            {/* Left Column */}
+            <div className="space-y-6">
               <div>
-                <h3 className="font-semibold">Subscribers</h3>
-                <p>{numberWithCommas(channel.subscriberCount)}</p>
+                <h3 className="text-lg font-semibold mb-2">About</h3>
+                <p className="text-sm text-muted-foreground">{channel.description}</p>
               </div>
+
               <div>
-                <h3 className="font-semibold">Total Views</h3>
-                <p>{numberWithCommas(channel.viewCount)}</p>
+                <h3 className="text-lg font-semibold mb-2">Topics</h3>
+                <div className="flex flex-wrap gap-2">
+                  {channel.topicCategories?.map((topic, index) => (
+                    <Badge 
+                      key={index}
+                      variant="secondary" 
+                      className="bg-gray-100 dark:bg-gray-800"
+                    >
+                      {topic.split('/').pop()}
+                    </Badge>
+                  ))}
+                </div>
               </div>
-              <div>
-                <h3 className="font-semibold">Video Count</h3>
-                <p>{numberWithCommas(channel.videoCount)}</p>
+            </div>
+
+            {/* Right Column */}
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-white dark:bg-gray-800 p-4 rounded-xl">
+                  <p className="text-sm text-muted-foreground mb-1">Total Views</p>
+                  <p className="text-2xl font-semibold">{numberWithCommas(channel.viewCount)}</p>
+                </div>
+                <div className="bg-white dark:bg-gray-800 p-4 rounded-xl">
+                  <p className="text-sm text-muted-foreground mb-1">Country</p>
+                  <p className="text-2xl font-semibold">{channel.country || 'N/A'}</p>
+                </div>
+                <div className="bg-white dark:bg-gray-800 p-4 rounded-xl">
+                  <p className="text-sm text-muted-foreground mb-1">Status</p>
+                  <p className="text-2xl font-semibold">{channel.status}</p>
+                </div>
+                <div className="bg-white dark:bg-gray-800 p-4 rounded-xl">
+                  <p className="text-sm text-muted-foreground mb-1">Joined</p>
+                  <p className="text-2xl font-semibold">{new Date(channel.publishedAt || '').getFullYear()}</p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-semibold">Country</h3>
-                <p>{channel.country}</p>
+
+              <div className="bg-white dark:bg-gray-800 p-4 rounded-xl">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm text-muted-foreground">Channel ID</p>
+                  <Button variant="ghost" size="sm" className="h-8 text-xs">
+                    Copy
+                  </Button>
+                </div>
+                <p className="text-sm font-mono">{channel.channelId}</p>
               </div>
-            </div>
-            <div>
-              <h3 className="font-semibold">Privacy Status</h3>
-              <p>{channel.privacyStatus}</p>
-            </div>
-            <div>
-              <h3 className="font-semibold">Published At</h3>
-              <p>{new Date(channel.publishedAt || '').toLocaleDateString()}</p>
-            </div>
-            <div>
-              <h3 className="font-semibold">Topic Categories</h3>
-              <ul className="list-disc list-inside">
-                {channel.topicCategories?.map((topic, index) => (
-                  <li key={index}>{topic.split('/').pop()}</li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold">Status</h3>
-              <p>{channel.status}</p>
-            </div>
-            <div>
-              <h3 className="font-semibold">Channel ID</h3>
-              <p>{channel.channelId}</p>
             </div>
           </div>
         </CardContent>
