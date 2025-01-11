@@ -284,16 +284,16 @@ export default function Dashboard() {
                 <div className="p-4 border-t border-border/40">
                   {authState.isAuthenticated && userData && (userData.subscription && userData.subscription.status === 'active') && (
                     <div className="flex flex-col gap-4">
-                      <Card className="w-full px-2 p-2 pt-2 md:p-4">
+                      <div className="w-full px-2 p-2 pt-2 md:p-4 bg-white/80 rounded-lg text-black">
                         <div className="mb-4">
                           <h4 className="text-sm font-semibold mb-2">Credit quota</h4>
                           <Progress value={Math.round(100 * (userData?.credits?.current || 0) / (userData?.credits?.monthlyAllocation || 10000))} className="h-2 mb-1" />
-                          <div className="flex justify-between text-sm text-gray-400">
+                          <div className="flex justify-between text-sm text-neutral-800">
                             <span>{(userData?.credits?.current || 0).toLocaleString()} remaining</span>
                             <span>{(userData?.credits?.monthlyAllocation || 10000).toLocaleString()} total</span>
                           </div>
                         </div>
-                      </Card>
+                      </div>
 
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>

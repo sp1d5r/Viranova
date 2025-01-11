@@ -287,8 +287,9 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
   };
 
   const handleAddVideo = async () => {
-    if (newVideoLink) {
-      if (isValidYouTubeUrl(newVideoLink)) {
+    if (authState.user?.uid) {
+      if (newVideoLink) {
+        if (isValidYouTubeUrl(newVideoLink)) {
         try {
           const videoId = extractVideoId(newVideoLink);
           const videoInfo = await getVideoInfo(videoId);
@@ -335,8 +336,12 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
       } else {
         showNotification("Invalid Link", "Please provide a valid YouTube link.", "error");
       }
+      } else {
+          showNotification("No Link", "You need to add a YouTube link", "error");
+        }
     } else {
-      showNotification("No Link", "You need to add a YouTube link", "error");
+      console.log("No user");
+      window.location.href = "/authenticate";
     }
   };
 
