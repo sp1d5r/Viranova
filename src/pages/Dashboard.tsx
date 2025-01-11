@@ -353,17 +353,20 @@ export default function Dashboard() {
                   )}
 
                   {!authState.isAuthenticated && (
-                    <Card>
+                    <Card className="border-none !bg-neutral-800">
                       <CardHeader className="p-2 pt-0 md:p-4">
-                        <CardTitle>Upgrade to Pro</CardTitle>
+                        <CardTitle>Create an Account</CardTitle>
                         <CardDescription>
-                          Unlock all features and get unlimited access to our support team.
+                          No fun being here without an account... 
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="p-2 pt-0 md:p-4 md:pt-0">
                         <a href="/authenticate">
                           <Button size="sm" className="w-full">
-                            Upgrade
+                            Create an Account
+                          </Button>
+                          <Button variant="link" size="sm" className="w-full">
+                            Login
                           </Button>
                         </a>
                       </CardContent>
@@ -401,7 +404,7 @@ export default function Dashboard() {
                     {
                       !authState.isAuthenticated && <Card>
                         <CardHeader>
-                          <CardTitle>Upgrade to Pro</CardTitle>
+                          <CardTitle>Create an account</CardTitle>
                           <CardDescription>
                             Unlock all features and get unlimited access to our
                             support team.
@@ -415,7 +418,7 @@ export default function Dashboard() {
                       </Card>
                     }
 
-                    {userData && (!userData.subscription && userData.subscription!.status != 'active') && <Card>
+                    {userData && (!userData.subscription && userData.subscription!.status != 'active') && <Card className="border-none !bg-neutral-800">
                       <CardHeader>
                         <CardTitle>Upgrade to Pro</CardTitle>
                         <CardDescription>
@@ -432,7 +435,7 @@ export default function Dashboard() {
 
                     {authState.isAuthenticated && userData && (userData.subscription && userData.subscription.status === 'active') &&
                       <div className="flex gap-2 text-sm font-bold items-center text-primary">
-                        <Card className="mt-auto w-full px-2 p-2 pt-2 md:p-4">
+                        <Card className="border-none mt-auto w-full px-2 p-2 pt-2 md:p-4">
                           <div className="mb-4">
                             <h4 className="text-sm font-semibold mb-2">Credit quota</h4>
                             <Progress value={40} className="h-2 mb-1" />
