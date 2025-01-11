@@ -286,32 +286,40 @@ const ChannelsList: React.FC<ChannelsListProps> = ({
                                                      error,
                                                      channelIdError
                                                    }) => (
-  <div className=" p-4 flex flex-col gap-2">
+  <div className="p-4 flex flex-col gap-2">
     <div className="flex flex-col items-center justify-between w-full">
       {error && (
-        <Alert variant="destructive">
+        <Alert variant="destructive" className="bg-red-50 dark:bg-red-900/20 border-none rounded-xl">
           <ExclamationTriangleIcon className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
       {channelIdError && (
-        <Alert variant="destructive">
+        <Alert variant="destructive" className="bg-red-50 dark:bg-red-900/20 border-none rounded-xl">
           <ExclamationTriangleIcon className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{channelIdError} <a className="underline text-primary" href="https://commentpicker.com/youtube-channel-id.php#google_vignette">Check here.</a></AlertDescription>
+          <AlertDescription>
+            {channelIdError} <a className="underline text-primary" href="https://commentpicker.com/youtube-channel-id.php#google_vignette">Check here.</a>
+          </AlertDescription>
         </Alert>
       )}
       <h1 className="w-full text-lg font-semibold md:text-2xl my-2">Channels</h1>
       <div className="w-full flex gap-2" data-id="channel-id-adder">
         <Input
-          className="h-9"
+          className="h-9 bg-[#f8f9fc] dark:bg-[#1c1c1c] border-none rounded-xl"
           type="text"
           placeholder="Add a channel ID to track"
           value={newChannelId}
           onChange={(e) => setNewChannelId(e.target.value)}
         />
-        <CreditButton className="h-9" onClick={handleAddChannel} disabled={isLoading} creditCost={50} confirmationMessage="This action will cost 50 credits every month. Are you sure?">
+        <CreditButton 
+          className="h-9 bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black rounded-xl" 
+          onClick={handleAddChannel} 
+          disabled={isLoading} 
+          creditCost={50} 
+          confirmationMessage="This action will cost 50 credits every month. Are you sure?"
+        >
           <GitPullRequestCreateArrow size={16}/>
         </CreditButton>
       </div>
@@ -322,6 +330,7 @@ const ChannelsList: React.FC<ChannelsListProps> = ({
             selected={selectedChannel ? selectedChannel.channelId === channel.channelId : false}
             clickCard={() => { setSelectedChannel(channel) }}
             channel={channel}
+            className="bg-[#f8f9fc] dark:bg-[#1c1c1c] border-none rounded-xl mb-2 hover:bg-gray-50 dark:hover:bg-gray-800"
           />
         ))}
       </ScrollArea>
@@ -343,8 +352,13 @@ const NewVideoForm: React.FC<NewVideoFormProps> = ({ newVideoLink, setNewVideoLi
       placeholder="Enter YouTube video link"
       value={newVideoLink}
       onChange={(e) => setNewVideoLink(e.target.value)}
+      className="bg-[#f8f9fc] dark:bg-[#1c1c1c] border-none rounded-xl"
     />
-    <Button onClick={handleAddVideo} disabled={!newVideoLink || isAddingVideo}>
+    <Button 
+      onClick={handleAddVideo} 
+      disabled={!newVideoLink || isAddingVideo}
+      className="bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black rounded-xl"
+    >
       {isAddingVideo ? "Adding Video..." : "Add New Video"}
     </Button>
   </div>

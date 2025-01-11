@@ -7,19 +7,21 @@ import {Channel} from "../../../types/collections/Channels";
 
 interface ChannelCardProps {
   channel: Channel;
-  clickCard: () => void;
+  clickCard: () => void;  
   selected: boolean;
+  className?: string;
 }
 
 export const ChannelCard: React.FC<ChannelCardProps> = ({
     channel,
     clickCard,
-    selected
+    selected,
+    className
   }) => {
 
   return (
     <Card
-      className={`mb-4 transition-colors cursor-pointer hover:bg-muted/50 ${selected ? "!bg-white border-white" : ''}`}
+      className={cn(`mb-4 transition-colors cursor-pointer hover:bg-muted/50 ${selected ? "!bg-white border-white" : ''}`, className)}
       onClick={clickCard}
     >
       <CardHeader className="flex flex-row items-center gap-4 pb-2">
