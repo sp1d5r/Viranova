@@ -16,10 +16,21 @@ import { useNotification } from "../../contexts/NotificationProvider";
 import {CreditButton} from "../ui/credit-button";
 import FirebaseFirestoreService from "../../services/database/strategies/FirebaseFirestoreService";
 import { getVideoInfo } from "../../services/youtube";
+import { motion } from "framer-motion";
 
 export interface DashboardChannelsProps {
   userId?: string;
 }
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
 
 export const DashboardChannels: React.FC<DashboardChannelsProps> = ({ userId }) => {
   const [channels, setChannels] = useState<Channel[]>([]);
@@ -324,15 +335,21 @@ const ChannelsList: React.FC<ChannelsListProps> = ({
         </CreditButton>
       </div>
       <ScrollArea className="h-[calc(100vh-200px)] my-2 w-full">
-        {channels.map((channel, index) => (
-          <ChannelCard
-            key={index}
-            selected={selectedChannel ? selectedChannel.channelId === channel.channelId : false}
-            clickCard={() => { setSelectedChannel(channel) }}
-            channel={channel}
-            className="bg-[#f8f9fc] dark:bg-[#1c1c1c] border-none rounded-xl mb-2 hover:bg-gray-50 dark:hover:bg-gray-800"
-          />
-        ))}
+        <motion.div
+          variants={container}
+          initial="hidden"
+          animate="show"
+        >
+          {channels.map((channel, index) => (
+            <ChannelCard
+              key={index}
+              selected={selectedChannel ? selectedChannel.channelId === channel.channelId : false}
+              clickCard={() => { setSelectedChannel(channel) }}
+              channel={channel}
+              className="hover:bg-gray-50 dark:hover:bg-gray-800"
+            />
+          ))}
+        </motion.div>
       </ScrollArea>
     </div>
   </div>
