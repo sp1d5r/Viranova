@@ -157,9 +157,9 @@ const ChannelDetails: React.FC<ChannelDetailsProps> = ({ channel, channelId, use
 
   return (
     <ScrollArea className="h-[calc(100vh-100px)] gap-2">
-      <Card className="m-4 bg-[#f8f9fc] dark:bg-[#1c1c1c] border-none rounded-xl">
+      <Card className="mx-4 w-[calc(100%-2rem)] bg-[#f8f9fc] dark:bg-[#1c1c1c] border-none rounded-xl">
         <CardHeader>
-          <div className="flex flex-col md:flex-row items-start gap-6">
+          <div className="flex flex-col flex-wrap md:flex-row items-start gap-6">
             {/* Left Section: Avatar and Main Info */}
             <div className="flex items-start gap-4">
               <Avatar className="w-24 h-24 rounded-xl">
@@ -276,7 +276,7 @@ const ChannelDetails: React.FC<ChannelDetailsProps> = ({ channel, channelId, use
         </CardContent>
       </Card>
 
-      <Card className="m-4 bg-[#f8f9fc] dark:bg-[#1c1c1c] border-none rounded-xl">
+      <Card className="mx-4 w-[calc(100%-2rem)] bg-[#f8f9fc] dark:bg-[#1c1c1c] border-none rounded-xl">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle className="text-lg font-semibold">Refresh Connection</CardTitle>
