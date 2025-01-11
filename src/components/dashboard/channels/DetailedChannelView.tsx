@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {Channel, useAddChannelToTrack} from '../../../types/collections/Channels';
-import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../ui/card';
 import { ScrollArea } from '../../ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '../../ui/avatar';
 import {Video} from "../../../types/youtube/YoutubeVideo";
@@ -10,9 +10,10 @@ import {Button} from "../../ui/button";
 import FirebaseFirestoreService from "../../../services/database/strategies/FirebaseFirestoreService";
 import {useAuth} from "../../../contexts/Authentication";
 import {useNotification} from "../../../contexts/NotificationProvider";
-import {Loader2, MinusCircle, Trash} from "lucide-react";
+import {Loader2, MinusCircle, Trash, X, Bell} from "lucide-react";
 import {ResubscribeTask} from "../../../types/collections/Task";
 import {Timestamp} from "firebase/firestore";
+import { motion } from 'framer-motion';
 
 interface ChannelDetailsProps {
   channel: Channel;
@@ -26,6 +27,7 @@ const ChannelDetails: React.FC<ChannelDetailsProps> = ({ channel, channelId, use
   const { showNotification } = useNotification();
   const { removeChannelFromTrack, isLoading, error } = useAddChannelToTrack(userId? userId : "N/A");
   const [resubTasks, setResubTasks] = useState<ResubscribeTask[]>([]);
+  const [openResubTask, setOpenResubTask] = useState<boolean>(false);
 
   useEffect(() => {
     getResubTasks()
@@ -244,40 +246,101 @@ const ChannelDetails: React.FC<ChannelDetailsProps> = ({ channel, channelId, use
         </CardContent>
       </Card>
 
-      <Card className="m-4">
-        <CardHeader>
-          <CardTitle>Resubscribe Tasks</CardTitle>
+      <Card className="m-4 bg-[#f8f9fc] dark:bg-[#1c1c1c] border-none rounded-xl">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-lg font-semibold">Refresh Connection</CardTitle>
+            <CardDescription>To automatically download videos from this channel.</CardDescription>
+          </div>
+          <Button
+            variant="default"
+            size="sm"
+            onClick={createRescheduleAnalyticsTask}
+            className="bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black rounded-xl"
+          >
+            Refresh Connection
+          </Button>
         </CardHeader>
         <CardContent>
           {resubTasks.length > 0 ? (
-            <ul className="space-y-2">
-              {resubTasks.map((task, index) => (
-                <li key={index} className="outline outline-white/30 outline-1 flex justify-between items-center p-2 rounded-md">
-                  <div>
-                    <p><strong>Scheduled Time:</strong> {task.scheduledTime.toDate().toString()}</p>
-                    <p><strong>Status:</strong> {task.status}</p>
-                  </div>
-                  <Button size="icon" variant={"ghost"} onClick={() => {
+            <div className="space-y-4">
+              <div className="text-sm text-muted-foreground">
+                Next refresh in: {formatDistanceToNow(resubTasks[resubTasks.length - 1].scheduledTime.toDate())}
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <motion.div 
+                    className="h-full bg-black dark:bg-white"
+                    initial={{ width: "0%" }}
+                    animate={{ width: "100%" }}
+                    transition={{ 
+                      duration: (resubTasks[0].scheduledTime.toDate().getTime() - Date.now()) / 1000,
+                      ease: "linear"
+                    }}
+                  />
+                </div>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => {
                     FirebaseFirestoreService.deleteDocument(
                       'tasks',
-                      task.id!,
+                      resubTasks[0].id!,
                       () => {
-                        showNotification("Deleted Task", "Successfully deleted task", "success")
-                        window.location.reload();
+                        showNotification("Cancelled Refresh", "Successfully cancelled the analytics refresh", "success")
+                        getResubTasks();
                       }
                     )
-                  }}>
-                    <MinusCircle />
-                  </Button>
-                </li>
-              ))}
-            </ul>
+                  }}
+                  className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {resubTasks.length > 1 && (
+                <div onClick={() => setOpenResubTask(!openResubTask)} className="text-sm text-muted-foreground hover:underline cursor-pointer">
+                  +{resubTasks.length - 1} more refresh{resubTasks.length - 1 > 1 ? 'es' : ''} scheduled
+                </div>
+              )}
+
+              {openResubTask && <div className="flex flex-col items-center justify-center">
+                {resubTasks.map((task, index) => (
+                  <motion.div whileInView={{ opacity: 1 }} className="w-full">
+                    <div className="flex items-center justify-center gap-2 w-full hover:bg-muted/50 rounded-xl p-2">
+                      <div className="flex flex-col items-start justify-center flex-1">
+                        <p>{task.scheduledTime.toDate().toLocaleString()}</p>
+                        <p>{task.status}</p>
+                      </div>
+
+                      <Button className="bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black rounded-xl" size="icon" variant="ghost" onClick={() => {
+                        FirebaseFirestoreService.deleteDocument(
+                          'tasks',
+                          task.id!,
+                          () => {
+                            showNotification("Cancelled Refresh", "Successfully cancelled the analytics refresh", "success")
+                            getResubTasks();
+                          }
+                        )
+                      }}>
+                        <MinusCircle />
+                      </Button>
+                    </div>
+                  </motion.div>
+                ))
+                }
+              </div>}
+            </div>
           ) : (
-            <p>No resubscribe tasks scheduled.</p>
+            <div className="flex flex-col items-center justify-center py-6 text-center text-muted-foreground">
+              <Bell className="h-12 w-12 mb-4 opacity-50" />
+              <p>No analytics refreshes scheduled</p>
+              <p className="text-sm">Click the button above to schedule a refresh</p>
+            </div>
           )}
         </CardContent>
       </Card>
-
       <div className="m-4">
         <h2 className="text-2xl font-bold mb-4">Recent Videos</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
