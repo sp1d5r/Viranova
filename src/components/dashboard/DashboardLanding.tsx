@@ -451,54 +451,73 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
           </div>
 
           <div className="space-y-4">
-            {currentPageData.map((video) => (
-              <Card 
-                key={video.id} 
-                className="bg-[#f8f9fc] dark:bg-[#1c1c1c] border-none shadow-sm rounded-xl"
-              >
-                <CardContent className="p-6">
-                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-sm break-words line-clamp-2">
-                        {video.description}
-                      </h3>
-                      <a 
-                        href={video.link} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="text-sm text-primary hover:underline break-all line-clamp-1"
-                      >
-                        {video.link}
-                      </a>
-                    </div>
-                    <span className="text-sm text-gray-500 whitespace-nowrap">
-                      {new Date(video.date).toLocaleDateString()}
-                    </span>
-                  </div>
-                  
-                  <div className="flex flex-wrap gap-4 mt-4">
-                    <div className="flex items-center gap-2">
-                      <Eye className="h-4 w-4 text-gray-500" />
-                      <span className="text-sm font-medium">
-                        {video.views.toLocaleString()}
+            {currentPageData.length > 0 ? (
+              currentPageData.map((video) => (
+                <Card 
+                  key={video.id} 
+                  className="bg-[#f8f9fc] dark:bg-[#1c1c1c] border-none shadow-sm rounded-xl"
+                >
+                  <CardContent className="p-6">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium text-sm break-words line-clamp-2">
+                          {video.description}
+                        </h3>
+                        <a 
+                          href={video.link} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="text-sm text-primary hover:underline break-all line-clamp-1"
+                        >
+                          {video.link}
+                        </a>
+                      </div>
+                      <span className="text-sm text-gray-500 whitespace-nowrap">
+                        {new Date(video.date).toLocaleDateString()}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Heart className="h-4 w-4 text-gray-500" />
-                      <span className="text-sm font-medium">
-                        {video.likes.toLocaleString()}
-                      </span>
+                    
+                    <div className="flex flex-wrap gap-4 mt-4">
+                      <div className="flex items-center gap-2">
+                        <Eye className="h-4 w-4 text-gray-500" />
+                        <span className="text-sm font-medium">
+                          {video.views.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Heart className="h-4 w-4 text-gray-500" />
+                        <span className="text-sm font-medium">
+                          {video.likes.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <MessageCircle className="h-4 w-4 text-gray-500" />
+                        <span className="text-sm font-medium">
+                          {video.comments.toLocaleString()}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <MessageCircle className="h-4 w-4 text-gray-500" />
-                      <span className="text-sm font-medium">
-                        {video.comments.toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <Card className="bg-[#f8f9fc] dark:bg-[#1c1c1c] border-none shadow-sm rounded-xl">
+                <CardContent className="p-12 flex flex-col items-center justify-center text-center">
+                  <Activity className="h-12 w-12 text-gray-400 mb-4" />
+                  <h3 className="text-lg font-medium mb-2">No Videos Posted Yet</h3>
+                  <p className="text-sm text-gray-500 mb-4">
+                    Start adding videos to see them appear here
+                  </p>
+                  <Button 
+                    onClick={() => setIsAddingVideo(true)}
+                    className="bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black rounded-xl"
+                  >
+                    Add Your First Video
+                    <Plus className="ml-2 h-4 w-4" />
+                  </Button>
                 </CardContent>
               </Card>
-            ))}
+            )}
           </div>
 
           {/* Pagination */}
