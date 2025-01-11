@@ -136,6 +136,21 @@ const item = {
   show: { opacity: 1, y: 0 }
 };
 
+const statsContainer = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const statsItem = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
+};
+
 export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
   const [shorts, setShorts] = useState<Short[]>([]);
   const [comments, setComments] = useState<Comment[]>([])
@@ -391,57 +406,70 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
 
       {/* Statistics Section */}
       <div className="grid gap-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="bg-[#f8f9fc] dark:bg-[#1c1c1c] border-none shadow-sm rounded-xl">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Total Views</CardTitle>
-              <Eye className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{analyticsSummary.totalViews.toLocaleString()}</div>
-              <p className="text-xs text-muted-foreground">
-                {analyticsSummary.viewsChange > 0 ? '+' : ''}{analyticsSummary.viewsChange.toFixed(1)}% from last month
-              </p>
-            </CardContent>
-          </Card>
+        <motion.div 
+          className="grid grid-cols-2 md:grid-cols-4 gap-4"
+          variants={statsContainer}
+          initial="hidden"
+          animate="show"
+        >
+          <motion.div variants={statsItem}>
+            <Card className="bg-[#f8f9fc] dark:bg-[#1c1c1c] border-none shadow-sm rounded-xl">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Total Views</CardTitle>
+                <Eye className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{analyticsSummary.totalViews.toLocaleString()}</div>
+                <p className="text-xs text-muted-foreground">
+                  {analyticsSummary.viewsChange > 0 ? '+' : ''}{analyticsSummary.viewsChange.toFixed(1)}% from last month
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
 
-          <Card className="bg-[#f8f9fc] dark:bg-[#1c1c1c] border-none shadow-sm rounded-xl">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Likes</CardTitle>
-              <Heart className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{analyticsSummary.totalLikes.toLocaleString()}</div>
-              <p className="text-xs text-muted-foreground">
-                {analyticsSummary.likesChange > 0 ? '+' : ''}{analyticsSummary.likesChange.toFixed(1)}% from last month
-              </p>
-            </CardContent>
-          </Card>
+          <motion.div variants={statsItem}>
+            <Card className="bg-[#f8f9fc] dark:bg-[#1c1c1c] border-none shadow-sm rounded-xl">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Likes</CardTitle>
+                <Heart className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{analyticsSummary.totalLikes.toLocaleString()}</div>
+                <p className="text-xs text-muted-foreground">
+                  {analyticsSummary.likesChange > 0 ? '+' : ''}{analyticsSummary.likesChange.toFixed(1)}% from last month
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
 
-          <Card className="bg-[#f8f9fc] dark:bg-[#1c1c1c] border-none shadow-sm rounded-xl">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Comments</CardTitle>
-              <MessageCircle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{analyticsSummary.totalComments.toLocaleString()}</div>
-              <p className="text-xs text-muted-foreground">
-                {analyticsSummary.commentsChange > 0 ? '+' : ''}{analyticsSummary.commentsChange.toFixed(1)}% from last month
-              </p>
-            </CardContent>
-          </Card>
+          <motion.div variants={statsItem}>
+            <Card className="bg-[#f8f9fc] dark:bg-[#1c1c1c] border-none shadow-sm rounded-xl">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Comments</CardTitle>
+                <MessageCircle className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{analyticsSummary.totalComments.toLocaleString()}</div>
+                <p className="text-xs text-muted-foreground">
+                  {analyticsSummary.commentsChange > 0 ? '+' : ''}{analyticsSummary.commentsChange.toFixed(1)}% from last month
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
 
-          <Card className="bg-[#f8f9fc] dark:bg-[#1c1c1c] border-none shadow-sm rounded-xl">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Followers</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{analyticsSummary.followerCount.toLocaleString()}</div>
-              <p className="text-xs text-muted-foreground">Last updated: {analyticsSummary.followerCountUpdated}</p>
-            </CardContent>
-          </Card>
-        </div>
+          <motion.div variants={statsItem}>
+            <Card className="bg-[#f8f9fc] dark:bg-[#1c1c1c] border-none shadow-sm rounded-xl">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Followers</CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{analyticsSummary.followerCount.toLocaleString()}</div>
+                <p className="text-xs text-muted-foreground">Last updated: {analyticsSummary.followerCountUpdated}</p>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </motion.div>
       </div>
 
       {/* Main Content Grid */}
@@ -554,7 +582,7 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
         {/* Right Sidebar Content */}
         <div className="space-y-6">
           {/* Recent Comments */}
-          <Card className="border-none shadow-sm rounded-xl">
+          <Card className="border-none shadow-sm rounded-xl !bg-transparent">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>Recent Comments</CardTitle>
@@ -564,56 +592,67 @@ export const DashboardLanding : React.FC<DashboardLandingProps> = ({}) => {
               </div>
             </CardHeader>
             <CardContent className="flex flex-col gap-2">
-              {/* Header Row */}
-              <div className="bg-[#f8f9fc] rounded-lg dark:bg-[#1c1c1c] grid grid-cols-[1fr_auto_auto_auto] gap-4 px-4 py-2 text-sm text-gray-500">
-                <div>User</div>
-                <div>Likes</div>
-                <div>Replies</div>
-                <div>Date</div>
-              </div>
+              {comments.length > 0 ? (
+                <>
+                  {/* Header Row */}
+                  <div className="bg-[#f8f9fc] rounded-lg dark:bg-[#1c1c1c] grid grid-cols-[1fr_auto_auto_auto] gap-4 px-4 py-2 text-sm text-gray-500">
+                    <div>User</div>
+                    <div>Likes</div>
+                    <div>Replies</div>
+                    <div>Date</div>
+                  </div>
 
-              {/* Comments List */}
-              <motion.div 
-                className="space-y-2"
-                variants={container}
-                initial="hidden"
-                animate="show"
-              >
-                {comments.slice(0, 5).map((comment) => (
-                  <motion.div
-                    key={comment.id}
-                    variants={item}
-                    className="bg-[#f8f9fc] dark:bg-[#1c1c1c]  grid grid-cols-[1fr_auto_auto_auto] items-center gap-4 px-4 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+                  {/* Comments List */}
+                  <motion.div 
+                    className="space-y-2"
+                    variants={container}
+                    initial="hidden"
+                    animate="show"
                   >
-                    {/* User & Avatar */}
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={comment.avatarThumbnail} />
-                        <AvatarFallback>{comment.uniqueId.substring(0, 2)}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="font-medium">{comment.uniqueId}</div>
-                        <p className="text-sm text-gray-500 line-clamp-1">{comment.text}</p>
-                      </div>
-                    </div>
+                    {comments.slice(0, 5).map((comment) => (
+                      <motion.div
+                        key={comment.id}
+                        variants={item}
+                        className="bg-[#f8f9fc] dark:bg-[#1c1c1c]  grid grid-cols-[1fr_auto_auto_auto] items-center gap-4 px-4 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+                      >
+                        {/* User & Avatar */}
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={comment.avatarThumbnail} />
+                            <AvatarFallback>{comment.uniqueId.substring(0, 2)}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <div className="font-medium">{comment.uniqueId}</div>
+                            <p className="text-sm text-gray-500 line-clamp-1">{comment.text}</p>
+                          </div>
+                        </div>
 
-                    {/* Likes */}
-                    <div className="text-sm font-medium">
-                      {comment.likes.toLocaleString()}
-                    </div>
+                        {/* Likes */}
+                        <div className="text-sm font-medium">
+                          {comment.likes.toLocaleString()}
+                        </div>
 
-                    {/* Reply Count */}
-                    <div className="text-sm font-medium">
-                      {comment.replyCommentTotal.toLocaleString()}
-                    </div>
+                        {/* Reply Count */}
+                        <div className="text-sm font-medium">
+                          {comment.replyCommentTotal.toLocaleString()}
+                        </div>
 
-                    {/* Date */}
-                    <div className="text-sm text-gray-500">
-                      {new Date(comment.createTime.toDate()).toLocaleDateString()}
-                    </div>
+                        {/* Date */}
+                        <div className="text-sm text-gray-500">
+                          {new Date(comment.createTime.toDate()).toLocaleDateString()}
+                        </div>
+                      </motion.div>
+                    ))}
                   </motion.div>
-                ))}
-              </motion.div>
+                </>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <MessageCircle className="h-12 w-12 text-gray-400 mb-4" />
+                  <p className="text-sm text-gray-500">
+                    There's really no comments yet... Make sure you've posted the analytics.
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
