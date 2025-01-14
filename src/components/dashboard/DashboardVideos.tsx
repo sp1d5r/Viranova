@@ -83,7 +83,8 @@ export const DashboardVideos: React.FC = () => {
       uniqueVideos.sort((elem1, elem2) => {
         const timestamp1 = elem1.uploadTimestamp instanceof Timestamp ? elem1.uploadTimestamp.toMillis() : elem1.uploadTimestamp;
         const timestamp2 = elem2.uploadTimestamp instanceof Timestamp ? elem2.uploadTimestamp.toMillis() : elem2.uploadTimestamp;
-        return timestamp1 - timestamp2});
+        return timestamp2 - timestamp1;
+      });
       setVideos(uniqueVideos);
     } catch (error) {
       console.error("Error fetching videos:", error);
