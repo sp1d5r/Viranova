@@ -381,8 +381,6 @@ export const DashboardVideos: React.FC = () => {
           <VideoCard
             key={video.id}
             video={video}
-            isExpanded={expandedRows.has(video.id!)}
-            onToggle={() => toggleRowExpansion(video.id!)}
             source={video.channelId ? 'Channel' : 'Manual'}
           />
         ))}

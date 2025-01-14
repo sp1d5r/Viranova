@@ -8,6 +8,7 @@ import { useNotification } from "../../../contexts/NotificationProvider";
 import FirebaseFirestoreService from "../../../services/database/strategies/FirebaseFirestoreService";
 import { VideoSegments } from "../../../pages/VideoSegments";
 import { Timestamp } from "firebase/firestore";
+import { VideoDetailsModal } from "./VideoDetailsModal";
 
 const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
     const getStatusColor = (status: string) => {
@@ -49,23 +50,12 @@ const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
 
 interface VideoCardProps {
   video: UserVideo;
-  isExpanded: boolean;
-  onToggle: () => void;
   source: 'Channel' | 'Manual';
 }
 
-export const VideoCard: React.FC<VideoCardProps> = ({ video, isExpanded, onToggle, source }) => {
+export const VideoCard: React.FC<VideoCardProps> = ({ video, source }) => {
   const { showNotification } = useNotification();
-
-  useEffect(() => {
-    if (isExpanded) {
-      const videoSegmentsSection = document.getElementById(video.id!);
-      if (videoSegmentsSection) {
-        videoSegmentsSection.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
-  }, [isExpanded]);
-
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
 
   const handleDelete = () => {
     FirebaseFirestoreService.deleteDocument(
@@ -78,73 +68,65 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video, isExpanded, onToggl
     );
   };
 
-
   return (
-    <div className={`bg-card rounded-lg shadow-md overflow-hidden ${isExpanded ? 'col-span-full' : ''}`}>
-      <div className="relative">
-        <img
-          src={getThumbnailUrl(video)}
-          alt={video.originalFileName}
-          className="w-full h-40 object-cover"
-        />
-        <div className="absolute top-2 right-2">
-          <StatusBadge status={video.status} />
-        </div>
-      </div>
-      <div className="p-4">
-        <a href={video.videoUrl} target="_blank" className="font-semibold  mb-2 underline">{video.videoTitle || video.originalFileName}</a>
-        <div className="flex justify-between items-center">
-          <a href={`https://www.youtube.com/channel/${video.channelId}`} target="_blank" className="text-sm font-bold mb-2 underline">
-            {video.channelTitle}
-          </a>
-          <p className="text-sm text-muted-foreground mb-2">
-            Uploaded: {new Date(video.uploadTimestamp instanceof Timestamp ? video.uploadTimestamp.toMillis() : video.uploadTimestamp).toLocaleDateString()}
-          </p>
-        </div>
-        <Progress value={video.processingProgress} className="mb-2" />
-        <p className="text-sm mb-2">{!!video.processingProgress ? video.processingProgress.toFixed(2) : 0}% complete</p>
-        <div className="flex justify-between items-center">
-          <Button size="sm" variant="outline" onClick={onToggle}>
-            {isExpanded ? <ChevronUp className="h-4 w-4 mr-1" /> : <ChevronDown className="h-4 w-4 mr-1" />}
-            {isExpanded ? 'Less' : 'More'}
-          </Button>
-          <div className="flex gap-2">
-            <Button size="sm" variant="secondary" onClick={() => {
-              FirebaseFirestoreService.updateDocument(
-                "videos",
-                video.id!,
-                {
-                  previousStatus: 'Reloaded',
-                  processingProgress: 0,
-                }
-              )
-            }}>
-              <RefreshCcw className="h-4 w-4" />
-            </Button>
-            <Button size="sm" variant="destructive" onClick={handleDelete}>
-              <TrashIcon className="h-4 w-4" />
-            </Button>
+    <>
+      <div className="bg-card rounded-lg shadow-md overflow-hidden">
+        <div className="relative">
+          <img
+            src={getThumbnailUrl(video)}
+            alt={video.originalFileName}
+            className="w-full h-40 object-cover cursor-pointer"
+            onClick={() => setIsModalOpen(true)}
+          />
+          <div className="absolute top-2 right-2">
+            <StatusBadge status={video.status} />
           </div>
         </div>
-      </div>
-      {isExpanded && (
-        <div id={video.id!} className="p-4 bg-gray-500/5 border-primary border-2 rounded-lg backdrop-blur-md my-2">
-          <div className="flex flex-col gap-4">
-            <div>
-              <h3 className="font-semibold mb-2 text-2xl">Video Segments</h3>
-              <VideoSegments videoId={video.id!} />
-              <div>
-                <h3 className="font-semibold mb-2">Details:</h3>
-                <p>Source: {source}</p>
-                <p>Link: {video.link || 'N/A'}</p>
-                <p>Video Id: {video.id || 'N/A'}</p>
-                <p>Backend Status: {video.backend_status}</p>
-                <p>Progress Message: {video.progressMessage}</p>
-              </div>
+        <div className="p-4">
+          <a href={video.videoUrl} target="_blank" className="font-semibold mb-2 underline">
+            {video.videoTitle || video.originalFileName}
+          </a>
+          <div className="flex justify-between items-center">
+            <a href={`https://www.youtube.com/channel/${video.channelId}`} target="_blank" className="text-sm font-bold mb-2 underline">
+              {video.channelTitle}
+            </a>
+            <p className="text-sm text-muted-foreground mb-2">
+              Uploaded: {new Date(video.uploadTimestamp instanceof Timestamp ? video.uploadTimestamp.toMillis() : video.uploadTimestamp).toLocaleDateString()}
+            </p>
+          </div>
+          <Progress value={video.processingProgress} className="mb-2" />
+          <p className="text-sm mb-2">{!!video.processingProgress ? video.processingProgress.toFixed(2) : 0}% complete</p>
+          <div className="flex justify-between items-center">
+            <Button size="sm" variant="outline" onClick={() => setIsModalOpen(true)}>
+              View Details
+            </Button>
+            <div className="flex gap-2">
+              <Button size="sm" variant="secondary" onClick={() => {
+                FirebaseFirestoreService.updateDocument(
+                  "videos",
+                  video.id!,
+                  {
+                    previousStatus: 'Reloaded',
+                    processingProgress: 0,
+                  }
+                )
+              }}>
+                <RefreshCcw className="h-4 w-4" />
+              </Button>
+              <Button size="sm" variant="destructive" onClick={handleDelete}>
+                <TrashIcon className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         </div>
-      )}
-    </div>
+      </div>
+
+      <VideoDetailsModal
+        video={video}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        source={source}
+      />
+    </>
   );
 };
