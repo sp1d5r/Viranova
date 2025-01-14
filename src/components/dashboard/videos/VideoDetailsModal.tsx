@@ -18,7 +18,7 @@ export const VideoDetailsModal: React.FC<VideoDetailsModalProps> = ({
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-[90vw] w-full max-h-[90vh] overflow-y-auto text-white !bg-background ">
         <DialogHeader>
           <DialogTitle>{video.videoTitle || video.originalFileName}</DialogTitle>
         </DialogHeader>
