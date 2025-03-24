@@ -133,20 +133,20 @@ export default function Dashboard() {
       title: 'Data Catalog',
       icon: <Book className="h-4 w-4" />,
     },
-    {
-      id: 'query',
-      title: 'Query Catalog',
-      icon: <SearchCheck className="h-4 w-4" />,
-    },
-    {
-      id: 'assets',
-      title: 'Assets',
-      icon: <LibraryBig className="h-4 w-4" />,
-      children: [
-        { id: 'asset-images', title: 'Images', icon: <Focus className="h-4 w-4" /> },
-        { id: 'asset-videos', title: 'Videos', icon: <Clapperboard className="h-4 w-4" /> },
-      ]
-    },
+    // {
+    //   id: 'query',
+    //   title: 'Query Catalog',
+    //   icon: <SearchCheck className="h-4 w-4" />,
+    // },
+    // {
+    //   id: 'assets',
+    //   title: 'Assets',
+    //   icon: <LibraryBig className="h-4 w-4" />,
+    //   children: [
+    //     { id: 'asset-images', title: 'Images', icon: <Focus className="h-4 w-4" /> },
+    //     { id: 'asset-videos', title: 'Videos', icon: <Clapperboard className="h-4 w-4" /> },
+    //   ]
+    // },
     {
       id: 'analytics',
       title: 'Analytics',
