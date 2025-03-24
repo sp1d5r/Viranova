@@ -311,7 +311,7 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({ short,
               <TabsTrigger value="timeline">Timeline</TabsTrigger>
               <TabsTrigger value="ai-context">AI Context</TabsTrigger>
             </TabsList>
-            <div className="flex gap-2 flex-wrap ">
+            <div className="flex gap-2 flex-wrap">
               <Popover>
                 <PopoverTrigger>
                   <Button variant="outline">Request AI Generation</Button>
