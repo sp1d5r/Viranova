@@ -6,10 +6,12 @@ import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Trash2, Save, Undo2, Video, PanelTop, Columns2, UserRound, Gamepad2 } from "lucide-react";
 import { Tooltip, TooltipTrigger, TooltipProvider, TooltipContent } from "../ui/tooltip";
 import { Switch } from "../ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
+import { Separator } from "../ui/separator";
+import { Badge } from "../ui/badge";
 
 export interface ShortSettingsTabProps {
   short: Short;
@@ -66,15 +68,18 @@ export const ShortSettingsTab: React.FC<ShortSettingsTabProps> = ({ short, short
     }
   };
 
+  const boxTypeOptions = [
+    { value: "standard_tiktok", label: "Single Panel", icon: <PanelTop className="h-4 w-4 mr-2" /> },
+    { value: "two_boxes", label: "Two Panels", icon: <Columns2 className="h-4 w-4 mr-2" /> },
+    { value: "reaction_box", label: "Reaction Video", icon: <UserRound className="h-4 w-4 mr-2" /> },
+    { value: "half_screen_box", label: "Gameplay", icon: <Gamepad2 className="h-4 w-4 mr-2" /> }
+  ];
+
   return (
     <div className="space-y-6">
-      <div>
-        <h4 className="text-sm font-medium mb-2">Original Transcript:</h4>
-        <p className="text-sm bg-secondary p-3 rounded-md">{short.transcript}</p>
-      </div>
-
+      {/* Warning Alert - Only show if needed */}
       {!short.short_idea_run_id && (
-        <Alert variant="destructive">
+        <Alert variant="destructive" className="mb-6">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Warning</AlertTitle>
           <AlertDescription>
@@ -83,125 +88,191 @@ export const ShortSettingsTab: React.FC<ShortSettingsTabProps> = ({ short, short
         </Alert>
       )}
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label htmlFor="shortIdea" className="text-sm font-medium block mb-2">
-            Short Idea:
-          </label>
-          <Input
-            id="shortIdea"
-            value={shortIdea}
-            onChange={(e) => setShortIdea(e.target.value)}
-          />
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Left Column */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Short Content</CardTitle>
+            <CardDescription>Basic information about this short</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Short Idea */}
+            <div>
+              <label htmlFor="shortIdea" className="text-sm font-medium block mb-2">
+                Short Idea:
+              </label>
+              <Input
+                id="shortIdea"
+                value={shortIdea}
+                onChange={(e) => setShortIdea(e.target.value)}
+                placeholder="Enter short idea"
+              />
+            </div>
 
-        <div>
-          <label htmlFor="defaultLineColor" className="text-sm font-medium block mb-2">
-            Default Line Color:
-          </label>
-          <Input
-            id="defaultLineColor"
-            type="color"
-            value={defaultLineColor}
-            onChange={(e) => setDefaultLineColor(e.target.value)}
-          />
-        </div>
-      </div>
+            {/* Idea Justification */}
+            <div>
+              <label htmlFor="ideaJustification" className="text-sm font-medium block mb-2">
+                Idea Justification:
+              </label>
+              <Textarea
+                id="ideaJustification"
+                value={shortIdeaExplanation}
+                onChange={(e) => setShortIdeaExplanation(e.target.value)}
+                placeholder="Why is this idea compelling?"
+                rows={3}
+              />
+            </div>
 
-      <div>
-        <label htmlFor="ideaJustification" className="text-sm font-medium block mb-2">
-          Idea Justification:
-        </label>
-        <Textarea
-          id="ideaJustification"
-          value={shortIdeaExplanation}
-          onChange={(e) => setShortIdeaExplanation(e.target.value)}
-          rows={4}
-        />
-      </div>
+            {/* Original Transcript with badge for status */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm font-medium">Original Transcript:</label>
+                <Badge variant={transcriptDisabled ? "destructive" : "outline"}>
+                  {transcriptDisabled ? "Disabled" : "Active"}
+                </Badge>
+              </div>
+              <div className="text-sm bg-secondary p-3 rounded-md max-h-40 overflow-y-auto">
+                {short.transcript || "No transcript available"}
+              </div>
+            </div>
 
-      <div className="flex items-center space-x-2">
-        <Switch
-          id="transcriptDisabled"
-          checked={transcriptDisabled}
-          onCheckedChange={setTranscriptDisabled}
-        />
-        <label htmlFor="transcriptDisabled" className="text-sm font-medium">
-          Disable Transcript
-        </label>
-      </div>
-      <div>
-        <p className="text-sm font-medium block mb-2">
-          Selected TikTok Type:
-        </p>
-        <div className="w-full flex gap-2 flex-wrap">
-          <Button disabled={selectedBoxType==="standard_tiktok"} className="disabled:!border-primary disabled:!bg-accent !border-accent" variant="outline" onClick={() => {setSelectedBoxType("standard_tiktok")}}>
-            Single Panel
-          </Button>
-          <Button
-            disabled={selectedBoxType==="two_boxes"}
-            className="disabled:!border-primary disabled:!bg-accent !border-accent"
-            variant="outline"
-            onClick={() => {setSelectedBoxType("two_boxes")}}
-          >
-            Two Panels
-          </Button>
-          <Button
-            disabled={selectedBoxType==="reaction_box"}
-            className="disabled:!border-primary disabled:!bg-accent !border-accent"
-            variant="outline"
-            onClick={() => {setSelectedBoxType("reaction_box")}}
-          >
-            Reaction Video
-          </Button>
-          <Button
-            disabled={selectedBoxType==="half_screen_box"}
-            className="disabled:!border-primary disabled:!bg-accent disabled:!text-primary !border-accent"
-            variant="outline"
-            onClick={() => {setSelectedBoxType("half_screen_box")}}
-          >
-            Gameplay
-          </Button>
-        </div>
-      </div>
-      <div>
-        <p className="text-sm font-medium block mb-2">
-          Gameplay Footage (Optional):
-        </p>
-        <div className="w-full flex gap-2">
-          <Button disabled={backgroundVideoPath.startsWith("background-gameplay")} className="disabled:!border-primary disabled:!bg-accent !border-accent" variant="outline" onClick={() => {setSelectedBoxType("standard_tiktok")}}>
-            CSGO Surfer
-          </Button>
-        </div>
-      </div>
+            {/* Transcript Toggle */}
+            <div className="flex items-center justify-between pt-2">
+              <label htmlFor="transcriptDisabled" className="text-sm font-medium">
+                Disable Transcript
+              </label>
+              <Switch
+                id="transcriptDisabled"
+                checked={transcriptDisabled}
+                onCheckedChange={setTranscriptDisabled}
+              />
+            </div>
+          </CardContent>
+        </Card>
 
-      <div className="flex justify-between items-center">
-        <div>
-          <Button variant="outline" onClick={reset} className="mr-2">
-            Reset
-          </Button>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button onClick={updateShortDetails} disabled={!isChanged}>
-                  Submit
+        {/* Right Column */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Visual Settings</CardTitle>
+            <CardDescription>Configure how your short appears</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Default Line Color */}
+            <div>
+              <label htmlFor="defaultLineColor" className="text-sm font-medium block mb-2">
+                Default Line Color:
+              </label>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded border" style={{ backgroundColor: defaultLineColor }}></div>
+                <Input
+                  id="defaultLineColor"
+                  type="color"
+                  value={defaultLineColor}
+                  onChange={(e) => setDefaultLineColor(e.target.value)}
+                  className="w-16 h-10 p-1"
+                />
+                <span className="text-xs text-muted-foreground">{defaultLineColor}</span>
+              </div>
+            </div>
+
+            <Separator className="my-4" />
+
+            {/* Layout Selection */}
+            <div>
+              <label className="text-sm font-medium block mb-3">
+                TikTok Layout:
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {boxTypeOptions.map((option) => (
+                  <Button 
+                    key={option.value}
+                    variant={selectedBoxType === option.value ? "default" : "outline"}
+                    className={`justify-start ${selectedBoxType === option.value ? "" : "border-accent hover:border-primary"}`}
+                    onClick={() => setSelectedBoxType(option.value)}
+                  >
+                    {option.icon}
+                    {option.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            {/* Gameplay Footage (Optional) - Only show if relevant */}
+            {selectedBoxType === "half_screen_box" && (
+              <div className="pt-2">
+                <label className="text-sm font-medium block mb-2">
+                  Gameplay Footage:
+                </label>
+                <Button 
+                  variant={backgroundVideoPath.startsWith("background-gameplay") ? "default" : "outline"} 
+                  className="w-full justify-start" 
+                  onClick={() => setBackgroundVideoPath("background-gameplay")}
+                >
+                  <Video className="h-4 w-4 mr-2" />
+                  CSGO Surfer
                 </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Only press this if you want to update the short settings.</p>
-                <p>If you manually override these settings, some automated processes may be affected.</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-        <Button variant="destructive" onClick={() => deleteShort(shortId)}>
-          Delete Short
-        </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
-      <p className="text-sm text-muted-foreground">
-        *Note: Updating short information may affect automated processes and analytics.
-      </p>
+      {/* Action Buttons */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="flex gap-2">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="outline" onClick={reset} disabled={!isChanged}>
+                      <Undo2 className="h-4 w-4 mr-2" />
+                      Reset Changes
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Revert all changes to original values</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button onClick={updateShortDetails} disabled={!isChanged}>
+                      <Save className="h-4 w-4 mr-2" />
+                      Save Changes
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Only press this if you want to update the short settings.</p>
+                    <p>If you manually override these settings, some automated processes may be affected.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="destructive" onClick={() => deleteShort(shortId)}>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete Short
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Permanently delete this short</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        </CardContent>
+        <CardFooter>
+          <p className="text-xs text-muted-foreground w-full text-center">
+            Updating short information may affect automated processes and analytics
+          </p>
+        </CardFooter>
+      </Card>
     </div>
   );
 };
