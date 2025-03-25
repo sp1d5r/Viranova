@@ -70,7 +70,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video, source }) => {
 
   return (
     <>
-      <div className="bg-card rounded-lg shadow-md overflow-hidden">
+      <div className="bg-neutral-900/50 rounded-lg shadow-md overflow-hidden">
         <div className="relative">
           <img
             src={getThumbnailUrl(video)}
@@ -97,7 +97,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video, source }) => {
           <Progress value={video.processingProgress} className="mb-2" />
           <p className="text-sm mb-2">{!!video.processingProgress ? video.processingProgress.toFixed(2) : 0}% complete</p>
           <div className="flex justify-between items-center">
-            <Button size="sm" variant="outline" onClick={() => setIsModalOpen(true)}>
+            <Button size="sm"  onClick={() => setIsModalOpen(true)}>
               View Details
             </Button>
             <div className="flex gap-2">

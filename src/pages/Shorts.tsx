@@ -259,6 +259,7 @@ export const Shorts: React.FC = () => {
       <ShortVideoNavbar 
           onAutoGenerateClick={() => {}}
           steps={stepConfig}
+          stages={stages}
           currentStepIndex={currentStepIndex}
           onStepChange={handleStepChange}
         />

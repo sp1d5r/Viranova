@@ -1,6 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "./button";
-import { Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
+import { Sparkles, ChevronLeft, ChevronRight, TriangleAlert, ChevronDown, ChevronUp, CheckCircle2, Loader2, Circle } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "./popover";
+import { Card } from "./card";
+import { CreditButton } from "./credit-button";
+import { Label } from "./label";
+import { Timestamp } from "firebase/firestore";
+import { ShortRequest } from "../../types/collections/Request";
+import { ShortRequestEndpoints } from "../../types/collections/Request";
+import { Dialog, DialogTrigger, DialogContent, DialogClose, DialogTitle, DialogDescription } from "./dialog";
 
 export interface StepConfig {
   value: string;
@@ -11,6 +19,17 @@ export interface StepConfig {
   icon?: React.ReactNode;
 }
 
+export interface ProcessingStage {
+    id: string;
+    label: string;
+    creationEndpoint: ShortRequestEndpoints;
+    endpoints: ShortRequestEndpoints[];
+    requests: ShortRequest[];
+    status: 'not-started' | 'in-progress' | 'completed' | 'outdated';
+    lastUpdated: Timestamp | null;
+    stepConfig: StepConfig;
+  }
+
 interface ShortVideoNavbarProps {
   title?: string;
   subtitle?: string;
@@ -19,6 +38,7 @@ interface ShortVideoNavbarProps {
   onStepChange: (index: number) => void;
   onBackClick?: () => void;
   onAutoGenerateClick?: () => void;
+  stages: ProcessingStage[];
 }
 
 const ShortVideoNavbar: React.FC<ShortVideoNavbarProps> = ({
@@ -26,10 +46,14 @@ const ShortVideoNavbar: React.FC<ShortVideoNavbarProps> = ({
   subtitle = "Create your short videos step by step",
   steps,
   currentStepIndex,
+  stages,
   onStepChange,
   onBackClick = () => window.location.href = "/dashboard?tab=shorts",
   onAutoGenerateClick = () => {},
 }) => {
+
+    const [isOpen, setIsOpen] = useState(false);
+
   return (
     <div className="flex flex-col bg-background mb-4">
       {/* Combined row with title, subtitle, and steps */}
@@ -93,13 +117,81 @@ const ShortVideoNavbar: React.FC<ShortVideoNavbarProps> = ({
           ))}
         </div>
         
-        <Button 
-          onClick={onAutoGenerateClick}
-          className="bg-purple-600 hover:bg-purple-700 w-full md:w-auto"
-        >
-          <Sparkles className="h-4 w-4 mr-2" />
-          Auto Generate
-        </Button>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button 
+              className="bg-purple-600 hover:bg-purple-700 w-full md:w-auto"
+            >
+              <Sparkles className="h-4 w-4 mr-2" />
+              Auto Generate
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="text-white">
+            <DialogTitle>Auto Generate</DialogTitle>
+            <DialogDescription>
+              Edit each component and select auto-generate from that point onwards.
+            </DialogDescription>
+            {stages.filter((elem) => elem.status !== 'not-started').map((stage) => (
+              <div key={stage.id} className="flex items-center justify-between mb-2">
+                {stage.status === 'completed' && <CheckCircle2 className="text-green-500" />}
+                {stage.status === 'in-progress' && <Loader2 className="animate-spin text-gray-300" />}
+                {stage.status === 'not-started' && <Circle className="text-gray-300" />}
+                {stage.status === 'outdated' && <TriangleAlert className="text-yellow-300" />}
+                <span className={`flex-grow px-2 ${
+                  stage.status === 'completed' ? 'text-green-500' : 
+                  stage.status === 'in-progress' ? 'text-gray-300' : 
+                  'text-gray-500'
+                }`}>
+                  {stage.label}
+                </span>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button size="icon" variant="secondary">
+                      <Sparkles size={15} />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80 z-50">
+                    <Card className="grid gap-4 p-4">
+                      <div className="space-y-2">
+                        <h4 className="font-medium leading-none">Confirm</h4>
+                        <p className="text-sm text-muted-foreground">
+                          You're going to redo auto-generation from {stage.label}. {stage.stepConfig.description}.
+                        </p>
+                      </div>
+                      <div className="grid gap-2">
+                        <div className="grid grid-cols-2 items-center gap-4">
+                          <Label htmlFor="width">Confirm AutoGenerate</Label>
+                          <CreditButton
+                            creditCost={20}
+                            confirmationMessage={"You're auto-generating a video, we're expecting this to take 20 credits"}
+                            onClick={() => {
+                                // if (short_id) {
+                                    // createShortRequest(
+                                        //     short_id,
+                                        //     stage.creationEndpoint,
+                                        //     20,
+                                        //     () => {},
+                                        //     () => {},
+                                        //     true
+                                        // )
+                                        // }
+                                    }}
+                            variant="secondary"
+                          >
+                            Generate
+                          </CreditButton>
+                        </div>
+                      </div>
+                    </Card>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            ))}
+            <DialogClose asChild>
+              <Button variant="outline">Close</Button>
+            </DialogClose>
+          </DialogContent>
+        </Dialog>
       </div>
       {/* Progress bar that matches the active step */}
       <div className="w-full h-1 bg-gray-800 mt-2"> {/* Added margin-top for spacing */}
