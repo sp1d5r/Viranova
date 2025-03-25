@@ -267,7 +267,7 @@ export const Shorts: React.FC = () => {
         {/* Main Content Area */}
         <div className="px-4">
           {/* Current Step Content */}
-          <Card className="bg-gray-900 border border-gray-800 shadow-lg">
+          <Card className="bg-neutral-900/50 shadow-lg">
             <CardHeader>
               <CardTitle>{stepConfig[currentStepIndex].title}</CardTitle>
               <CardDescription>{stepConfig[currentStepIndex].description}</CardDescription>

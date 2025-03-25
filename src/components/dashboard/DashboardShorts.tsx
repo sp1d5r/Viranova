@@ -269,7 +269,7 @@ export const DashboardShorts: React.FC = () => {
                   )}
                   <div className="flex justify-between mt-2">
                     <Button
-                      variant="outline"
+                      variant="secondary"
                       size="sm"
                       onClick={() => handleRegenerateShort(short.id)}
                       className="text-xs"
@@ -278,7 +278,6 @@ export const DashboardShorts: React.FC = () => {
                       Regenerate
                     </Button>
                     <Button
-                      variant="outline"
                       size="sm"
                       onClick={() => window.open(`/shorts?short_id=${short.id}`, '_blank')}
                       className="text-xs"

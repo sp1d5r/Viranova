@@ -15,6 +15,7 @@ import {Sparkles} from "lucide-react";
 import {Textarea} from "../ui/textarea";
 import {Input} from "../ui/input";
 import {CreditButton} from "../ui/credit-button";
+import VideoTranscriptPlayer from "../video-player/VideoTranscriptPlayer";
 
 export interface TranscriptEditorTabProps {
   short: Short;
@@ -134,8 +135,6 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({ short,
   const [deleteRange, setDeleteRange] = useState<DeleteRange>({ startIndex: undefined, endIndex: undefined });
   const { showNotification } = useNotification();
   const { createShortRequest } = useShortRequestManagement();
-
-  console.log(segment)
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -310,6 +309,7 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({ short,
               <TabsTrigger value="transcript">Transcript</TabsTrigger>
               <TabsTrigger value="timeline">Timeline</TabsTrigger>
               <TabsTrigger value="ai-context">AI Context</TabsTrigger>
+              <TabsTrigger value="video-transcript">Video Transcript</TabsTrigger>
             </TabsList>
             <div className="flex gap-2 flex-wrap">
               <Popover>
@@ -462,6 +462,18 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({ short,
                       Load Audio
                     </Button>
                   )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="video-transcript">
+            <Card>
+              <CardHeader>
+                <CardTitle>Video Transcript Player</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="w-full aspect-video">
+                  <VideoTranscriptPlayer segment={segment} />
                 </div>
               </CardContent>
             </Card>

@@ -17,6 +17,7 @@ import {OnboardingSuccess} from "./pages/OnboardingSuccess";
 import WyrVideoPage from "./pages/WyrVideoPage";
 import TiktokAuthenticated from './pages/TiktokAuthenticated';
 import { OnboardingCancel } from './pages/OnboardingCancel';
+import Test from './pages/Test';
 
 
 function App() {
@@ -49,6 +50,8 @@ function App() {
 
           {/* Tiktok */}
           <Route path="/tiktok-authenticated" element={<TiktokAuthenticated />} />
+
+          <Route path={"/test"} element={<Test />} />
 
 
           <Route path={"*"} element={<NotFound />} />
