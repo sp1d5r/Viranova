@@ -9,7 +9,10 @@ interface VideoTranscriptPlayerProps {
   className?: string;
   operations?: Logs[];
   editing?: boolean;
-  onWordToggle?: (index: number, status: 'none' | 'deleted') => void;
+  skipTrimmedContent?: boolean;
+  onToggleSkipTrimmed?: (skip: boolean) => void;
+  activeWordIndex?: number | null;
+  onSeekToWord?: (time: number) => void;
 }
 
 // Define a type for the debug info object
@@ -68,7 +71,10 @@ const VideoTranscriptPlayer: React.FC<VideoTranscriptPlayerProps> = ({
   segment, 
   operations = [],
   editing = false,
-  onWordToggle,
+  skipTrimmedContent = false,
+  onToggleSkipTrimmed,
+  activeWordIndex = null,
+  onSeekToWord,
   className = 'w-full h-full'
 }) => {
   const [currentTime, setCurrentTime] = useState(0);
@@ -80,10 +86,8 @@ const VideoTranscriptPlayer: React.FC<VideoTranscriptPlayerProps> = ({
   const [visibleWords, setVisibleWords] = useState<Word[]>([]);
   const [seekTo, setSeekTo] = useState<number | undefined>(undefined);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [activeWordIndex, setActiveWordIndex] = useState<number | null>(null);
-  const transcriptRef = useRef<HTMLDivElement>(null);
+  const [internalActiveWordIndex, setInternalActiveWordIndex] = useState<number | null>(null);
   const [transcriptWords, setTranscriptWords] = useState<TranscriptWord[]>([]);
-  const [skipTrimmedContent, setSkipTrimmedContent] = useState(false);
   const [nextWordTime, setNextWordTime] = useState<number | null>(null);
   
   // Format time in MM:SS
@@ -423,24 +427,12 @@ const VideoTranscriptPlayer: React.FC<VideoTranscriptPlayerProps> = ({
     setSeekTo(time);
     // Also update our local time tracking
     setCurrentTime(time);
-  }, []);
-
-  // Handle word toggle (delete/undelete)
-  const handleWordToggle = useCallback((index: number) => {
-    if (!editing || !onWordToggle) return;
     
-    const newStatus = transcriptWords[index]?.status === 'none' ? 'deleted' : 'none';
-    onWordToggle(index, newStatus);
-    
-    // Update local state for immediate feedback
-    setTranscriptWords(prev => 
-      prev.map((word, i) => 
-        i === index 
-          ? { ...word, status: newStatus } 
-          : word
-      )
-    );
-  }, [transcriptWords, editing, onWordToggle]);
+    // If onSeekToWord is provided, call it to sync external components
+    if (onSeekToWord) {
+      onSeekToWord(time);
+    }
+  }, [onSeekToWord]);
 
   // Listen for play/pause events from the video element
   useEffect(() => {
@@ -472,20 +464,11 @@ const VideoTranscriptPlayer: React.FC<VideoTranscriptPlayerProps> = ({
       return currentTime >= adjustedStartTime && currentTime <= adjustedEndTime;
     });
     
-    setActiveWordIndex(index >= 0 ? index : null);
-    
-    // Scroll the active word into view
-    if (index >= 0 && transcriptRef.current) {
-      const wordElements = transcriptRef.current.querySelectorAll('.transcript-word');
-      if (wordElements[index]) {
-        wordElements[index].scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-          inline: 'center'
-        });
-      }
-    }
+    setInternalActiveWordIndex(index >= 0 ? index : null);
   }, [currentTime, transcriptWords, segment.earliestStartTime]);
+  
+  // Use either the internal or external active word index
+  const currentActiveWordIndex = activeWordIndex !== null ? activeWordIndex : internalActiveWordIndex;
 
   return (
     <div 
@@ -494,17 +477,19 @@ const VideoTranscriptPlayer: React.FC<VideoTranscriptPlayerProps> = ({
       onMouseEnter={() => setShowControls(true)}
       onMouseLeave={() => setShowControls(false)}
     >
-      <div className="flex items-center gap-2">
-        <label className="flex items-center gap-1 cursor-pointer text-sm">
+      {/* Skip Trimmed Toggle */}
+      <div className="absolute top-10 right-2 z-20">
+        <label className="flex items-center gap-1 cursor-pointer text-sm bg-black bg-opacity-70 text-white px-2 py-1 rounded">
           <input 
             type="checkbox" 
             checked={skipTrimmedContent}
-            onChange={() => setSkipTrimmedContent(!skipTrimmedContent)}
+            onChange={() => onToggleSkipTrimmed && onToggleSkipTrimmed(!skipTrimmedContent)}
             className="h-3 w-3"
           />
           Skip Trimmed
         </label>
       </div>
+      
       {/* Main video */}
       <VideoPlayer
         path={segment.videoSegmentLocation || ''}
@@ -514,31 +499,7 @@ const VideoTranscriptPlayer: React.FC<VideoTranscriptPlayerProps> = ({
         className="w-full h-full"
       />
       
-      {/* Scrollable transcript */}
-      <div className="absolute bottom-16 left-0 right-0 bg-black bg-opacity-80 max-h-32 overflow-y-auto z-20 p-3">
-        <div ref={transcriptRef} className="flex flex-wrap gap-1 justify-center">
-          {transcriptWords.map((word, index) => {
-            const isActive = index === activeWordIndex;
-            const segmentStartTime = segment.earliestStartTime || 0;
-            const adjustedStartTime = word.start_time - segmentStartTime;
-            
-            return (
-              <span
-                key={index}
-                className={`transcript-word cursor-pointer px-1 py-0.5 rounded transition-all duration-150
-                  ${isActive ? 'bg-green-600 text-white font-bold' : ''}
-                  ${word.status === 'deleted' ? 'bg-red-600 text-white' : 'text-white hover:bg-gray-700'}
-                  ${editing ? 'hover:bg-blue-600' : ''}
-                `}
-                onClick={() => editing ? handleWordToggle(index) : handleSeek(adjustedStartTime)}
-              >
-                {word.word}
-              </span>
-            );
-          })}
-        </div>
-      </div>
-      
+      {/* Center word display */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div className="flex justify-around items-center mt-[20%] w-full max-w-md">
           {visibleWords.map((word, index) => {
@@ -569,8 +530,7 @@ const VideoTranscriptPlayer: React.FC<VideoTranscriptPlayerProps> = ({
           })}
         </div>
       </div>
-
-    
+      
       {/* Overlay timeline at the top */}
       <div className="absolute top-0 left-0 right-0 bg-black bg-opacity-70 p-2 z-10">
         <div className="relative h-8 bg-gray-800 rounded overflow-hidden">
@@ -649,10 +609,9 @@ const VideoTranscriptPlayer: React.FC<VideoTranscriptPlayerProps> = ({
           />
         </div>
         
-        {/* Time counter and Skip Trimmed toggle */}
+        {/* Time counter */}
         <div className="text-white text-xs mt-1 flex justify-between items-center">
           <span>{formatTime(currentTime)}</span>
-          
           <span>{formatTime(duration)}</span>
         </div>
       </div>
@@ -706,21 +665,8 @@ const VideoTranscriptPlayer: React.FC<VideoTranscriptPlayerProps> = ({
             />
           </div>
           
-          {/* Skip Trimmed toggle for bottom controls */}
-          <div className="flex items-center ml-3 mr-3">
-            <label className="flex items-center gap-1 cursor-pointer text-white text-sm">
-              <input 
-                type="checkbox" 
-                checked={skipTrimmedContent}
-                onChange={() => setSkipTrimmedContent(!skipTrimmedContent)}
-                className="h-3 w-3"
-              />
-              Skip Trimmed
-            </label>
-          </div>
-          
           {/* Time display */}
-          <span className="text-white text-sm">
+          <span className="text-white text-sm ml-3">
             {formatTime(currentTime)} / {formatTime(duration)}
           </span>
         </div>
