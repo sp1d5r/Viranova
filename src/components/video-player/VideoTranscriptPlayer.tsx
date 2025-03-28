@@ -1,10 +1,15 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { VideoPlayer } from './VideoPlayer';
 import { Segment, Word } from '../../types/collections/Segment';
+import { words } from 'lodash';
+import { Logs } from '../../types/collections/Shorts';
 
 interface VideoTranscriptPlayerProps {
   segment: Segment;
   className?: string;
+  operations?: Logs[];
+  editing?: boolean;
+  onWordToggle?: (index: number, status: 'none' | 'deleted') => void;
 }
 
 // Define a type for the debug info object
@@ -52,8 +57,18 @@ interface DebugInfo {
   } | null;
 }
 
+type TranscriptWord = Word & {
+  status: 'none' | 'deleted' | 'selected';
+  timeStart: number;
+  timeEnd: number;
+  index: number;
+};
+
 const VideoTranscriptPlayer: React.FC<VideoTranscriptPlayerProps> = ({ 
   segment, 
+  operations = [],
+  editing = false,
+  onWordToggle,
   className = 'w-full h-full'
 }) => {
   const [currentTime, setCurrentTime] = useState(0);
@@ -65,6 +80,11 @@ const VideoTranscriptPlayer: React.FC<VideoTranscriptPlayerProps> = ({
   const [visibleWords, setVisibleWords] = useState<Word[]>([]);
   const [seekTo, setSeekTo] = useState<number | undefined>(undefined);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [activeWordIndex, setActiveWordIndex] = useState<number | null>(null);
+  const transcriptRef = useRef<HTMLDivElement>(null);
+  const [transcriptWords, setTranscriptWords] = useState<TranscriptWord[]>([]);
+  const [skipTrimmedContent, setSkipTrimmedContent] = useState(false);
+  const [nextWordTime, setNextWordTime] = useState<number | null>(null);
   
   // Format time in MM:SS
   const formatTime = (seconds: number) => {
@@ -127,6 +147,110 @@ const VideoTranscriptPlayer: React.FC<VideoTranscriptPlayerProps> = ({
     }
   }, [segment]);
 
+  // Process segment words and apply operations (deleted/undeleted status)
+  useEffect(() => {
+    if (!segment.words || !Array.isArray(segment.words)) {
+      console.log("No words array found or not an array", segment.words);
+      setDebugInfo((prev) => ({
+        ...prev,
+        wordsError: "No words array found or not an array",
+        wordsType: typeof segment.words
+      }));
+      setTranscriptWords([]);
+      return;
+    }
+    
+    // Get flat words array
+    let flatWords: Word[] = [];
+    if (segment.words.length > 0 && Array.isArray(segment.words[0])) {
+      flatWords = segment.words.flat();
+    } else {
+      flatWords = segment.words as Word[];
+    }
+    
+    // Create transcript words with status
+    const processedWords: TranscriptWord[] = flatWords.map((word, index) => ({
+      ...word,
+      status: 'none',
+      timeStart: word.start_time,
+      timeEnd: word.end_time,
+      index
+    }));
+    
+    // Apply operations
+    operations.forEach(operation => {
+      if (operation.type === "delete") {
+        for (let i = operation.start_index; i <= operation.end_index; i++) {
+          if (processedWords[i]) {
+            processedWords[i].status = 'deleted';
+          }
+        }
+      }
+      if (operation.type === "undelete") {
+        for (let i = operation.start_index; i <= operation.end_index; i++) {
+          if (processedWords[i]) {
+            processedWords[i].status = 'none';
+          }
+        }
+      }
+    });
+    
+    setTranscriptWords(processedWords);
+  }, [segment.words, operations]);
+
+  // Handle skipping trimmed content during playback
+  useEffect(() => {
+    if (!skipTrimmedContent || !isPlaying || !transcriptWords.length) return;
+    
+    const segmentStartTime = segment.earliestStartTime || 0;
+    
+    // Find the next non-deleted word after the current time
+    const currentIndex = transcriptWords.findIndex(word => {
+      const adjustedStartTime = word.timeStart - segmentStartTime;
+      const adjustedEndTime = word.timeEnd - segmentStartTime;
+      return currentTime >= adjustedStartTime && currentTime <= adjustedEndTime;
+    });
+    
+    if (currentIndex !== -1) {
+      // If the current word is deleted, find the next non-deleted word
+      if (transcriptWords[currentIndex].status === 'deleted') {
+        const nextNonDeletedIndex = transcriptWords.findIndex((word, idx) => 
+          idx > currentIndex && word.status !== 'deleted'
+        );
+        
+        if (nextNonDeletedIndex !== -1) {
+          const nextWordStartTime = transcriptWords[nextNonDeletedIndex].timeStart - segmentStartTime;
+          setNextWordTime(nextWordStartTime);
+        }
+      } else {
+        // If we're on a non-deleted word, check if the next word is deleted
+        if (currentIndex < transcriptWords.length - 1) {
+          const nextWord = transcriptWords[currentIndex + 1];
+          if (nextWord.status === 'deleted') {
+            // Find the next non-deleted word after this one
+            const nextNonDeletedIndex = transcriptWords.findIndex((word, idx) => 
+              idx > currentIndex + 1 && word.status !== 'deleted'
+            );
+            
+            if (nextNonDeletedIndex !== -1) {
+              // Set up the next jump point, but don't jump yet
+              const nextWordStartTime = transcriptWords[nextNonDeletedIndex].timeStart - segmentStartTime;
+              setNextWordTime(nextWordStartTime);
+            }
+          }
+        }
+      }
+    }
+  }, [currentTime, isPlaying, skipTrimmedContent, transcriptWords, segment.earliestStartTime]);
+
+  // Perform the jump to next non-deleted word when needed
+  useEffect(() => {
+    if (nextWordTime !== null && skipTrimmedContent && isPlaying) {
+      handleSeek(nextWordTime);
+      setNextWordTime(null);
+    }
+  }, [nextWordTime, skipTrimmedContent, isPlaying]);
+
   // Update visible words when current time changes
   useEffect(() => {
     // Fix the debugging code to handle array vs object correctly
@@ -152,20 +276,23 @@ const VideoTranscriptPlayer: React.FC<VideoTranscriptPlayerProps> = ({
       return;
     }
     
-    // Check if words is an array of arrays and flatten it if needed
+    // Compute the flattened words array as before
     let flatWords: Word[] = [];
     if (segment.words.length > 0 && Array.isArray(segment.words[0])) {
-      console.log("Detected nested array structure, flattening words array");
-      // Flatten the array of arrays into a single array of words
       flatWords = segment.words.flat();
-      console.log("Flattened words array:", {
-        length: flatWords.length,
-        sample: flatWords.slice(0, 3)
-      });
     } else {
       flatWords = segment.words as Word[];
     }
-    
+
+    // Determine current word index from flatWords
+    const currentIndex = flatWords.findIndex(word =>
+      isCurrentWord(word.start_time, word.end_time)
+    );
+
+    // Define a window size (e.g., 5 words total)
+    const contextSize = 5;
+    let wordsToShow: Word[] = [];
+
     // Get segment start time (needed to adjust word timestamps)
     const segmentStartTime = segment.earliestStartTime || 0;
     
@@ -180,8 +307,18 @@ const VideoTranscriptPlayer: React.FC<VideoTranscriptPlayerProps> = ({
       // - end after (current time - 0.5 second behind window)
       return adjustedStartTime <= (currentTime + 2) && adjustedEndTime >= (currentTime - 0.5);
     });
-    
-    setVisibleWords(currentVisibleWords);
+
+    if (currentIndex !== -1) {
+      // Calculate start and end indices ensuring we don't go out-of-bounds
+      const start = Math.max(0, currentIndex - Math.floor(contextSize / 2));
+      const end = Math.min(flatWords.length, start + contextSize);
+      wordsToShow = flatWords.slice(start, end);
+    } else {
+      // If no current word is found, you might fallback to visible words by time window
+      wordsToShow = currentVisibleWords;
+    }
+
+    setVisibleWords(wordsToShow);
     
     // Update debug info
     setDebugInfo((prev) => {
@@ -288,6 +425,23 @@ const VideoTranscriptPlayer: React.FC<VideoTranscriptPlayerProps> = ({
     setCurrentTime(time);
   }, []);
 
+  // Handle word toggle (delete/undelete)
+  const handleWordToggle = useCallback((index: number) => {
+    if (!editing || !onWordToggle) return;
+    
+    const newStatus = transcriptWords[index]?.status === 'none' ? 'deleted' : 'none';
+    onWordToggle(index, newStatus);
+    
+    // Update local state for immediate feedback
+    setTranscriptWords(prev => 
+      prev.map((word, i) => 
+        i === index 
+          ? { ...word, status: newStatus } 
+          : word
+      )
+    );
+  }, [transcriptWords, editing, onWordToggle]);
+
   // Listen for play/pause events from the video element
   useEffect(() => {
     const videoElement = containerRef.current?.querySelector('video');
@@ -305,6 +459,34 @@ const VideoTranscriptPlayer: React.FC<VideoTranscriptPlayerProps> = ({
     };
   }, []);
 
+  // Find the active word based on current time
+  useEffect(() => {
+    if (!transcriptWords.length) return;
+    
+    const segmentStartTime = segment.earliestStartTime || 0;
+    
+    // Find the index of the word being spoken at current time
+    const index = transcriptWords.findIndex(word => {
+      const adjustedStartTime = word.start_time - segmentStartTime;
+      const adjustedEndTime = word.end_time - segmentStartTime;
+      return currentTime >= adjustedStartTime && currentTime <= adjustedEndTime;
+    });
+    
+    setActiveWordIndex(index >= 0 ? index : null);
+    
+    // Scroll the active word into view
+    if (index >= 0 && transcriptRef.current) {
+      const wordElements = transcriptRef.current.querySelectorAll('.transcript-word');
+      if (wordElements[index]) {
+        wordElements[index].scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'center'
+        });
+      }
+    }
+  }, [currentTime, transcriptWords, segment.earliestStartTime]);
+
   return (
     <div 
       ref={containerRef}
@@ -312,6 +494,17 @@ const VideoTranscriptPlayer: React.FC<VideoTranscriptPlayerProps> = ({
       onMouseEnter={() => setShowControls(true)}
       onMouseLeave={() => setShowControls(false)}
     >
+      <div className="flex items-center gap-2">
+        <label className="flex items-center gap-1 cursor-pointer text-sm">
+          <input 
+            type="checkbox" 
+            checked={skipTrimmedContent}
+            onChange={() => setSkipTrimmedContent(!skipTrimmedContent)}
+            className="h-3 w-3"
+          />
+          Skip Trimmed
+        </label>
+      </div>
       {/* Main video */}
       <VideoPlayer
         path={segment.videoSegmentLocation || ''}
@@ -321,26 +514,53 @@ const VideoTranscriptPlayer: React.FC<VideoTranscriptPlayerProps> = ({
         className="w-full h-full"
       />
       
-      {/* Floating transcript words */}
+      {/* Scrollable transcript */}
+      <div className="absolute bottom-16 left-0 right-0 bg-black bg-opacity-80 max-h-32 overflow-y-auto z-20 p-3">
+        <div ref={transcriptRef} className="flex flex-wrap gap-1 justify-center">
+          {transcriptWords.map((word, index) => {
+            const isActive = index === activeWordIndex;
+            const segmentStartTime = segment.earliestStartTime || 0;
+            const adjustedStartTime = word.start_time - segmentStartTime;
+            
+            return (
+              <span
+                key={index}
+                className={`transcript-word cursor-pointer px-1 py-0.5 rounded transition-all duration-150
+                  ${isActive ? 'bg-green-600 text-white font-bold' : ''}
+                  ${word.status === 'deleted' ? 'bg-red-600 text-white' : 'text-white hover:bg-gray-700'}
+                  ${editing ? 'hover:bg-blue-600' : ''}
+                `}
+                onClick={() => editing ? handleWordToggle(index) : handleSeek(adjustedStartTime)}
+              >
+                {word.word}
+              </span>
+            );
+          })}
+        </div>
+      </div>
+      
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="relative w-full h-48">
+        <div className="flex justify-around items-center mt-[20%] w-full max-w-md">
           {visibleWords.map((word, index) => {
-            const position = getWordPosition(word.start_time, word.end_time);
             const isCurrent = isCurrentWord(word.start_time, word.end_time);
+            const wordIndex = transcriptWords.findIndex(tw => 
+              tw.start_time === word.start_time && tw.end_time === word.end_time
+            );
+            const isDeleted = wordIndex >= 0 && transcriptWords[wordIndex].status === 'deleted';
             
             return (
               <div
                 key={index}
-                className={`absolute text-white px-2 py-1 rounded transition-all duration-300 transform
-                  ${isCurrent ? 'bg-blue-600 font-bold scale-125' : 'bg-gray-800 bg-opacity-70'}
-                `}
+                className={`px-2 py-1 rounded transition-all duration-300 ${
+                  isCurrent ? 'bg-green-600 font-bold scale-125 text-white' : 
+                  isDeleted ? 'bg-red-600 bg-opacity-70 text-white' : 
+                  'bg-gray-800 bg-opacity-70 text-white'
+                }`}
                 style={{
-                  left: `${position}%`,
-                  top: '50%',
-                  transform: `translate(-50%, -50%) scale(${isCurrent ? 1.25 : 1})`,
                   fontSize: isCurrent ? '1.5rem' : '1.2rem',
-                  opacity: position < 10 || position > 90 ? 0.3 : 1,
-                  zIndex: 20
+                  opacity: isDeleted ? 0.5 : isCurrent ? 1 : 0.7,
+                  zIndex: isCurrent ? 20 : 10,
+                  textDecoration: isDeleted ? 'line-through' : 'none'
                 }}
               >
                 {word.word}
@@ -349,42 +569,74 @@ const VideoTranscriptPlayer: React.FC<VideoTranscriptPlayerProps> = ({
           })}
         </div>
       </div>
-      
-      {/* Debug button */}
-      <button 
-        onClick={toggleDebugMode}
-        className="absolute top-16 right-2 bg-gray-800 text-white p-1 rounded text-xs z-30"
-      >
-        {debugMode ? "Hide Debug" : "Show Debug"}
-      </button>
-      
-      {/* Debug info */}
-      {debugMode && (
-        <div className="absolute top-24 left-2 right-2 text-white text-xs bg-black bg-opacity-90 p-2 rounded z-30 max-h-40 overflow-auto">
-          <h3 className="font-bold mb-1">Debug Info:</h3>
-          <pre className="whitespace-pre-wrap">
-            {JSON.stringify(debugInfo, null, 2)}
-          </pre>
-        </div>
-      )}
-      
+
+    
       {/* Overlay timeline at the top */}
       <div className="absolute top-0 left-0 right-0 bg-black bg-opacity-70 p-2 z-10">
-        <div className="relative h-4 bg-gray-800 rounded overflow-hidden">
+        <div className="relative h-8 bg-gray-800 rounded overflow-hidden">
           {/* Progress bar */}
           <div 
-            className="absolute h-full bg-blue-600"
+            className="absolute h-full bg-blue-600 opacity-30"
             style={{ width: `${(currentTime / Math.max(duration, 0.1)) * 100}%` }}
           />
           
+          <div className='absolute h-full w-full'>
+          {(() => {
+            if (transcriptWords.length === 0) return null;
+            
+            const segmentStartTime = segment.earliestStartTime || 0;
+            const segmentDuration = segment.latestEndTime - segmentStartTime;
+            
+            // Generate continuous timeline segments that represent the content flow
+            // We'll create segments that extend from one word's start to the next word's start
+            return transcriptWords.map((word, index) => {
+              const adjustedStartTime = word.start_time - segmentStartTime;
+              const startPercent = (adjustedStartTime / segmentDuration) * 100;
+              
+              // For width calculation, we need to determine where this segment ends
+              let endPercent;
+              if (index < transcriptWords.length - 1) {
+                // If not the last word, extend to the start of the next word
+                const nextWordStartTime = transcriptWords[index + 1].start_time - segmentStartTime;
+                endPercent = (nextWordStartTime / segmentDuration) * 100;
+              } else {
+                // If last word, extend to the end of the segment or the word's end time
+                const adjustedEndTime = word.end_time - segmentStartTime;
+                endPercent = (adjustedEndTime / segmentDuration) * 100;
+              }
+              
+              const widthPercent = endPercent - startPercent;
+              
+              return (
+                <div 
+                  key={index}
+                  className={`absolute h-full ${word.status === 'deleted' ? 'bg-red-600' : 'bg-green-600'}`}
+                  style={{ 
+                    left: `${startPercent}%`,
+                    width: `${Math.max(0.1, widthPercent)}%`,
+                    opacity: 0.7
+                  }}
+                  title={word.word}
+                />
+              );
+            });
+          })()}
+          </div>
+
           {/* Time markers */}
           {duration > 0 && Array.from({ length: Math.ceil(duration) + 1 }).map((_, second) => (
             <div 
               key={second}
               className="absolute h-full w-px bg-gray-600"
-              style={{ left: `${(second / duration) * 100}%` }}
+              style={{ left: `${(second / duration) * 100}%`, zIndex: 2 }}
             />
           ))}
+          
+          {/* Playhead indicator */}
+          <div
+            className="absolute h-full w-1 bg-white"
+            style={{ left: `${(currentTime / Math.max(duration, 0.1)) * 100}%`, zIndex: 5 }}
+          />
           
           {/* Clickable timeline */}
           <div 
@@ -397,9 +649,10 @@ const VideoTranscriptPlayer: React.FC<VideoTranscriptPlayerProps> = ({
           />
         </div>
         
-        {/* Time counter */}
-        <div className="text-white text-xs mt-1 flex justify-between">
+        {/* Time counter and Skip Trimmed toggle */}
+        <div className="text-white text-xs mt-1 flex justify-between items-center">
           <span>{formatTime(currentTime)}</span>
+          
           <span>{formatTime(duration)}</span>
         </div>
       </div>
@@ -410,7 +663,7 @@ const VideoTranscriptPlayer: React.FC<VideoTranscriptPlayerProps> = ({
         onClick={handlePlayPause}
       >
         {!isPlaying && (
-          <div className="w-16 h-16 flex items-center justify-center bg-blue-600 bg-opacity-80 rounded-full">
+          <div className="w-16 h-16 flex items-center justify-center bg-green-600 bg-opacity-80 rounded-full">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
             </svg>
@@ -424,7 +677,7 @@ const VideoTranscriptPlayer: React.FC<VideoTranscriptPlayerProps> = ({
           {/* Play/pause button */}
           <button
             onClick={handlePlayPause}
-            className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full mr-3 flex items-center justify-center"
+            className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-full mr-3 flex items-center justify-center"
             aria-label={isPlaying ? "Pause" : "Play"}
           >
             {isPlaying ? (
@@ -448,20 +701,33 @@ const VideoTranscriptPlayer: React.FC<VideoTranscriptPlayerProps> = ({
             }}
           >
             <div 
-              className="absolute h-full bg-blue-600"
+              className="absolute h-full bg-green-600"
               style={{ width: `${(currentTime / Math.max(duration, 0.1)) * 100}%` }}
             />
           </div>
           
+          {/* Skip Trimmed toggle for bottom controls */}
+          <div className="flex items-center ml-3 mr-3">
+            <label className="flex items-center gap-1 cursor-pointer text-white text-sm">
+              <input 
+                type="checkbox" 
+                checked={skipTrimmedContent}
+                onChange={() => setSkipTrimmedContent(!skipTrimmedContent)}
+                className="h-3 w-3"
+              />
+              Skip Trimmed
+            </label>
+          </div>
+          
           {/* Time display */}
-          <span className="text-white text-sm ml-3">
+          <span className="text-white text-sm">
             {formatTime(currentTime)} / {formatTime(duration)}
           </span>
         </div>
       )}
       
       {/* Fallback message if no words are available */}
-      {(!segment.words || !Array.isArray(segment.words) || segment.words.length === 0) && (
+      {(!transcriptWords.length) && (
         <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-20">
           <div className="bg-gray-800 p-4 rounded text-white">
             No transcript data available for this segment

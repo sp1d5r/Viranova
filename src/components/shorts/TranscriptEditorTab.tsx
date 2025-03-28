@@ -473,8 +473,43 @@ export const TranscriptEditorTab: React.FC<TranscriptEditorTabProps> = ({ short,
               </CardHeader>
               <CardContent>
                 <div className="w-full aspect-video">
-                  <VideoTranscriptPlayer segment={segment} />
+                  <VideoTranscriptPlayer 
+                    segment={segment} 
+                    operations={short.logs} 
+                    editing={editing}
+                    onWordToggle={(index, status) => {
+                      const newOperation: Logs = {
+                        type: status === 'deleted' ? 'delete' : 'undelete',
+                        start_index: index,
+                        end_index: index,
+                        message: `User toggled ${status === 'deleted' ? 'deletion' : 'undeletion'} at index ${index}`,
+                        time: Timestamp.now()
+                      };
+                      
+                      // Add operation to the logs
+                      const newLogs = [...short.logs, newOperation];
+                      FirebaseFirestoreService.updateDocument(
+                        "shorts",
+                        shortId,
+                        { "logs": newLogs },
+                        () => {
+                          showNotification("Updated operation", `Word ${status === 'deleted' ? 'deleted' : 'undeleted'}`, "success");
+                        },
+                        (error) => {
+                          showNotification("Failed Update", "Failed to update document", "error");
+                        }
+                      );
+                    }}
+                  />
                 </div>
+                {editing && (
+                  <div className="mt-4 p-2 bg-gray-800 rounded">
+                    <p className="text-sm text-white mb-2">
+                      Click on words in the transcript to toggle their deletion status.
+                      You can also use the range selection in the Transcript tab for batch operations.
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
